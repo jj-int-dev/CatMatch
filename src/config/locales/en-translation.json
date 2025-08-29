@@ -27,5 +27,8 @@
   "adopt_a_cat_today": "Adopt a cat today",
   "search_through_cats": "Search through several cats that are up for adoption",
   "find_cat_dream_home": "Find your cat's dream home",
-  "get_started": "Get Started"
+  "get_started": "Get Started",
+  "log_in_with_facebook": "Continue with Facebook",
+  "log_in_with_google": "Continue with Google",
+  "or": "or"
 }
