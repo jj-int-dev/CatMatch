@@ -46,7 +46,6 @@ export function LanguageNavigation() {
           <li>
             <a
               href="#"
-              n
               className="hover:bg-base-100 block py-2 pl-4 text-sm text-gray-300"
               onClick={() => setLanguageAndCloseMenu('es')}
             >

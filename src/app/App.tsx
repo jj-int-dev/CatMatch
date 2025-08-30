@@ -5,6 +5,8 @@ import Login from '../features/log-in/components/Login';
 import Registration from '../features/registration/components/Registration';
 import UserProfile from '../features/user-profile/components/UserProfile';
 import UserTypeSelection from '../features/user-type-selection/components/UserTypeSelection';
+import { AdopterExplanation } from '../features/adopter-explanation/components/AdopterExplanation';
+import { AddCatListing } from '../features/add-cat-listing/components/AddCatListing';
 import ForgotPassword from '../features/forgot-password/components/ForgotPassword';
 import NotFound from '../features/not-found/components/NotFound';
 import './App.css';
@@ -19,6 +21,8 @@ function App() {
         <Route path="register" element={<Registration />} />
         <Route path="user-profile" element={<UserProfile />} />
         <Route path="user-type-selection" element={<UserTypeSelection />} />
+        <Route path="adopter-explanation" element={<AdopterExplanation />} />
+        <Route path="add-cat-listing" element={<AddCatListing />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

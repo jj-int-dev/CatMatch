@@ -50,5 +50,9 @@
   "become_an_adopter": "Become an Adopter",
   "become_a_rehomer": "Become a rehomer",
   "delete_account": "Delete Account",
-  "phone": "Phone"
+  "phone": "Phone",
+  "welcome": "Welcome",
+  "are_you_looking_to": "Are you looking to",
+  "rehome_a_cat": "Rehome a Cat",
+  "next": "Next"
 }

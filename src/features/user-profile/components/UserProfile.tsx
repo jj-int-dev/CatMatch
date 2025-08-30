@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import { MdEmail } from 'react-icons/md';
 import { IoPhonePortrait } from 'react-icons/io5';
-import { FaTransgenderAlt } from 'react-icons/fa';
+import { FaTransgenderAlt, FaArrowRight } from 'react-icons/fa';
 import { FaRegCalendar } from 'react-icons/fa6';
 import { useState, useEffect } from 'react';
 import { useNavigationStore } from '../../../stores/navigation-store';
@@ -10,9 +10,11 @@ import { getAgeFromDateOfBirth } from '../utils/getAgeFromDateOfBirth';
 import PhoneNumberIcon from '../../../assets/phone_number_icon.svg?react';
 import type { FormChangeEvent } from '../types/FormChangeEvent';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 
 export default function UserProfile() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const setNavigationColor = useNavigationStore(
     (state) => state.setNavigationColor
@@ -226,6 +228,15 @@ export default function UserProfile() {
             src="https://images.unsplash.com/photo-1535982368253-05d640fe0755?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             className="max-h-[550px] w-auto self-center rounded-lg shadow-2xl/50"
           />
+        </div>
+        <div className="ml-45 flex">
+          <button
+            onClick={() => navigate('/user-type-selection')}
+            className="btn btn-xl hover:inset-shadow-xl gap-x-2 rounded-full border-white bg-white p-6 text-indigo-500 shadow-md ring-4 shadow-white ring-white transition-transform duration-300 ease-in-out hover:translate-y-2 hover:text-[#ff13f0] hover:shadow-sm hover:inset-shadow-white"
+          >
+            <span>{t('next')}</span>
+            <FaArrowRight />
+          </button>
         </div>
       </div>
     </div>
