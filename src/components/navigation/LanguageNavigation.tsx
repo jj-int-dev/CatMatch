@@ -14,6 +14,8 @@ export function LanguageNavigation() {
   return (
     <>
       <button
+        popoverTarget="language-popover"
+        style={{ anchorName: '--anchor-1' } as React.CSSProperties}
         className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
         onClick={() => setIsMenuOpen((prev) => !prev)}
       >
@@ -26,11 +28,16 @@ export function LanguageNavigation() {
         />
       </button>
       {isMenuOpen && (
-        <ul className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+        <ul
+          popover="auto"
+          id="language-popover"
+          style={{ positionAnchor: '--anchor-1' } as React.CSSProperties}
+          className="dropdown menu-sm dropdown-end rounded-box mt-2 w-25 bg-[#040200] p-2 shadow-md"
+        >
           <li>
             <a
               href="#"
-              className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
+              className="hover:bg-base-100 block py-2 pl-4 text-sm text-gray-300"
               onClick={() => setLanguageAndCloseMenu('en')}
             >
               English
@@ -39,7 +46,8 @@ export function LanguageNavigation() {
           <li>
             <a
               href="#"
-              className="block px-4 py-2 text-sm text-gray-300 data-focus:bg-white/5 data-focus:outline-hidden"
+              n
+              className="hover:bg-base-100 block py-2 pl-4 text-sm text-gray-300"
               onClick={() => setLanguageAndCloseMenu('es')}
             >
               Español

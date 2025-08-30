@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import landingPageCat from '../../assets/landing_page_cat.png';
-import CatIcon from '../../assets/cat_icon.svg?react';
-import HouseIcon from '../../assets/house_icon.svg?react';
-import CatTestimonialPic1 from '../../assets/cat_testimonial_1.jpg';
-import CatTestimonialPic2 from '../../assets/cat_testimonial_2.jpg';
+import landingPageCat from '../../../assets/landing_page_cat.png';
+import CatIcon from '../../../assets/cat_icon.svg?react';
+import HouseIcon from '../../../assets/house_icon.svg?react';
+import CatTestimonialPic1 from '../../../assets/cat_testimonial_1.jpg';
 import { Link } from 'react-router';
 
 function LandingPage() {
@@ -87,7 +86,7 @@ function LandingPage() {
           </div>
           <div className="card lg:card-side max-w-xs bg-white shadow-sm">
             <figure>
-              <img src={CatTestimonialPic2} alt="Album" />
+              <img src={CatTestimonialPic1} alt="Album" />
             </figure>
             <div className="card-body">
               <h2 className="card-title text-black">Max</h2>

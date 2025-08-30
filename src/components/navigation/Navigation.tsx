@@ -7,13 +7,17 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
 import { LanguageNavigation } from './LanguageNavigation';
+import { useNavigationStore } from '../../stores/navigation-store';
 
 export default function Navigation() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const navigationColor = useNavigationStore((state) => state.color);
 
   return (
-    <div className="navbar z-1 grid grid-cols-12 bg-[#7289DA]">
+    <div
+      className={`navbar sticky top-0 z-50 grid grid-cols-12 bg-${navigationColor}`}
+    >
       <MobileNavigation />
       <div className="col-span-6 flex flex-row items-center pl-2 sm:justify-start md:pl-6">
         <div className="flex shrink-0 items-center">

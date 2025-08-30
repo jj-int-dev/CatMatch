@@ -1,16 +1,20 @@
 import catLogo from '../../../assets/cat_logo.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
 
 export default function Login() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const goToUserProfile = () => navigate('/user-profile');
 
   return (
     <>
-      <div className="h-screen bg-white pt-7">
+      <div className="bg-main-background h-screen bg-cover pt-7">
         <div className="flex flex-col justify-center px-6">
-          <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+          <div className="mt-2 sm:mx-auto sm:w-full sm:max-w-sm">
             <img
               alt="CatMatch"
               src={catLogo}
@@ -52,12 +56,12 @@ export default function Login() {
                       {t('password')}
                     </label>
                     <div className="text-sm">
-                      <a
-                        href="#"
-                        className="font-semibold text-indigo-400 hover:text-indigo-300"
+                      <Link
+                        to="/forgot-password"
+                        className="text-sm/6 text-white hover:font-bold hover:text-indigo-700"
                       >
                         {t('forgot_password')}
-                      </a>
+                      </Link>
                     </div>
                   </div>
                   <div className="mt-2">
@@ -86,18 +90,20 @@ export default function Login() {
               <div className="mt-4 space-y-2">
                 <div>
                   <button
+                    onClick={goToUserProfile}
                     type="submit"
                     className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
                     {t('sign_in')}
                   </button>
                 </div>
-                <p className="text-center">or</p>
+                <p className="text-center">{t('or')}</p>
               </div>
 
               <div className="mt-3 space-y-2">
                 <div>
                   <button
+                    onClick={goToUserProfile}
                     type="submit"
                     className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
@@ -108,6 +114,7 @@ export default function Login() {
 
                 <div>
                   <button
+                    onClick={goToUserProfile}
                     type="submit"
                     className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
