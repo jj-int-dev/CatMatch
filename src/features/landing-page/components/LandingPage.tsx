@@ -12,22 +12,22 @@ function LandingPage() {
     <>
       <main
         data-testid="homepage"
-        className="h-screen bg-[#7289DA] pt-10 pl-10 md:pt-14"
+        className="h-screen bg-[#7289DA] pt-10 pl-32 md:pt-14"
       >
         <div className="grid grid-flow-col grid-cols-12">
           <div className="col-span-5 col-start-1">
             <div className="row-1 space-y-4">
               <h1 className="m0 box-border block border-0 border-solid border-[#e5e7eb]">
                 <span className="block font-sans text-[56px] leading-[0.9] font-bold tracking-[-0.03em] text-black md:text-[72px] lg:text-[90px] xl:text-[120px]">
-                  {t('find_the_cat')}
+                  {t('title_line_1')}
                 </span>
                 <span className="mt-5 block text-[56px] leading-[0.9] tracking-[-0.05em] text-black italic md:text-[72px] lg:text-[90px] xl:text-[120px]">
-                  {t('of_your_dreams')}
+                  {t('title_line_2')}
                 </span>
               </h1>
             </div>
 
-            <div className="row-2 mt-15 mb-10 px-20">
+            <div className="row-2 mt-15 mb-10">
               <div className="grid max-w-[600px] grid-flow-col grid-cols-1 grid-rows-2 gap-x-20 md:grid-cols-2 md:grid-rows-1">
                 <div className="flex flex-row gap-x-4 md:col-1">
                   <CatIcon />
@@ -46,7 +46,7 @@ function LandingPage() {
                 <div className="flex flex-row gap-x-4 md:col-2">
                   <HouseIcon />
                   <p
-                    className="mt-[5px] font-sans text-[20px] leading-none font-semibold text-black"
+                    className="mt-[5px] self-center font-sans text-[20px] leading-none font-semibold text-black"
                     data-testid="hero-module-apy"
                   >
                     {t('find_cat_dream_home')}
