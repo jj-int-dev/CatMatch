@@ -11,6 +11,7 @@ import './App.css';
 import { Discovery } from '../features/discovery/components/Discovery';
 import { RehomerDashboard } from '../features/rehomer-dashboard/components/RehomerDashboard';
 import { DiscoveryPreferences } from '../features/discovery-preferences/components/DiscoveryPreferences';
+import ResetPassword from '../features/reset-password/components/ResetPassword';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           element={<DiscoveryPreferences />}
         />
         <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-password" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

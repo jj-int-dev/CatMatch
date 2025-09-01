@@ -65,5 +65,8 @@
   "interest_desc": "La gente verá el perfil del gato y deslizará a la derecha o dará un corazón si está interesado",
   "swipe_creates_chat_desc": "Un deslizar a la derecha o un corazón creará un nuevo chat entre usted y la persona interesada",
   "chats_notifications_desc": "Revise sus notificaciones y chats para estar al tanto de posibles adoptantes",
-  "rehome_desc": "Una vez que haya encontrado al adoptante adecuado, coordine para que el gato vaya a su nuevo hogar!"
+  "rehome_desc": "Una vez que haya encontrado al adoptante adecuado, coordine para que el gato vaya a su nuevo hogar!",
+  "enter_new_password": "Ingrese su nueva contraseña",
+  "confirm_new_password": "Confirme su nueva contraseña",
+  "reset_your_password": "Restablezca su Contraseña"
 }

@@ -65,5 +65,8 @@
   "interest_desc": "People will see the cat's profile and swipe right or heart it if they are interested",
   "swipe_creates_chat_desc": "A swipe right or heart will create a new chat between you and the interested party",
   "chats_notifications_desc": "Review your notifications and chats to stay updated on potential adopters",
-  "rehome_desc": "Once you've found the right adopter, arrange for the cat to be taken to their new home!"
+  "rehome_desc": "Once you've found the right adopter, arrange for the cat to be taken to their new home!",
+  "enter_new_password": "Enter your new password",
+  "confirm_new_password": "Confirm your new password",
+  "reset_your_password": "Reset Your Password"
 }
