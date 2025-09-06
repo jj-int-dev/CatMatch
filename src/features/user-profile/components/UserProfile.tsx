@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormChangeEvent } from '../types/FormTypes';
 import { useTranslation } from 'react-i18next';
 import { useSetNavigationColor } from '../../../hooks/useSetNavigationColor';
@@ -12,6 +12,10 @@ import FormButton from './FormButton';
 import { ProfileFooter } from './ProfileFooter';
 import { ProfilePicture } from './ProfilePicture';
 import { NextButton } from './NextButton';
+import { useParams } from 'react-router';
+import { useNavigate } from 'react-router';
+import type { Session } from '@supabase/supabase-js';
+import { useAuthStore } from '../../../stores/auth-store';
 
 type UserProfileData = {
   displayName: string;
@@ -25,7 +29,19 @@ type UserProfileData = {
 export default function UserProfile() {
   useSetNavigationColor('transparent');
   const { t } = useTranslation();
+  const { userId } = useParams();
+  const navigate = useNavigate();
+  const userSession = useAuthStore((state) => state.session);
+  const isAuthenticatedUser = useAuthStore(
+    (state) => state.isAuthenticatedUser
+  );
 
+  useEffect(() => {
+    if (!userId || !isAuthenticatedUser(userSession)) navigate('/login');
+    //TODO: use tanstack react query to get userProfileData here?
+  }, [userId, userSession]);
+
+  const canEdit = userId === userSession?.user?.id;
   const [isEditMode, setIsEditMode] = useState(false);
   const [userProfileData, setUserProfileData] =
     useState<UserProfileData | null>({
@@ -75,19 +91,21 @@ export default function UserProfile() {
           <Gender value={userProfileData?.gender} isEditMode={isEditMode} />
           <Age value={userProfileData?.dateOfBirth} isEditMode={isEditMode} />
           <Bio value={userProfileData?.bio} isEditMode={isEditMode} />
-          <FormButton
-            onEditPress={() => setIsEditMode(!isEditMode)}
-            onSavePress={handleSave}
-            isEditMode={isEditMode}
-          />
-          <ProfileFooter />
+          {canEdit && (
+            <FormButton
+              onEditPress={() => setIsEditMode(!isEditMode)}
+              onSavePress={handleSave}
+              isEditMode={isEditMode}
+            />
+          )}
+          {canEdit && <ProfileFooter />}
         </div>
         <ProfilePicture
           profilePicUrl={
             'https://images.unsplash.com/photo-1535982368253-05d640fe0755?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
           }
         />
-        <NextButton />
+        {canEdit && <NextButton />}
       </div>
     </div>
   );

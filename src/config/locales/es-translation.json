@@ -68,5 +68,13 @@
   "rehome_desc": "Una vez que haya encontrado al adoptante adecuado, coordine para que el gato vaya a su nuevo hogar!",
   "enter_new_password": "Ingrese su nueva contraseña",
   "confirm_new_password": "Confirme su nueva contraseña",
-  "reset_your_password": "Restablezca su Contraseña"
+  "reset_your_password": "Restablezca su Contraseña",
+  "email_required": "Se requiere un correo electrónico válido",
+  "password_required": "Se requiere una contraseña",
+  "password_minimum": "La contraseña debe tener al menos 8 caracteres",
+  "password_maximum": "La contraseña debe tener como máximo 64 caracteres",
+  "password_format": "La contraseña debe contener al menos 1 letra mayúscula, 1 letra minúscula y 1 número",
+  "passwords_must_match": "Las contraseñas deben coincidir",
+  "confirmed_password_required": "Se requiere la contraseña confirmada",
+  "no_authenticated_user_found": "No se encontró un usuario autenticado"
 }

@@ -42,7 +42,7 @@ function App() {
       <Routes>
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Registration />} />
-        <Route path="user-profile" element={<UserProfile />} />
+        <Route path="user-profile/:userId" element={<UserProfile />} />
         <Route path="user-type-selection" element={<UserTypeSelection />} />
         <Route path="discovery" element={<Discovery />} />
         <Route path="rehomer-dashboard" element={<RehomerDashboard />} />

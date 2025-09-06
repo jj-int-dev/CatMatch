@@ -68,5 +68,13 @@
   "rehome_desc": "Once you've found the right adopter, arrange for the cat to be taken to their new home!",
   "enter_new_password": "Enter your new password",
   "confirm_new_password": "Confirm your new password",
-  "reset_your_password": "Reset Your Password"
+  "reset_your_password": "Reset Your Password",
+  "email_required": "Valid email is required",
+  "password_required": "Password is required",
+  "password_minimum": "Password must be at least 8 characters",
+  "password_maximum": "Password must be at most 64 characters",
+  "password_format": "Password must have at least 1 uppercase letter, 1 lowercase letter and 1 digit",
+  "passwords_must_match": "Passwords must match",
+  "confirmed_password_required": "Confirmed Password required",
+  "no_authenticated_user_found": "No authenticated user found"
 }

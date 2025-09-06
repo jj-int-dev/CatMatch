@@ -3,16 +3,104 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import {
+  registrationFormValidator,
+  type RegistrationFormSchema
+} from '../validators/registration-form-validator';
+import { useAuthStore } from '../../../stores/auth-store';
+import { useState, type MouseEvent } from 'react';
+import type { BannerMessage } from '../../../components/banners/types/BannerProps';
+import ErrorBanner from '../../../components/banners/ErrorBanner';
 
 export default function Registration() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const registerNewUserWithEmailAndPassword = useAuthStore(
+    (state) => state.registerNewUserWithEmailAndPassword
+  );
+  const isAuthenticatedUser = useAuthStore(
+    (state) => state.isAuthenticatedUser
+  );
+  const logUserInWithFacebook = useAuthStore(
+    (state) => state.logUserInWithFacebook
+  );
+  const logUserInWithGoogle = useAuthStore(
+    (state) => state.logUserInWithGoogle
+  );
 
-  const goToUserProfile = () => navigate('/user-profile');
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    clearErrors,
+    formState: { errors, isSubmitting },
+    reset
+  } = useForm<RegistrationFormSchema>({
+    resolver: zodResolver(registrationFormValidator)
+  });
+
+  const goToUserProfile = (userId: string) =>
+    navigate(`/user-profile/${userId}`);
+
+  const onEmailPasswordRegistration = async (
+    formData: RegistrationFormSchema
+  ) => {
+    const { error, data } = await registerNewUserWithEmailAndPassword(
+      formData.email,
+      formData.password
+    );
+    const userSession = data?.session;
+    const errorMessage = error?.message;
+
+    if (errorMessage || !isAuthenticatedUser(userSession)) {
+      setAuthError(errorMessage ?? t('no_authenticated_user_found'));
+    } else {
+      reset();
+      goToUserProfile(userSession!.user.id);
+    }
+  };
+
+  const onFacebookLogin = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    await logUserInWithFacebook();
+  };
+
+  const onGoogleLogin = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    await logUserInWithGoogle();
+  };
+
+  const onCloseErrorBanner = () => {
+    clearErrors();
+    setAuthError(null);
+  };
+
+  const hasRegistrationErrors = Boolean(
+    errors.email || errors.password || errors.confirmPassword || authError
+  );
+
+  const getErrorBannerMessages = (): BannerMessage[] => {
+    const msgs: BannerMessage[] = [];
+    if (errors.email?.message) msgs.push([errors.email.message!]);
+    if (errors.password?.message) msgs.push([errors.password.message, '\n']);
+    if (errors.confirmPassword?.message)
+      msgs.push([errors.confirmPassword.message]);
+    if (authError) msgs.push([authError]);
+    return msgs;
+  };
 
   return (
     <>
       <div className="bg-main-background h-screen bg-cover pt-7">
+        {hasRegistrationErrors && (
+          <ErrorBanner
+            messages={getErrorBannerMessages()}
+            onCloseBanner={onCloseErrorBanner}
+          />
+        )}
         <div className="flex flex-col justify-center px-6">
           <div className="sm:mx-auto sm:w-full sm:max-w-sm">
             <img
@@ -26,7 +114,7 @@ export default function Registration() {
           </div>
 
           <div className="mt-10 rounded-xl bg-[#7289DA] p-8 shadow-2xl sm:mx-auto sm:w-full sm:max-w-sm">
-            <form action="#" method="POST">
+            <form>
               <div className="space-y-6">
                 <div>
                   <label
@@ -38,10 +126,9 @@ export default function Registration() {
                   <div className="mt-2">
                     <input
                       id="email"
-                      name="email"
                       type="email"
-                      required
                       autoComplete="email"
+                      {...register('email')}
                       className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
                     />
                   </div>
@@ -59,10 +146,8 @@ export default function Registration() {
                   <div className="mt-2">
                     <input
                       id="password"
-                      name="password"
                       type="password"
-                      required
-                      autoComplete="current-password"
+                      {...register('password')}
                       className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
                     />
                   </div>
@@ -71,7 +156,7 @@ export default function Registration() {
                 <div>
                   <div className="flex items-center justify-between">
                     <label
-                      htmlFor="confirm-password"
+                      htmlFor="confirmPassword"
                       className="block text-sm/6 font-medium text-black"
                     >
                       {t('confirm_password')}
@@ -79,11 +164,9 @@ export default function Registration() {
                   </div>
                   <div className="mt-2">
                     <input
-                      id="confirm-password"
-                      name="confirm-password"
+                      id="confirmPassword"
                       type="password"
-                      required
-                      autoComplete="current-password"
+                      {...register('confirmPassword')}
                       className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
                     />
                   </div>
@@ -103,8 +186,9 @@ export default function Registration() {
               <div className="mt-4 space-y-2">
                 <div>
                   <button
-                    onClick={goToUserProfile}
+                    disabled={isSubmitting}
                     type="submit"
+                    onClick={handleSubmit(onEmailPasswordRegistration)}
                     className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
                     {t('sign_in')}
@@ -116,8 +200,9 @@ export default function Registration() {
               <div className="mt-3 space-y-2">
                 <div>
                   <button
-                    onClick={goToUserProfile}
+                    disabled={isSubmitting}
                     type="submit"
+                    onClick={onFacebookLogin}
                     className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
                     <FaFacebook className="size-4 self-center" />
@@ -127,8 +212,9 @@ export default function Registration() {
 
                 <div>
                   <button
-                    onClick={goToUserProfile}
+                    disabled={isSubmitting}
                     type="submit"
+                    onClick={onGoogleLogin}
                     className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
                     <FaGoogle className="ml-[-15px] size-4 self-center" />
