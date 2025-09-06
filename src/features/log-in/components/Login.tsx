@@ -1,18 +1,100 @@
 import catLogo from '../../../assets/cat_logo.png';
+import { useState, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
+import { useAuthStore } from '../../../stores/auth-store';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import {
+  loginFormValidator,
+  type LoginFormSchema
+} from '../validators/login-form-validator';
+import type { ToastMessage } from '../../../components/toasts/types/ToastTypes';
+import ErrorToast from '../../../components/toasts/ErrorToast';
 
 export default function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const isAuthenticatedUser = useAuthStore(
+    (state) => state.isAuthenticatedUser
+  );
+  const logUserInWithEmailAndPassword = useAuthStore(
+    (state) => state.logUserInWithEmailAndPassword
+  );
+  const logUserInWithFacebook = useAuthStore(
+    (state) => state.logUserInWithFacebook
+  );
+  const logUserInWithGoogle = useAuthStore(
+    (state) => state.logUserInWithGoogle
+  );
 
-  const goToUserProfile = () => navigate('/user-profile');
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    clearErrors,
+    formState: { errors, isSubmitting },
+    reset
+  } = useForm<LoginFormSchema>({
+    resolver: zodResolver(loginFormValidator)
+  });
+
+  const goToUserProfile = (userId: string) =>
+    navigate(`/user-profile/${userId}`);
+
+  const onEmailPasswordLogin = async (formData: LoginFormSchema) => {
+    const { error, data } = await logUserInWithEmailAndPassword(
+      formData.email,
+      formData.password
+    );
+    const userSession = data?.session;
+    const errorMessage = error?.message;
+
+    if (errorMessage || !isAuthenticatedUser(userSession)) {
+      setAuthError(errorMessage ?? t('no_authenticated_user_found'));
+    } else {
+      reset();
+      goToUserProfile(userSession!.user.id);
+    }
+  };
+
+  const onFacebookLogin = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    await logUserInWithFacebook();
+  };
+
+  const onGoogleLogin = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    await logUserInWithGoogle();
+  };
+
+  const onCloseErrorToast = () => {
+    clearErrors();
+    setAuthError(null);
+  };
+
+  const getErrorToastMessages = (): ToastMessage[] => {
+    const msgs: ToastMessage[] = [];
+    if (errors.email?.message) msgs.push([errors.email.message!]);
+    if (errors.password?.message) msgs.push([errors.password.message, '\n']);
+    if (authError) msgs.push([authError]);
+    return msgs;
+  };
+
+  const hasLoginErrors = Boolean(errors.email || errors.password || authError);
 
   return (
     <>
       <div className="bg-main-background h-screen bg-cover pt-7">
+        {hasLoginErrors && (
+          <ErrorToast
+            messages={getErrorToastMessages()}
+            onCloseToast={onCloseErrorToast}
+          />
+        )}
         <div className="flex flex-col justify-center px-6">
           <div className="mt-2 sm:mx-auto sm:w-full sm:max-w-sm">
             <img
@@ -38,10 +120,9 @@ export default function Login() {
                   <div className="mt-2">
                     <input
                       id="email"
-                      name="email"
                       type="email"
-                      required
                       autoComplete="email"
+                      {...register('email')}
                       className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
                     />
                   </div>
@@ -67,10 +148,8 @@ export default function Login() {
                   <div className="mt-2">
                     <input
                       id="password"
-                      name="password"
                       type="password"
-                      required
-                      autoComplete="current-password"
+                      {...register('password')}
                       className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
                     />
                   </div>
@@ -90,7 +169,8 @@ export default function Login() {
               <div className="mt-4 space-y-2">
                 <div>
                   <button
-                    onClick={goToUserProfile}
+                    disabled={isSubmitting}
+                    onClick={handleSubmit(onEmailPasswordLogin)}
                     type="submit"
                     className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
@@ -103,7 +183,8 @@ export default function Login() {
               <div className="mt-3 space-y-2">
                 <div>
                   <button
-                    onClick={goToUserProfile}
+                    disabled={isSubmitting}
+                    onClick={onFacebookLogin}
                     type="submit"
                     className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
@@ -114,7 +195,8 @@ export default function Login() {
 
                 <div>
                   <button
-                    onClick={goToUserProfile}
+                    disabled={isSubmitting}
+                    onClick={onGoogleLogin}
                     type="submit"
                     className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >

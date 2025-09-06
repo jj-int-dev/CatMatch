@@ -11,8 +11,8 @@ import {
 } from '../validators/registration-form-validator';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useState, type MouseEvent } from 'react';
-import type { BannerMessage } from '../../../components/banners/types/BannerProps';
-import ErrorBanner from '../../../components/banners/ErrorBanner';
+import type { ToastMessage } from '../../../components/toasts/types/ToastTypes';
+import ErrorToast from '../../../components/toasts/ErrorToast';
 
 export default function Registration() {
   const { t } = useTranslation();
@@ -73,7 +73,7 @@ export default function Registration() {
     await logUserInWithGoogle();
   };
 
-  const onCloseErrorBanner = () => {
+  const onCloseErrorToast = () => {
     clearErrors();
     setAuthError(null);
   };
@@ -82,8 +82,8 @@ export default function Registration() {
     errors.email || errors.password || errors.confirmPassword || authError
   );
 
-  const getErrorBannerMessages = (): BannerMessage[] => {
-    const msgs: BannerMessage[] = [];
+  const getErrorToastMessages = (): ToastMessage[] => {
+    const msgs: ToastMessage[] = [];
     if (errors.email?.message) msgs.push([errors.email.message!]);
     if (errors.password?.message) msgs.push([errors.password.message, '\n']);
     if (errors.confirmPassword?.message)
@@ -96,9 +96,9 @@ export default function Registration() {
     <>
       <div className="bg-main-background h-screen bg-cover pt-7">
         {hasRegistrationErrors && (
-          <ErrorBanner
-            messages={getErrorBannerMessages()}
-            onCloseBanner={onCloseErrorBanner}
+          <ErrorToast
+            messages={getErrorToastMessages()}
+            onCloseToast={onCloseErrorToast}
           />
         )}
         <div className="flex flex-col justify-center px-6">

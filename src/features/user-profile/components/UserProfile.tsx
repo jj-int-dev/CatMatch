@@ -38,7 +38,6 @@ export default function UserProfile() {
 
   useEffect(() => {
     if (!userId || !isAuthenticatedUser(userSession)) navigate('/login');
-    //TODO: use tanstack react query to get userProfileData here?
   }, [userId, userSession]);
 
   const canEdit = userId === userSession?.user?.id;
