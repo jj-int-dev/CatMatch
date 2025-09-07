@@ -9,6 +9,7 @@ import DarkModeToggle from './DarkModeToggle';
 import { LanguageNavigation } from './LanguageNavigation';
 import { useNavigationStore } from '../../stores/navigation-store';
 import { useAuthStore } from '../../stores/auth-store';
+import ProfilePicture from './ProfilePicture';
 
 export default function Navigation() {
   const { t } = useTranslation();
@@ -50,6 +51,9 @@ export default function Navigation() {
         </div>
         <div className="hidden sm:ml-3 sm:block">
           <div className="flex space-x-3">
+            {isAuthenticatedUser(userSession) && (
+              <ProfilePicture userId={userSession!.user!.id} />
+            )}
             {navLinkItems
               .filter((item) => canShowItem(item))
               .map((item) => (
