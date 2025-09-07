@@ -2,17 +2,37 @@ import { FaBell } from 'react-icons/fa';
 import catLogo from '../../assets/cat_logo.png';
 import { NavLink } from 'react-router';
 import { MobileNavigation } from './MobileNavigation';
-import { navLinkItems } from './data/navLinkItems';
+import { navLinkItems, type NavLinkItem } from './data/navLinkItems';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
 import { LanguageNavigation } from './LanguageNavigation';
 import { useNavigationStore } from '../../stores/navigation-store';
+import { useAuthStore } from '../../stores/auth-store';
 
 export default function Navigation() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const navigationColor = useNavigationStore((state) => state.color);
+  const userSession = useAuthStore((state) => state.session);
+  const isAuthenticatedUser = useAuthStore(
+    (state) => state.isAuthenticatedUser
+  );
+  const logUserOut = useAuthStore((state) => state.logUserOut);
+
+  const onLogout = async () => {
+    await logUserOut();
+    navigate('/login', { replace: true });
+  };
+
+  const canShowItem = (item: NavLinkItem): boolean => {
+    return (
+      (!item.authRequired ||
+        (item.authRequired && isAuthenticatedUser(userSession))) &&
+      (!item.unAuthRequired ||
+        (item.unAuthRequired && !isAuthenticatedUser(userSession)))
+    );
+  };
 
   return (
     <div
@@ -30,27 +50,39 @@ export default function Navigation() {
         </div>
         <div className="hidden sm:ml-3 sm:block">
           <div className="flex space-x-3">
-            {navLinkItems.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.href}
-                className={({ isActive }) =>
-                  isActive
-                    ? 'rounded-xl bg-indigo-900 px-4 py-3 text-sm font-bold text-white'
-                    : 'rounded-xl bg-transparent px-4 py-3 text-sm font-medium text-white hover:bg-indigo-900 hover:font-bold'
-                }
+            {navLinkItems
+              .filter((item) => canShowItem(item))
+              .map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.href}
+                  className={({ isActive }) =>
+                    isActive
+                      ? 'rounded-xl bg-indigo-900 px-4 py-3 text-sm font-bold text-white'
+                      : 'rounded-xl bg-transparent px-4 py-3 text-sm font-medium text-white hover:bg-indigo-900 hover:font-bold'
+                  }
+                >
+                  {item.name}
+                </NavLink>
+              ))}
+            {isAuthenticatedUser(userSession) && (
+              <button
+                className="btn btn-ghost rounded-xl text-sm font-medium text-white hover:fill-indigo-900 hover:font-bold"
+                onClick={onLogout}
               >
-                {item.name}
-              </NavLink>
-            ))}
+                {t('logout')}
+              </button>
+            )}
           </div>
         </div>
       </div>
       <div className="flex-flow-reverse col-span-6 flex items-center justify-end gap-x-4 pr-2 md:pr-6">
-        <span className="text-white hover:cursor-pointer hover:text-yellow-500">
-          <span className="sr-only">{t('view_notifications')}</span>
-          <FaBell aria-hidden="true" className="size-6" />
-        </span>
+        {isAuthenticatedUser(userSession) && (
+          <span className="cursor-pointer text-white hover:text-yellow-500">
+            <span className="sr-only">{t('view_notifications')}</span>
+            <FaBell aria-hidden="true" className="size-6" />
+          </span>
+        )}
         <DarkModeToggle />
         <LanguageNavigation />
       </div>

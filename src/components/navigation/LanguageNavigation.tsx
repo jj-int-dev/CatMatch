@@ -16,7 +16,7 @@ export function LanguageNavigation() {
       <button
         popoverTarget="language-popover"
         style={{ anchorName: '--anchor-1' } as React.CSSProperties}
-        className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+        className="relative flex cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
         onClick={() => setIsMenuOpen((prev) => !prev)}
       >
         <span className="absolute -inset-1.5" />
