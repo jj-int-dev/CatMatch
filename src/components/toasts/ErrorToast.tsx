@@ -11,7 +11,7 @@ export default function ErrorToast({ messages, onCloseToast }: ToastProps) {
       <div className="alert alert-error">
         <ul>
           {bannerMessages.map((msg) => (
-            <li>{msg}</li>
+            <li key={msg}>{msg}</li>
           ))}
         </ul>
       </div>
