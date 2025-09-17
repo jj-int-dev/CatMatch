@@ -14,33 +14,17 @@ const doPasswordsMatch = (
   return password === confirmedPassword;
 };
 
-const passwordValidator: z.core.$ZodErrorMap<
-  z.core.$ZodIssueInvalidType<unknown>
-> = (issue) => {
-  const password = issue.input as string | undefined;
-  const errorMsgs: string[] = [];
-
-  if (password === undefined) {
-    errorMsgs.push(i18next.t('password_required'));
-  } else {
-    if (password.length < 8) {
-      errorMsgs.push(i18next.t('password_minimum'));
-    }
-    if (password.length > 64) {
-      errorMsgs.push(i18next.t('password_maximum'));
-    }
-    if (!isPasswordFormatValid(password)) {
-      errorMsgs.push(i18next.t('password_format'));
-    }
-  }
-  return { message: errorMsgs.join('\n') };
-};
-
 export const registrationFormValidator = z
   .object({
     email: z.email(i18next.t('email_required')),
-    password: z.string({ error: passwordValidator }),
-    confirmPassword: z.string(i18next.t('confirmed_password_required'))
+    password: z
+      .string()
+      .min(8, i18next.t('password_minimum'))
+      .max(64, i18next.t('password_maximum'))
+      .refine(isPasswordFormatValid, {
+        message: i18next.t('password_format')
+      }),
+    confirmPassword: z.string().min(1, i18next.t('confirmed_password_required'))
   })
   .refine(
     (formData) => doPasswordsMatch(formData.password, formData.confirmPassword),
