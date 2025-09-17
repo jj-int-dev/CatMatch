@@ -1,16 +1,11 @@
-import type { ToastProps } from './types/ToastTypes';
-import flattenMessages from './utils/flattenMessages';
+import type { ToastProps } from './types/ToastProps';
 
 export default function ErrorToast({ messages, onCloseToast }: ToastProps) {
-  if (messages.length === 0) return <></>;
-
-  const bannerMessages = flattenMessages(messages);
-
   return (
     <div className="toast toast-center">
       <div className="alert alert-error">
         <ul>
-          {bannerMessages.map((msg) => (
+          {messages.map((msg) => (
             <li key={msg}>{msg}</li>
           ))}
         </ul>

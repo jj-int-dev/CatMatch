@@ -4,14 +4,13 @@ import { Link } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, type FieldErrors } from 'react-hook-form';
 import {
   registrationFormValidator,
   type RegistrationFormSchema
 } from '../validators/registration-form-validator';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useState, type MouseEvent } from 'react';
-import type { ToastMessage } from '../../../components/toasts/types/ToastTypes';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 
 export default function Registration() {
@@ -30,13 +29,16 @@ export default function Registration() {
     (state) => state.logUserInWithGoogle
   );
 
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [formValidationErrors, setFormValidationErrors] = useState<string[]>(
+    []
+  );
 
   const {
     register,
     handleSubmit,
     clearErrors,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
     reset
   } = useForm<RegistrationFormSchema>({
     resolver: zodResolver(registrationFormValidator)
@@ -56,12 +58,37 @@ export default function Registration() {
     const errorMessage = error?.message;
 
     if (errorMessage || !isAuthenticatedUser(userSession)) {
-      setAuthError(errorMessage ?? t('no_authenticated_user_found'));
+      setFormValidationErrors([
+        errorMessage ? errorMessage : t('no_authenticated_user_found')
+      ]);
+      setShowErrorToast(true);
     } else {
       reset();
+      setShowErrorToast(false);
+      setFormValidationErrors([]);
       console.log('Registered session:', userSession);
       //goToUserProfile(userSession!.user.id);
     }
+  };
+
+  const onRegistrationFailure = (
+    formErrors: FieldErrors<RegistrationFormSchema>
+  ) => {
+    const errorMsgs: string[] = [];
+    console.log('formErrors:', formErrors);
+    if (formErrors.email?.message != null) {
+      errorMsgs.push(formErrors.email.message);
+    }
+    if (formErrors.password?.message != null) {
+      const passwordErrors = formErrors.password.message.split('\n');
+      errorMsgs.push(...passwordErrors);
+    }
+    if (formErrors.confirmPassword?.message != null) {
+      errorMsgs.push(formErrors.confirmPassword.message);
+    }
+
+    setFormValidationErrors(errorMsgs);
+    setShowErrorToast(errorMsgs.length > 0);
   };
 
   const onFacebookLogin = async (e: MouseEvent<HTMLButtonElement>) => {
@@ -76,29 +103,17 @@ export default function Registration() {
 
   const onCloseErrorToast = () => {
     clearErrors();
-    setAuthError(null);
+    setShowErrorToast(false);
+    setFormValidationErrors([]);
   };
 
-  const hasRegistrationErrors = Boolean(
-    errors.email || errors.password || errors.confirmPassword || authError
-  );
-
-  const getErrorToastMessages = (): ToastMessage[] => {
-    const msgs: ToastMessage[] = [];
-    if (errors.email?.message) msgs.push([errors.email.message!]);
-    if (errors.password?.message) msgs.push([errors.password.message, '\n']);
-    if (errors.confirmPassword?.message)
-      msgs.push([errors.confirmPassword.message]);
-    if (authError) msgs.push([authError]);
-    return msgs;
-  };
-
+  console.log('errors:', formValidationErrors);
   return (
     <>
       <div className="bg-main-background h-screen bg-cover pt-7">
-        {hasRegistrationErrors && (
+        {showErrorToast && (
           <ErrorToast
-            messages={getErrorToastMessages()}
+            messages={formValidationErrors}
             onCloseToast={onCloseErrorToast}
           />
         )}
@@ -189,7 +204,10 @@ export default function Registration() {
                   <button
                     disabled={isSubmitting}
                     type="submit"
-                    onClick={handleSubmit(onEmailPasswordRegistration)}
+                    onClick={handleSubmit(
+                      onEmailPasswordRegistration,
+                      onRegistrationFailure
+                    )}
                     className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
                     {t('sign_in')}
