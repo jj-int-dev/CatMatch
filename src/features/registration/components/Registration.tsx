@@ -6,15 +6,15 @@ import { FaFacebook, FaGoogle } from 'react-icons/fa';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, type FieldErrors } from 'react-hook-form';
 import {
-  registrationFormValidator,
+  createRegistrationFormValidator,
   type RegistrationFormSchema
 } from '../validators/registration-form-validator';
 import { useAuthStore } from '../../../stores/auth-store';
-import { useState, type MouseEvent } from 'react';
+import { useState, useMemo, type MouseEvent } from 'react';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 
 export default function Registration() {
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
   const navigate = useNavigate();
   const registerNewUserWithEmailAndPassword = useAuthStore(
     (state) => state.registerNewUserWithEmailAndPassword
@@ -34,6 +34,12 @@ export default function Registration() {
     []
   );
 
+  // Recreate the schema whenever the language changes so that error messages are in the correct language
+  const formSchema = useMemo(
+    () => createRegistrationFormValidator(),
+    [i18n.language]
+  );
+
   const {
     register,
     handleSubmit,
@@ -41,7 +47,7 @@ export default function Registration() {
     formState: { isSubmitting },
     reset
   } = useForm<RegistrationFormSchema>({
-    resolver: zodResolver(registrationFormValidator)
+    resolver: zodResolver(formSchema)
   });
 
   const goToUserProfile = (userId: string) =>

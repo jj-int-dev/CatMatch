@@ -1,5 +1,5 @@
 import catLogo from '../../../assets/cat_logo.png';
-import { useState, type MouseEvent } from 'react';
+import { useState, useMemo, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useNavigate } from 'react-router-dom';
@@ -8,13 +8,13 @@ import { useAuthStore } from '../../../stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, type FieldErrors } from 'react-hook-form';
 import {
-  loginFormValidator,
+  createLoginFormValidator,
   type LoginFormSchema
 } from '../validators/login-form-validator';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 
 export default function Login() {
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
   const navigate = useNavigate();
   const isAuthenticatedUser = useAuthStore(
     (state) => state.isAuthenticatedUser
@@ -34,6 +34,9 @@ export default function Login() {
     []
   );
 
+  // Recreate the schema whenever the language changes so that error messages are in the correct language
+  const formSchema = useMemo(() => createLoginFormValidator(), [i18n.language]);
+
   const {
     register,
     handleSubmit,
@@ -41,7 +44,7 @@ export default function Login() {
     formState: { isSubmitting },
     reset
   } = useForm<LoginFormSchema>({
-    resolver: zodResolver(loginFormValidator)
+    resolver: zodResolver(formSchema)
   });
 
   const goToUserProfile = (userId: string) =>

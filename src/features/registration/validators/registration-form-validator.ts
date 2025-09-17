@@ -14,24 +14,31 @@ const doPasswordsMatch = (
   return password === confirmedPassword;
 };
 
-export const registrationFormValidator = z
-  .object({
-    email: z.email(i18next.t('email_required')),
-    password: z
-      .string()
-      .min(8, i18next.t('password_minimum'))
-      .max(64, i18next.t('password_maximum'))
-      .refine(isPasswordFormatValid, {
-        message: i18next.t('password_format')
-      }),
-    confirmPassword: z.string().min(1, i18next.t('confirmed_password_required'))
-  })
-  .refine(
-    (formData) => doPasswordsMatch(formData.password, formData.confirmPassword),
-    {
-      error: i18next.t('passwords_must_match'),
-      path: ['confirmPassword']
-    }
-  );
+// exporting as a function instead of just the z object will allow the schema to be recreated dynamically whenever the language changes
+export const createRegistrationFormValidator = () =>
+  z
+    .object({
+      email: z.email(i18next.t('email_required')),
+      password: z
+        .string()
+        .min(8, i18next.t('password_minimum'))
+        .max(64, i18next.t('password_maximum'))
+        .refine(isPasswordFormatValid, {
+          message: i18next.t('password_format')
+        }),
+      confirmPassword: z
+        .string()
+        .min(1, i18next.t('confirmed_password_required'))
+    })
+    .refine(
+      (formData) =>
+        doPasswordsMatch(formData.password, formData.confirmPassword),
+      {
+        error: i18next.t('passwords_must_match'),
+        path: ['confirmPassword']
+      }
+    );
 
-export type RegistrationFormSchema = z.infer<typeof registrationFormValidator>;
+export type RegistrationFormSchema = z.infer<
+  ReturnType<typeof createRegistrationFormValidator>
+>;
