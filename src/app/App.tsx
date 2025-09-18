@@ -16,6 +16,8 @@ import ResetPassword from '../features/reset-password/components/ResetPassword';
 import { useEffect } from 'react';
 import { supabase } from '../utils/supabase-client';
 import { useAuthStore } from '../stores/auth-store';
+import PrivacyPolicy from '../features/privacy-policy/components/PrivacyPolicy';
+import UserDataDeletion from '../features/user-data-deletion/components/UserDataDeletion';
 
 function App() {
   const setSession = useAuthStore((state) => state.setSession);
@@ -44,6 +46,8 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Registration />} />
         <Route path="oauth-callback" element={<OAuthCallback />} />
+        <Route path="privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="user-data-deletion" element={<UserDataDeletion />} />
         <Route path="user-profile/:userId" element={<UserProfile />} />
         <Route path="user-type-selection" element={<UserTypeSelection />} />
         <Route path="discovery" element={<Discovery />} />
