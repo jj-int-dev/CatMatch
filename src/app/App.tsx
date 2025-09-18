@@ -3,6 +3,7 @@ import Navigation from '../components/navigation/Navigation';
 import LandingPage from '../features/landing-page/components/LandingPage';
 import Login from '../features/log-in/components/Login';
 import Registration from '../features/registration/components/Registration';
+import OAuthCallback from '../features/oauth-callback/components/OAuthCallback';
 import UserProfile from '../features/user-profile/components/UserProfile';
 import UserTypeSelection from '../features/user-type-selection/components/UserTypeSelection';
 import ForgotPassword from '../features/forgot-password/components/ForgotPassword';
@@ -42,6 +43,7 @@ function App() {
       <Routes>
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Registration />} />
+        <Route path="oauth-callback" element={<OAuthCallback />} />
         <Route path="user-profile/:userId" element={<UserProfile />} />
         <Route path="user-type-selection" element={<UserTypeSelection />} />
         <Route path="discovery" element={<Discovery />} />

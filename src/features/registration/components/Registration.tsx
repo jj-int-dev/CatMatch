@@ -81,7 +81,7 @@ export default function Registration() {
     formErrors: FieldErrors<RegistrationFormSchema>
   ) => {
     const errorMsgs: string[] = [];
-    console.log('formErrors:', formErrors);
+
     if (formErrors.email?.message != null) {
       errorMsgs.push(formErrors.email.message);
     }
@@ -113,7 +113,6 @@ export default function Registration() {
     setFormValidationErrors([]);
   };
 
-  console.log('errors:', formValidationErrors);
   return (
     <>
       <div className="bg-main-background h-screen bg-cover pt-7">
