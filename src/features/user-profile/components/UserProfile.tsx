@@ -14,7 +14,6 @@ import { ProfilePicture } from './ProfilePicture';
 import { NextButton } from './NextButton';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router';
-import type { Session } from '@supabase/supabase-js';
 import { useAuthStore } from '../../../stores/auth-store';
 
 type UserProfileData = {

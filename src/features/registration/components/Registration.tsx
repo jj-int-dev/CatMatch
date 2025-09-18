@@ -1,7 +1,7 @@
 import catLogo from '../../../assets/cat_logo.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, type FieldErrors } from 'react-hook-form';
@@ -15,7 +15,7 @@ import ErrorToast from '../../../components/toasts/ErrorToast';
 
 export default function Registration() {
   const { i18n, t } = useTranslation();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const registerNewUserWithEmailAndPassword = useAuthStore(
     (state) => state.registerNewUserWithEmailAndPassword
   );
@@ -50,8 +50,8 @@ export default function Registration() {
     resolver: zodResolver(formSchema)
   });
 
-  const goToUserProfile = (userId: string) =>
-    navigate(`/user-profile/${userId}`);
+  // const goToUserProfile = (userId: string) =>
+  //   navigate(`/user-profile/${userId}`);
 
   const onEmailPasswordRegistration = async (
     formData: RegistrationFormSchema

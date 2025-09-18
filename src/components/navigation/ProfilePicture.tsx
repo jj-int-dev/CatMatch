@@ -1,9 +1,9 @@
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 
 type ProfilePictureProps = { userId: string };
 
 export default function ProfilePicture({ userId }: ProfilePictureProps) {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const goToUserProfile = () => {
     console.log(userId);

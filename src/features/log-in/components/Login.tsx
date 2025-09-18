@@ -2,7 +2,7 @@ import catLogo from '../../../assets/cat_logo.png';
 import { useState, useMemo, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
 import { useAuthStore } from '../../../stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,7 +15,7 @@ import ErrorToast from '../../../components/toasts/ErrorToast';
 
 export default function Login() {
   const { i18n, t } = useTranslation();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const isAuthenticatedUser = useAuthStore(
     (state) => state.isAuthenticatedUser
   );
@@ -47,8 +47,8 @@ export default function Login() {
     resolver: zodResolver(formSchema)
   });
 
-  const goToUserProfile = (userId: string) =>
-    navigate(`/user-profile/${userId}`);
+  // const goToUserProfile = (userId: string) =>
+  //   navigate(`/user-profile/${userId}`);
 
   const onEmailPasswordLogin = async (formData: LoginFormSchema) => {
     const { error, data } = await logUserInWithEmailAndPassword(
