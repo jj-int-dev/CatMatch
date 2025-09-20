@@ -1,8 +1,8 @@
 import catLogo from '../../../assets/cat_logo.png';
-import { useState, useMemo, type MouseEvent } from 'react';
+import { useState, useMemo, type MouseEvent, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-//import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
 import { useAuthStore } from '../../../stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,12 +12,13 @@ import {
   type LoginFormSchema
 } from '../validators/login-form-validator';
 import ErrorToast from '../../../components/toasts/ErrorToast';
+import WarningToast from '../../../components/toasts/WarningToast';
 
 export default function Login() {
   const { i18n, t } = useTranslation();
-  //const navigate = useNavigate();
-  const isAuthenticatedUser = useAuthStore(
-    (state) => state.isAuthenticatedUser
+  const navigate = useNavigate();
+  const isAuthenticatedUserSession = useAuthStore(
+    (state) => state.isAuthenticatedUserSession
   );
   const logUserInWithEmailAndPassword = useAuthStore(
     (state) => state.logUserInWithEmailAndPassword
@@ -33,6 +34,7 @@ export default function Login() {
   const [formValidationErrors, setFormValidationErrors] = useState<string[]>(
     []
   );
+  const [showVerifyEmailToast, setShowVerifyEmailToast] = useState(false);
 
   // Recreate the schema whenever the language changes so that error messages are in the correct language
   const formSchema = useMemo(() => createLoginFormValidator(), [i18n.language]);
@@ -47,28 +49,33 @@ export default function Login() {
     resolver: zodResolver(formSchema)
   });
 
-  // const goToUserProfile = (userId: string) =>
-  //   navigate(`/user-profile/${userId}`);
+  const goToUserProfile = (userId: string) =>
+    navigate(`/user-profile/${userId}`);
 
   const onEmailPasswordLogin = async (formData: LoginFormSchema) => {
     const { error, data } = await logUserInWithEmailAndPassword(
       formData.email,
       formData.password
     );
+    console.log('Login data:', data);
+    console.log('Login error:', error);
     const userSession = data?.session;
     const errorMessage = error?.message;
 
-    if (errorMessage || !isAuthenticatedUser(userSession)) {
-      setFormValidationErrors([
-        errorMessage ? errorMessage : t('no_authenticated_user_found')
-      ]);
+    if (errorMessage === 'Email not confirmed') {
+      setShowVerifyEmailToast(true);
+    } else if (errorMessage) {
+      setFormValidationErrors([errorMessage]);
+      setShowErrorToast(true);
+    } else if (!isAuthenticatedUserSession(userSession)) {
+      setFormValidationErrors([t('no_authenticated_user_found')]);
       setShowErrorToast(true);
     } else {
       reset();
+      onCloseWarningToast();
       setShowErrorToast(false);
       setFormValidationErrors([]);
-      console.log('Logged in session:', userSession);
-      //goToUserProfile(userSession!.user.id);
+      goToUserProfile(userSession!.user.id);
     }
   };
 
@@ -103,6 +110,8 @@ export default function Login() {
     setFormValidationErrors([]);
   };
 
+  const onCloseWarningToast = () => setShowVerifyEmailToast(false);
+
   return (
     <>
       <div className="bg-main-background h-screen bg-cover pt-7">
@@ -110,6 +119,12 @@ export default function Login() {
           <ErrorToast
             messages={formValidationErrors}
             onCloseToast={onCloseErrorToast}
+          />
+        )}
+        {showVerifyEmailToast && (
+          <WarningToast
+            messages={[t('verify_email')]}
+            onCloseToast={onCloseWarningToast}
           />
         )}
         <div className="flex flex-col justify-center px-6">
@@ -167,7 +182,7 @@ export default function Login() {
                       id="password"
                       type="password"
                       {...register('password')}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
                     />
                   </div>
                 </div>

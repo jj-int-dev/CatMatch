@@ -3,7 +3,8 @@ import type {
   AuthTokenResponsePassword,
   Session,
   AuthError,
-  OAuthResponse
+  OAuthResponse,
+  User
 } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { supabase } from '../utils/supabase-client';
@@ -11,7 +12,8 @@ import { supabase } from '../utils/supabase-client';
 type AuthStore = {
   session: Session | null;
   setSession: (session: Session | null) => void;
-  isAuthenticatedUser: (session: Session | null) => boolean;
+  isAuthenticatedUser: (user: User | null) => boolean;
+  isAuthenticatedUserSession: (session: Session | null) => boolean;
   registerNewUserWithEmailAndPassword: (
     email: string,
     password: string
@@ -28,7 +30,9 @@ type AuthStore = {
 export const useAuthStore = create<AuthStore>((set) => ({
   session: null,
   setSession: (session) => set({ session }),
-  isAuthenticatedUser: (session) => session?.user?.aud === 'authenticated',
+  isAuthenticatedUser: (user) => user?.aud === 'authenticated',
+  isAuthenticatedUserSession: (session) =>
+    session?.user?.aud === 'authenticated',
   registerNewUserWithEmailAndPassword: (email, password) =>
     supabase.auth.signUp({
       email,

@@ -118,5 +118,6 @@
   "confirm_deletion": "Confirm the deletion when prompted.",
   "once_deleted": "Once confirmed, all of your personal data will be permanently deleted from our servers. This action cannot be undone.",
   "need_help": "Need Help?",
-  "need_help_desc": "If you experience any issues or need assistance with deleting your data, please contact us at"
+  "need_help_desc": "If you experience any issues or need assistance with deleting your data, please contact us at",
+  "verify_email": "Please verify your email to log in."
 }

@@ -1,7 +1,7 @@
 import catLogo from '../../../assets/cat_logo.png';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-//import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, type FieldErrors } from 'react-hook-form';
@@ -15,12 +15,15 @@ import ErrorToast from '../../../components/toasts/ErrorToast';
 
 export default function Registration() {
   const { i18n, t } = useTranslation();
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
   const registerNewUserWithEmailAndPassword = useAuthStore(
     (state) => state.registerNewUserWithEmailAndPassword
   );
   const isAuthenticatedUser = useAuthStore(
     (state) => state.isAuthenticatedUser
+  );
+  const isAuthenticatedUserSession = useAuthStore(
+    (state) => state.isAuthenticatedUserSession
   );
   const logUserInWithFacebook = useAuthStore(
     (state) => state.logUserInWithFacebook
@@ -50,8 +53,10 @@ export default function Registration() {
     resolver: zodResolver(formSchema)
   });
 
-  // const goToUserProfile = (userId: string) =>
-  //   navigate(`/user-profile/${userId}`);
+  const goToUserProfile = (userId: string) =>
+    navigate(`/user-profile/${userId}`);
+
+  const goToLoginPage = () => navigate('/login');
 
   const onEmailPasswordRegistration = async (
     formData: RegistrationFormSchema
@@ -60,20 +65,32 @@ export default function Registration() {
       formData.email,
       formData.password
     );
+    console.log('Registration data:', data);
+    console.log('Registration error:', error);
+    const user = data?.user;
     const userSession = data?.session;
     const errorMessage = error?.message;
 
-    if (errorMessage || !isAuthenticatedUser(userSession)) {
-      setFormValidationErrors([
-        errorMessage ? errorMessage : t('no_authenticated_user_found')
-      ]);
+    if (errorMessage) {
+      setFormValidationErrors([errorMessage]);
+      setShowErrorToast(true);
+    } else if (
+      !isAuthenticatedUser(user) &&
+      !isAuthenticatedUserSession(userSession)
+    ) {
+      setFormValidationErrors([t('no_authenticated_user_found')]);
       setShowErrorToast(true);
     } else {
       reset();
       setShowErrorToast(false);
       setFormValidationErrors([]);
-      console.log('Registered session:', userSession);
-      //goToUserProfile(userSession!.user.id);
+
+      if (isAuthenticatedUserSession(userSession)) {
+        goToUserProfile(userSession!.user.id);
+      } else if (isAuthenticatedUser(user)) {
+        // user hasn't confirmed email yet
+        goToLoginPage();
+      }
     }
   };
 
