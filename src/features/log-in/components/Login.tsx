@@ -1,5 +1,5 @@
 import catLogo from '../../../assets/cat_logo.png';
-import { useState, useMemo, type MouseEvent, useEffect } from 'react';
+import { useState, useMemo, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useNavigate } from 'react-router-dom';
