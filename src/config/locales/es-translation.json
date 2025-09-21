@@ -119,5 +119,8 @@
   "once_deleted": "Una vez confirmada, toda su información personal será eliminada permanentemente de nuestros servidores. Esta acción no se puede deshacer.",
   "need_help": "¿Necesita ayuda?",
   "need_help_desc": "Si tiene algún problema o necesita ayuda para eliminar sus datos, contáctenos en",
-  "verify_email": "Por favor verifique su correo para iniciar sesión."
+  "verify_email": "Por favor verifique su correo para iniciar sesión.",
+  "get_user_profile_error": "No se pudo obtener el perfil de usuario",
+  "update_user_profile_error": "No se pudo actualizar el perfil de usuario",
+  "update_user_type_error": "No se pudo actualizar el tipo de usuario"
 }

@@ -119,5 +119,8 @@
   "once_deleted": "Once confirmed, all of your personal data will be permanently deleted from our servers. This action cannot be undone.",
   "need_help": "Need Help?",
   "need_help_desc": "If you experience any issues or need assistance with deleting your data, please contact us at",
-  "verify_email": "Please verify your email to log in."
+  "verify_email": "Please verify your email to log in.",
+  "get_user_profile_error": "Unable to retrieve user profile",
+  "update_user_profile_error": "Unable to update user profile",
+  "update_user_type_error": "Unable to update user type"
 }

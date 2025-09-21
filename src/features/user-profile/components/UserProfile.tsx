@@ -31,12 +31,12 @@ export default function UserProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();
   const userSession = useAuthStore((state) => state.session);
-  const isAuthenticatedUser = useAuthStore(
-    (state) => state.isAuthenticatedUser
+  const isAuthenticatedUserSession = useAuthStore(
+    (state) => state.isAuthenticatedUserSession
   );
 
   useEffect(() => {
-    if (!userId || !isAuthenticatedUser(userSession)) navigate('/login');
+    if (!userId || !isAuthenticatedUserSession(userSession)) navigate('/login');
   }, [userId, userSession]);
 
   const canEdit = userId === userSession?.user?.id;
