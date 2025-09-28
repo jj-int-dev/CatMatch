@@ -1,8 +1,9 @@
 {
+  "home": "Inicio",
   "view_notifications": "Ver Notificaciones",
   "change_language": "Cambar idioma",
   "open_main_menu": "Abrir menú principal",
-  "view_profile": "Ver Mi Perfil",
+  "view_profile": "Mi Perfil",
   "adopt_a_cat": "Adoptar un Gato",
   "view_cat_listings": "Mis Gatos",
   "dark_mode": "Modo Oscuro",
