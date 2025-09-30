@@ -12,7 +12,7 @@ function LandingPage() {
     <>
       <main
         data-testid="homepage"
-        className="h-screen bg-[#7289DA] pt-10 pl-32 md:pt-14"
+        className="h-screen overflow-auto bg-[#7289DA] pt-10 pr-20 pb-20 pl-16 md:pt-14 lg:pr-0 lg:pl-32"
       >
         <div className="grid grid-flow-col grid-cols-12">
           <div className="col-span-5 col-start-1">

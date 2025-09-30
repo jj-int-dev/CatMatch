@@ -49,7 +49,7 @@ export default function Navigation() {
         profilePicUrl={profilePicUrl}
         onLogout={onLogout}
       />
-      <div className="flex-flow-reverse col-span-6 flex items-center justify-end gap-x-4 pr-2 md:pr-6">
+      <div className="flex-flow-reverse col-span-6 flex items-center justify-end gap-x-4 pr-2 max-sm:col-start-7 md:pr-6">
         {isAuthenticatedUserSession(userSession) && (
           <span className="cursor-pointer text-white hover:text-yellow-500">
             <span className="sr-only">{t('view_notifications')}</span>

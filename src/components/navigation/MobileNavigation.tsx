@@ -1,7 +1,7 @@
 import { IoMenu, IoClose } from 'react-icons/io5';
 import { NavLink } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { NavigationProps } from './types/NavigationProps';
 
 export function MobileNavigation({
@@ -15,29 +15,69 @@ export function MobileNavigation({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItemStyles =
     'hover:bg-base-100 block py-2 pl-4 text-sm text-gray-300';
+  const menuRef = useRef<HTMLUListElement>(null);
+
+  const closeMenu = () => setIsMenuOpen(false);
+
+  // Handle click outside to close menu and update state
+  useEffect(() => {
+    // Only set up event listeners when menu is open
+    if (!isMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current) {
+        const target = event.target as Node;
+        if (!menuRef.current.contains(target)) {
+          closeMenu();
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    // Close menu on popover hide event (for browsers that support popover API)
+    const popoverElement = document.getElementById('mobile-nav-popover');
+    if (popoverElement) {
+      popoverElement.addEventListener('hide', closeMenu);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (popoverElement) {
+        popoverElement.removeEventListener('hide', closeMenu);
+      }
+    };
+  }, [isMenuOpen]);
 
   return (
     <>
       <button
         popoverTarget="mobile-nav-popover"
-        style={{ anchorName: '--anchor-1' } as React.CSSProperties}
+        style={{ anchorName: '--anchor-mobile' } as React.CSSProperties}
         className="btn btn-square btn-ghost sm:hidden"
         onClick={() => setIsMenuOpen((prev) => !prev)}
       >
-        <span className="absolute -inset-0.5" />
+        <span className="absolute" />
         <span className="sr-only">{t('open_main_menu')}</span>
-        {!isMenuOpen && <IoMenu className="size-6" />}
-        {isMenuOpen && <IoClose className="size-6" />}
+
+        <div className="transition-all duration-300">
+          {isMenuOpen ? (
+            <IoClose className="size-6 rotate-90 transform" />
+          ) : (
+            <IoMenu className="size-6 rotate-0 transform" />
+          )}
+        </div>
       </button>
       {isMenuOpen && (
         <ul
+          ref={menuRef}
           popover="auto"
           id="mobile-nav-popover"
-          style={{ positionAnchor: '--anchor-1' } as React.CSSProperties}
-          className="dropdown menu-sm dropdown-end rounded-box mt-2 w-25 bg-[#040200] p-2 shadow-md sm:hidden"
+          style={{ positionAnchor: '--anchor-mobile' } as React.CSSProperties}
+          className="dropdown menu-sm dropdown-start rounded-box mt-2 w-25 bg-[#040200] p-2 shadow-md sm:hidden"
         >
           <li>
-            <NavLink to="/" className={menuItemStyles}>
+            <NavLink to="/" className={menuItemStyles} onClick={closeMenu}>
               {t('home')}
             </NavLink>
           </li>
@@ -47,6 +87,7 @@ export function MobileNavigation({
                 <NavLink
                   to={`/user-profile/${userSession!.user!.id}`}
                   className={menuItemStyles}
+                  onClick={closeMenu}
                 >
                   {t('view_profile')}
                 </NavLink>
@@ -54,11 +95,19 @@ export function MobileNavigation({
               {!!userType && (
                 <li>
                   {userType === 'Rehomer' ? (
-                    <NavLink to="/rehomer-dashboard" className={menuItemStyles}>
+                    <NavLink
+                      to="/rehomer-dashboard"
+                      className={menuItemStyles}
+                      onClick={closeMenu}
+                    >
                       {t('view_cat_listings')}
                     </NavLink>
                   ) : (
-                    <NavLink to="/discovery" className={menuItemStyles}>
+                    <NavLink
+                      to="/discovery"
+                      className={menuItemStyles}
+                      onClick={closeMenu}
+                    >
                       {t('adopt_a_cat')}
                     </NavLink>
                   )}
@@ -72,7 +121,7 @@ export function MobileNavigation({
             </>
           )}
           {!isAuthenticatedUserSession(userSession) && (
-            <NavLink to="/login" className={menuItemStyles}>
+            <NavLink to="/login" className={menuItemStyles} onClick={closeMenu}>
               {t('sign_in')}
             </NavLink>
           )}
