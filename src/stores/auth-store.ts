@@ -11,7 +11,9 @@ import { supabase } from '../utils/supabase-client';
 
 type AuthStore = {
   session: Session | null;
+  isLoadingSession: boolean;
   setSession: (session: Session | null) => void;
+  setIsLoadingSession: (loading: boolean) => void;
   isAuthenticatedUser: (user: User | null) => boolean;
   isAuthenticatedUserSession: (session: Session | null) => boolean;
   registerNewUserWithEmailAndPassword: (
@@ -29,7 +31,9 @@ type AuthStore = {
 
 export const useAuthStore = create<AuthStore>((set) => ({
   session: null,
+  isLoadingSession: true,
   setSession: (session) => set({ session }),
+  setIsLoadingSession: (loading) => set({ isLoadingSession: loading }),
   isAuthenticatedUser: (user) => user?.aud === 'authenticated',
   isAuthenticatedUserSession: (session) =>
     session?.user?.aud === 'authenticated',

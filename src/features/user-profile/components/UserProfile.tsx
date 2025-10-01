@@ -15,6 +15,8 @@ import { NextButton } from './NextButton';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
+import useGetUserProfile from '../hooks/useGetUserProfile';
+import { MobileProfilePicture } from './MobileProfilePicture';
 
 type UserProfileData = {
   displayName: string;
@@ -23,24 +25,36 @@ type UserProfileData = {
   gender: string;
   dateOfBirth: string;
   bio: string;
+  avatarUrl: string;
 };
 
 export default function UserProfile() {
   useSetNavigationColor('transparent');
   const { t } = useTranslation();
-  const { userId } = useParams();
+  const params = useParams();
+  const userId = params['userId'];
   const navigate = useNavigate();
   const userSession = useAuthStore((state) => state.session);
+  const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
   const isAuthenticatedUserSession = useAuthStore(
     (state) => state.isAuthenticatedUserSession
   );
 
   useEffect(() => {
-    if (!userId || !isAuthenticatedUserSession(userSession)) navigate('/login');
-  }, [userId, userSession]);
+    // Only check authentication after session loading is complete
+    if (
+      !userId ||
+      (!isLoadingSession && !isAuthenticatedUserSession(userSession))
+    ) {
+      navigate('/login');
+    }
+  }, [userId, userSession, isLoadingSession]);
 
-  const canEdit = userId === userSession?.user?.id;
+  const canEdit = !!userId && userId === userSession?.user?.id;
   const [isEditMode, setIsEditMode] = useState(false);
+
+  //const { isPending, isError, data } = useGetUserProfile();
+
   const [userProfileData, setUserProfileData] =
     useState<UserProfileData | null>({
       displayName: 'Leah Johnson',
@@ -48,8 +62,18 @@ export default function UserProfile() {
       phoneNumber: '+1 (555) 123-4567',
       gender: 'Woman',
       dateOfBirth: '08/27/1997',
-      bio: "Hi! I'm Leah, a mom of 6 adorable cats. My cat Luna had 5 kittens and I am looking for loving homes for one of them. They are still little babies so they will need a lot of care and attention."
+      bio: "Hi! I'm Leah, a mom of 6 adorable cats. My cat Luna had 5 kittens and I am looking for loving homes for one of them. They are still little babies so they will need a lot of care and attention.",
+      avatarUrl: `https://images.unsplash.com/photo-1535982368253-05d640fe0755?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`
     });
+
+  // Show loading state while session is being checked
+  if (isLoadingSession) {
+    return (
+      <div className="bg-purple-gradient -mt-16 flex h-screen w-screen items-center justify-center bg-cover bg-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   const onProfileDataChange = (e: FormChangeEvent) => {
     if (!userProfileData) return;
@@ -74,7 +98,7 @@ export default function UserProfile() {
     <div className="bg-purple-gradient -mt-16 flex h-screen w-screen justify-center bg-cover bg-center">
       <div className="flex w-full flex-row items-center justify-center">
         <div className="h-min max-h-[600px] max-w-[40%] self-center rounded-2xl bg-white p-2 text-center opacity-75 shadow-2xl md:p-12 lg:text-left">
-          <div className="bg-purple-gradient mx-auto -mt-16 block h-48 w-48 rounded-full bg-cover bg-center shadow-xl lg:hidden"></div>
+          <MobileProfilePicture profilePicUrl={userProfileData!.avatarUrl} />
           <DisplayName
             onChange={onProfileDataChange}
             isEditMode={isEditMode}
@@ -98,11 +122,7 @@ export default function UserProfile() {
           )}
           {canEdit && <ProfileFooter />}
         </div>
-        <ProfilePicture
-          profilePicUrl={
-            'https://images.unsplash.com/photo-1535982368253-05d640fe0755?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-          }
-        />
+        <ProfilePicture profilePicUrl={userProfileData!.avatarUrl} />
         {canEdit && <NextButton />}
       </div>
     </div>

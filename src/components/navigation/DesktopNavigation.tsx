@@ -4,12 +4,14 @@ import { NavLink, type NavLinkRenderProps } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { NavigationProps } from './types/NavigationProps';
+import { RiLogoutBoxRLine } from 'react-icons/ri';
 
 type DesktopNavigationProps = NavigationProps & { profilePicUrl: string };
 
 export default function DesktopNavigation({
   userType,
   onLogout,
+  isLoadingSession,
   userSession,
   isAuthenticatedUserSession,
   profilePicUrl
@@ -48,14 +50,14 @@ export default function DesktopNavigation({
                   </NavLink>
                 ))}
               <button
-                className="btn btn-ghost rounded-xl text-sm font-medium text-white hover:fill-indigo-900 hover:font-bold"
+                className="btn btn-outline btn-circle text-white transition duration-300 ease-in-out hover:scale-105 hover:shadow-md"
                 onClick={onLogout}
               >
-                {t('logout')}
+                <RiLogoutBoxRLine className="size-6" />
               </button>
             </>
           )}
-          {!isAuthenticatedUserSession(userSession) && (
+          {!isLoadingSession && !isAuthenticatedUserSession(userSession) && (
             <NavLink to="/login" className={menuItemStyles}>
               {t('sign_in')}
             </NavLink>

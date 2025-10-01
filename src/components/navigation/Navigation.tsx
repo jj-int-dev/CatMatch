@@ -14,6 +14,7 @@ export default function Navigation() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const navigationColor = useNavigationStore((state) => state.color);
+  const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
   const userSession = useAuthStore((state) => state.session);
   const isAuthenticatedUserSession = useAuthStore(
     (state) => state.isAuthenticatedUserSession
@@ -27,7 +28,7 @@ export default function Navigation() {
 
   const { isPending, isError, data } = useGetUserProfilePictureAndType();
   const profilePicUrl =
-    isPending || isError || !!data.avatarUrl
+    isPending || isError || !data.avatarUrl
       ? defaultProfilePic
       : data.avatarUrl!;
   const userType = isPending || isError ? null : data.userType;
@@ -37,12 +38,14 @@ export default function Navigation() {
       className={`navbar sticky top-0 z-50 grid grid-cols-12 bg-${navigationColor}`}
     >
       <MobileNavigation
+        isLoadingSession={isLoadingSession}
         userSession={userSession}
         isAuthenticatedUserSession={isAuthenticatedUserSession}
         userType={userType}
         onLogout={onLogout}
       />
       <DesktopNavigation
+        isLoadingSession={isLoadingSession}
         userSession={userSession}
         isAuthenticatedUserSession={isAuthenticatedUserSession}
         userType={userType}

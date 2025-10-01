@@ -9,6 +9,7 @@ import { useAuthStore } from '../../../stores/auth-store';
 function LandingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
   const userSession = useAuthStore((state) => state.session);
   const isAuthenticatedUserSession = useAuthStore(
     (state) => state.isAuthenticatedUserSession
@@ -75,6 +76,7 @@ function LandingPage() {
             <div className="row-3 mt-28">
               <button
                 onClick={handleClick}
+                disabled={isLoadingSession}
                 className="m-0 rounded-lg bg-white p-4 font-sans text-[15px] leading-[100%] font-semibold text-[#7289DA] shadow-lg transition-shadow duration-100 ease-out hover:bg-indigo-900 hover:text-white active:shadow-sm"
               >
                 {t('get_started')}

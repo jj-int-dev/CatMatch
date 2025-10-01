@@ -21,17 +21,24 @@ import UserDataDeletion from '../features/user-data-deletion/components/UserData
 
 function App() {
   const setSession = useAuthStore((state) => state.setSession);
+  const setIsLoadingSession = useAuthStore(
+    (state) => state.setIsLoadingSession
+  );
 
   useEffect(() => {
     const {
       data: { subscription }
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Set loading to true when auth state changes, then false after session is set
+      setIsLoadingSession(true);
       setSession(session);
+      setIsLoadingSession(false);
     });
 
     // Initial check for session on component mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setIsLoadingSession(false);
     });
 
     return () => {

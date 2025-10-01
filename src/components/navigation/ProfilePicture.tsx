@@ -14,7 +14,7 @@ export default function ProfilePicture({ imgSrc }: ProfilePictureProps) {
     <div className="avatar">
       <div
         onClick={goToUserProfile}
-        className="ring-offset-base-100 w-14 cursor-pointer rounded-full ring-2 ring-indigo-900 ring-offset-2"
+        className="ring-offset-base-100 size-9 cursor-pointer rounded-full ring-2 ring-indigo-900 ring-offset-1 transition duration-300 ease-in-out hover:scale-105 hover:shadow-md"
       >
         <img src={imgSrc} />
       </div>

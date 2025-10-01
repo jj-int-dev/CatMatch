@@ -7,6 +7,7 @@ import type { NavigationProps } from './types/NavigationProps';
 export function MobileNavigation({
   userType,
   onLogout,
+  isLoadingSession,
   userSession,
   isAuthenticatedUserSession
 }: NavigationProps) {
@@ -115,12 +116,12 @@ export function MobileNavigation({
               )}
               <li>
                 <button onClick={onLogout} className={menuItemStyles}>
-                  {t('logout')}
+                  {t('sign_out')}
                 </button>
               </li>
             </>
           )}
-          {!isAuthenticatedUserSession(userSession) && (
+          {!isLoadingSession && !isAuthenticatedUserSession(userSession) && (
             <NavLink to="/login" className={menuItemStyles} onClick={closeMenu}>
               {t('sign_in')}
             </NavLink>
