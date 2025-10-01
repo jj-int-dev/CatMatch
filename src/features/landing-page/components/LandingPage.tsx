@@ -3,10 +3,28 @@ import landingPageCat from '../../../assets/landing_page_cat.png';
 import CatIcon from '../../../assets/cat_icon.svg?react';
 import HouseIcon from '../../../assets/house_icon.svg?react';
 import CatTestimonialPic1 from '../../../assets/cat_testimonial_1.jpg';
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
+import { useAuthStore } from '../../../stores/auth-store';
 
 function LandingPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const userSession = useAuthStore((state) => state.session);
+  const isAuthenticatedUserSession = useAuthStore(
+    (state) => state.isAuthenticatedUserSession
+  );
+
+  const handleClick = () => {
+    // if user is logged in, navigate to user profile, else to login page
+    if (isAuthenticatedUserSession(userSession)) {
+      console.log(
+        `should navigate to user profile for user ${userSession!.user.id}`
+      );
+      //navigate(`/user-profile/${userSession!.user.id}`);
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <>
@@ -54,13 +72,13 @@ function LandingPage() {
                 </div>
               </div>
             </div>
-            <div className="row-3 mt-30">
-              <Link
-                to="/login"
+            <div className="row-3 mt-28">
+              <button
+                onClick={handleClick}
                 className="m-0 rounded-lg bg-white p-4 font-sans text-[15px] leading-[100%] font-semibold text-[#7289DA] shadow-lg transition-shadow duration-100 ease-out hover:bg-indigo-900 hover:text-white active:shadow-sm"
               >
                 {t('get_started')}
-              </Link>
+              </button>
             </div>
           </div>
           <div className="max-sm:col-span-8 max-sm:col-start-2 md:col-span-2 md:col-start-7 md:mt-[-30px] md:items-start">
