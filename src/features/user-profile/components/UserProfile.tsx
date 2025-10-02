@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
 import useGetUserProfile from '../hooks/useGetUserProfile';
 import { MobileProfilePicture } from './MobileProfilePicture';
+import UserProfileSkeleton from './UserProfileSkeleton';
 
 type UserProfileData = {
   displayName: string;
@@ -53,7 +54,7 @@ export default function UserProfile() {
   const canEdit = !!userId && userId === userSession?.user?.id;
   const [isEditMode, setIsEditMode] = useState(false);
 
-  //const { isPending, isError, data } = useGetUserProfile();
+  const { isPending, isError, data } = useGetUserProfile();
 
   const [userProfileData, setUserProfileData] =
     useState<UserProfileData | null>({
@@ -67,12 +68,8 @@ export default function UserProfile() {
     });
 
   // Show loading state while session is being checked
-  if (isLoadingSession) {
-    return (
-      <div className="bg-purple-gradient -mt-16 flex h-screen w-screen items-center justify-center bg-cover bg-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
+  if (isLoadingSession || isPending || isError) {
+    return <UserProfileSkeleton />;
   }
 
   const onProfileDataChange = (e: FormChangeEvent) => {
@@ -98,7 +95,10 @@ export default function UserProfile() {
     <div className="bg-purple-gradient -mt-16 flex h-screen w-screen justify-center bg-cover bg-center">
       <div className="flex w-full flex-row items-center justify-center">
         <div className="h-min max-h-[600px] max-w-[40%] self-center rounded-2xl bg-white p-2 text-center opacity-75 shadow-2xl md:p-12 lg:text-left">
-          <MobileProfilePicture profilePicUrl={userProfileData!.avatarUrl} />
+          <MobileProfilePicture
+            profilePicUrl={userProfileData!.avatarUrl}
+            isEditMode={isEditMode}
+          />
           <DisplayName
             onChange={onProfileDataChange}
             isEditMode={isEditMode}
@@ -122,7 +122,10 @@ export default function UserProfile() {
           )}
           {canEdit && <ProfileFooter />}
         </div>
-        <ProfilePicture profilePicUrl={userProfileData!.avatarUrl} />
+        <ProfilePicture
+          profilePicUrl={userProfileData!.avatarUrl}
+          isEditMode={isEditMode}
+        />
         {canEdit && <NextButton />}
       </div>
     </div>

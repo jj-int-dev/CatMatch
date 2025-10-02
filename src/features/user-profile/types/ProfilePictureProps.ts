@@ -1,1 +1,4 @@
-export type ProfilePicturComponentProps = { profilePicUrl: string };
+export type ProfilePicturComponentProps = {
+  profilePicUrl: string;
+  isEditMode: boolean;
+};
