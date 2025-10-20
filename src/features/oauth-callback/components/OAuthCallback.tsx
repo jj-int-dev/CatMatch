@@ -9,15 +9,15 @@ export default function OAuthCallback() {
   //const navigate = useNavigate();
   const params = useParams();
   const userSession = useAuthStore((state) => state.session);
-  // const isAuthenticatedUser = useAuthStore(
-  //   (state) => state.isAuthenticatedUser
+  // const isAuthenticatedUserSession = useAuthStore(
+  //   (state) => state.isAuthenticatedUserSession
   // );
 
   useEffect(() => {
     console.log('OAuthCallback location:', location);
     console.log('OAuthCallback params:', params);
     console.log('OAuthCallback userSession:', userSession);
-    // if (isAuthenticatedUser(userSession)) {
+    // if (isAuthenticatedUserSession(userSession)) {
     //   navigate(`/user-profile/${userSession!.user!.id}`);
     // } else {
     //   navigate('/login');

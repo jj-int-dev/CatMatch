@@ -1,4 +1,5 @@
 export default function () {
+  // TODO: update skeleton to match new profile layout
   return (
     <div className="bg-purple-gradient -mt-16 flex h-screen w-screen justify-center bg-cover bg-center">
       <div className="flex w-full flex-row items-center justify-center">

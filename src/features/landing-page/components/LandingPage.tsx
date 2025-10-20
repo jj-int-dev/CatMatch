@@ -18,10 +18,7 @@ function LandingPage() {
   const handleClick = () => {
     // if user is logged in, navigate to user profile, else to login page
     if (isAuthenticatedUserSession(userSession)) {
-      console.log(
-        `should navigate to user profile for user ${userSession!.user.id}`
-      );
-      //navigate(`/user-profile/${userSession!.user.id}`);
+      navigate(`/user-profile/${userSession!.user.id}`);
     } else {
       navigate('/login');
     }

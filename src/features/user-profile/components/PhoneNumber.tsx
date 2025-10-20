@@ -10,6 +10,8 @@ export default React.memo(function PhoneNumber({
   onChange
 }: FormComponentProps) {
   const { t } = useTranslation();
+  const e164PhoneNumberFormat = `^\+[1-9]\d{1,14}$`;
+
   return (
     <>
       {!isEditMode && (
@@ -30,11 +32,9 @@ export default React.memo(function PhoneNumber({
             type="tel"
             className="input-md rounded-lg border-pink-300 bg-indigo-500 p-2 tabular-nums placeholder:text-white"
             required
-            placeholder={t('phone')}
-            pattern="[0-9]*"
-            minLength={10}
-            maxLength={10}
-            title="Must be 10 digits"
+            placeholder="+14155552671"
+            pattern={e164PhoneNumberFormat}
+            maxLength={16}
             onChange={onChange}
           />
           <p className="validator-hint">{t('must_be_10_digits')}</p>
