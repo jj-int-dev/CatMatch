@@ -1,9 +1,7 @@
 import * as z from 'zod';
 import i18next from '../../../utils/i18n';
 
-// TODO: add translations for validation error messages
-
-const ACCEPTED_IMAGE_TYPES = [
+export const ACCEPTED_IMAGE_TYPES = [
   'image/jpeg',
   'image/jpg',
   'image/png',
@@ -19,11 +17,11 @@ export const createNewUserProfilePictureValidator = () =>
       .transform((fileList) => (fileList.length > 0 ? fileList[0] : undefined))
       .refine(
         (file) => !file || file.size <= MAX_FILE_SIZE_MB,
-        `Max image size is ${MAX_FILE_SIZE_MB}MB.`
+        `${i18next.t('max_image_size')} ${MAX_FILE_SIZE_MB}MB.`
       )
       .refine(
         (file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type),
-        '.jpg, .jpeg, .png and .webp files are accepted.'
+        i18next.t('invalid_image_type')
       )
       .optional()
   });

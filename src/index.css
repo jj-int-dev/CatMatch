@@ -3,8 +3,15 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  --color-skeleton-base: oklch(95% 0 0);
   --background-image-main-background: url('/src/assets/background.svg');
   --background-image-purple-gradient: url('/src/assets/purple_gradient.jpg');
+  --background-image-skeleton: linear-gradient(
+    105deg,
+    #0000 0% 40%,
+    oklch(100% 0 0) 50%,
+    #0000 60% 100%
+  );
 }
 html,
 body {

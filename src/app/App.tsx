@@ -56,7 +56,10 @@ function App() {
         <Route path="privacy-policy" element={<PrivacyPolicy />} />
         <Route path="user-data-deletion" element={<UserDataDeletion />} />
         <Route path="user-profile/:userId" element={<UserProfile />} />
-        <Route path="user-type-selection" element={<UserTypeSelection />} />
+        <Route
+          path="user-type-selection/:userId"
+          element={<UserTypeSelection />}
+        />
         <Route path="discovery" element={<Discovery />} />
         <Route path="rehomer-dashboard" element={<RehomerDashboard />} />
         <Route

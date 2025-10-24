@@ -18,8 +18,8 @@ export default async function (
       userProfileResponse.data
     );
     if (success && data) return { userProfile: data };
-    throw new Error();
+    return Promise.reject(new Error(i18next.t('get_user_profile_error')));
   } catch (error) {
-    return { error: i18next.t('get_user_profile_error') };
+    return Promise.reject(new Error(i18next.t('get_user_profile_error')));
   }
 }

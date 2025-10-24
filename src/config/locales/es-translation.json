@@ -124,5 +124,22 @@
   "verify_email": "Por favor verifique su correo para iniciar sesión.",
   "get_user_profile_error": "No se pudo obtener el perfil de usuario",
   "update_user_profile_error": "No se pudo actualizar el perfil de usuario",
-  "update_user_type_error": "No se pudo actualizar el tipo de usuario"
+  "get_user_profile_picture_error": "No se pudo obtener la foto de perfil del usuario",
+  "update_user_profile_picture_error": "No se pudo actualizar la foto de perfil del usuario",
+  "update_user_type_error": "No se pudo actualizar el tipo de usuario",
+  "display_name": "Nombre",
+  "date_of_birth": "Fecha de Nacimiento",
+  "gender": "Género",
+  "phone_number": "Número de Teléfono",
+  "bio": "Biografía",
+  "profile": "Perfil",
+  "display_name_required": "Se requiere el Nombre",
+  "invalid_date": "La fecha de nacimiento debe ser válida y anterior a hoy",
+  "invalid_phone_number": "El número de teléfono debe seguir el formato E.164 o estar vacío",
+  "invalid_gender": "El género debe ser Hombre, Mujer o estar vacío",
+  "max_image_size": "La foto no debe superar el tamaño de",
+  "invalid_image_type": "Solo se permiten archivos de .jpg, .jpeg, .png y .webp",
+  "getting_profile": "Obteniendo perfil...",
+  "upload_user_profile_picture": "Subir foto",
+  "delete_user_profile_picture": "Eliminar"
 }

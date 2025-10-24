@@ -6,7 +6,6 @@ export const updateUserProfileResponseValidator = z.object({
   phoneNumber: z.e164().nullable(),
   gender: z.literal(['Man', 'Woman', '']).nullable(),
   bio: z.string().nullable(),
-  avatarUrl: z.string().nullable(),
   userType: z.string().nullable()
 });
 

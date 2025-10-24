@@ -124,5 +124,22 @@
   "verify_email": "Please verify your email to log in.",
   "get_user_profile_error": "Unable to retrieve user profile",
   "update_user_profile_error": "Unable to update user profile",
-  "update_user_type_error": "Unable to update user type"
+  "get_user_profile_picture_error": "Unable to retrieve user profile picture",
+  "update_user_profile_picture_error": "Unable to update user profile picture",
+  "update_user_type_error": "Unable to update user type",
+  "display_name": "Display Name",
+  "date_of_birth": "Date of Birth",
+  "gender": "Gender",
+  "phone_number": "Phone Number",
+  "bio": "Bio",
+  "profile": "Profile",
+  "display_name_required": "Display Name is required",
+  "invalid_date": "Date of birth must be valid and before today",
+  "invalid_phone_number": "Phone number must follow E.164 format or be empty",
+  "invalid_gender": "Gender must be Man, Woman, or empty",
+  "max_image_size": "Image can not be larger than",
+  "invalid_image_type": "Only .jpg, .jpeg, .png and .webp files are accepted",
+  "getting_profile": "Getting profile...",
+  "upload_user_profile_picture": "Upload photo",
+  "delete_user_profile_picture": "Delete"
 }
