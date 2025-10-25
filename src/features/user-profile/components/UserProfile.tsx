@@ -19,6 +19,8 @@ import {
   ACCEPTED_IMAGE_TYPES
 } from '../validators/newUserProfilePictureValidator';
 import defaultProfilePic from '../../../assets/default_profile_pic.jpg';
+import { RiDeleteBin6Line } from 'react-icons/ri';
+import { PiUploadSimple } from 'react-icons/pi';
 
 export default function UserProfile() {
   const { i18n, t } = useTranslation();
@@ -134,7 +136,6 @@ export default function UserProfile() {
     )?.showModal();
 
   const openFileExplorer = () => {
-    // Opens the file explorer
     fileInputRef.current?.click();
   };
 
@@ -274,15 +275,15 @@ export default function UserProfile() {
       </div>
 
       <dialog id="chooseProfilePicDialog" className="modal">
-        <div className="modal-box">
+        <div className="modal-box w-md bg-white">
           <form method="dialog">
             {/* if there is a button in form, it will close the modal */}
-            <button className="btn btn-sm btn-circle btn-ghost absolute top-2 right-2">
+            <button className="btn btn-sm btn-circle btn-ghost absolute top-2 right-2 text-black transition-colors duration-200 hover:border-[rgba(0,0,0,0.12)] hover:bg-[rgba(0,0,0,0.12)] hover:text-black">
               ✕
             </button>
           </form>
-          <div className="avatar">
-            <div className="w-12 rounded-full">
+          <div className="avatar my-10 flex justify-center">
+            <div className="w-36 rounded-full">
               <img
                 src={
                   isLoadingUserProfilePicture ||
@@ -298,15 +299,15 @@ export default function UserProfile() {
             {!isLoadingUserProfilePicture &&
               !getUserProfilePictureFailed &&
               !!userProfilePictureData.avatarUrl && (
-                <button className="btn border-[#e53935] bg-[#e53935] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm">
-                  {t('delete_user_profile_picture')}
+                <button className="btn btn-sm border-[#e53935] bg-[#e53935] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm">
+                  <RiDeleteBin6Line /> {t('delete_user_profile_picture')}
                 </button>
               )}
             <button
-              className="btn border-[#4181fa] bg-[#4181fa] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
+              className="btn btn-sm border-[#4181fa] bg-[#4181fa] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
               onClick={openFileExplorer}
             >
-              {t('upload_user_profile_picture')}
+              <PiUploadSimple /> {t('upload_user_profile_picture')}
             </button>
           </div>
         </div>

@@ -140,6 +140,6 @@
   "max_image_size": "Image can not be larger than",
   "invalid_image_type": "Only .jpg, .jpeg, .png and .webp files are accepted",
   "getting_profile": "Getting profile...",
-  "upload_user_profile_picture": "Upload photo",
+  "upload_user_profile_picture": "Upload",
   "delete_user_profile_picture": "Delete"
 }

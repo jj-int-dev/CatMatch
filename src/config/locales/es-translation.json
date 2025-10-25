@@ -140,6 +140,6 @@
   "max_image_size": "La foto no debe superar el tamaño de",
   "invalid_image_type": "Solo se permiten archivos de .jpg, .jpeg, .png y .webp",
   "getting_profile": "Obteniendo perfil...",
-  "upload_user_profile_picture": "Subir foto",
+  "upload_user_profile_picture": "Subir",
   "delete_user_profile_picture": "Eliminar"
 }
