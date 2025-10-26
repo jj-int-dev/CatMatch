@@ -4,8 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
+import { useQueryClient } from '@tanstack/react-query';
 import useGetUserProfile from '../hooks/useGetUserProfile';
+import useUpdateUserProfile from '../hooks/useUpdateUserProfile';
 import useGetUserProfilePicture from '../hooks/useGetUserProfilePicture';
+import useUpdateUserProfilePicture from '../hooks/useUpdateUserProfilePicture';
+import useDeleteUserProfilePicture from '../hooks/useDeleteUserProfilePicture';
 import UserProfileSkeleton from './UserProfileSkeleton';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,15 +22,19 @@ import {
   type NewUserProfilePictureSchema,
   ACCEPTED_IMAGE_TYPES
 } from '../validators/newUserProfilePictureValidator';
+import type { GetUserProfilePictureAndTypeResponse } from '../../../components/navigation/types/GetUserProfilePictureAndTypeResponse';
+import compressImage from '../../../utils/compressImage';
 import defaultProfilePic from '../../../assets/default_profile_pic.jpg';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { PiUploadSimple } from 'react-icons/pi';
+import type { GetUserProfileResponse } from '../types/GetUserProfileResponse';
 
 export default function UserProfile() {
   const { i18n, t } = useTranslation();
   const params = useParams();
   const userId = params['userId'];
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const userSession = useAuthStore((state) => state.session);
   const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
   const isAuthenticatedUserSession = useAuthStore(
@@ -38,6 +46,7 @@ export default function UserProfile() {
   const [formValidationErrors, setFormValidationErrors] = useState<string[]>(
     []
   );
+  const [imageUpdateErrors, setImageUpdateErrors] = useState<string[]>([]);
 
   const goToLoginPage = () => navigate('/login', { replace: true });
 
@@ -74,28 +83,82 @@ export default function UserProfile() {
     data: userProfilePictureData
   } = useGetUserProfilePicture();
   const {
+    isPending: isUpdatingUserProfilePicture,
+    mutateAsync: updateUserProfilePicture
+  } = useUpdateUserProfilePicture();
+  const {
+    isPending: isDeletingUserProfilePicture,
+    mutateAsync: deleteUserProfilePicture
+  } = useDeleteUserProfilePicture();
+  const {
     isPending: isLoadingUserProfile,
     isError: getUserProfileFailed,
     error: getUserProfileError,
     data: userProfileData
   } = useGetUserProfile();
+  const { isPending: isUpdatingUserProfile, mutateAsync: updateUserProfile } =
+    useUpdateUserProfile();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleProfilePictureChange = (
+  const saveNewProfilePicture = async (newPicture: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('profile_picture', newPicture);
+      const { avatarUrl } = await updateUserProfilePicture(formData);
+      queryClient.setQueryData(['user-profile-picture', userId], { avatarUrl });
+      queryClient.setQueryData(
+        ['navigation', userId],
+        (oldData: GetUserProfilePictureAndTypeResponse) => {
+          return { ...oldData, avatarUrl };
+        }
+      );
+      if (imageUpdateErrors.length === 0) {
+        closeChooseProfilePicDialog();
+      }
+    } catch (error) {
+      setImageUpdateErrors([(error as Error).message]);
+    }
+  };
+
+  const handleProfilePictureChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { success, data, error } = profilePicValidator.safeParse({
       profilePicture: event.target.files
     });
     if (success && data?.profilePicture) {
-      // TODO: compress profile pic and create mutation to upload it. then update react-query cache and close dialog
+      setImageUpdateErrors([]);
+      const { image, success } = await compressImage(data.profilePicture);
+      if (success) {
+        await saveNewProfilePicture(image!);
+      } else {
+        setImageUpdateErrors([t('update_user_profile_picture_error')]);
+      }
     } else if (error?.issues?.length) {
       // TODO: show validation errors in dialog.
+      setImageUpdateErrors(error.issues.map((err) => err.message));
     }
   };
 
   // TODO: handle delete profile picture functionality. will probably need a mutation for that too
+  const handleDeleteProfilePicture = async () => {
+    try {
+      await deleteUserProfilePicture();
+      queryClient.setQueryData(['user-profile-picture', userId], {
+        avatarUrl: defaultProfilePic
+      });
+      queryClient.setQueryData(
+        ['navigation', userId],
+        (oldData: GetUserProfilePictureAndTypeResponse) => {
+          return { ...oldData, avatarUrl: defaultProfilePic };
+        }
+      );
+      closeChooseProfilePicDialog();
+    } catch (error) {
+      setImageUpdateErrors([(error as Error).message]);
+    }
+  };
 
   const {
     register,
@@ -117,7 +180,8 @@ export default function UserProfile() {
     isLoadingSession ||
     isLoadingUserProfile ||
     getUserProfileFailed ||
-    isSubmitting
+    isSubmitting ||
+    isUpdatingUserProfile
   ) {
     return (
       <UserProfileSkeleton
@@ -135,14 +199,38 @@ export default function UserProfile() {
       ) as HTMLDialogElement | null
     )?.showModal();
 
+  const closeChooseProfilePicDialog = () =>
+    (
+      document.getElementById(
+        'chooseProfilePicDialog'
+      ) as HTMLDialogElement | null
+    )?.close();
+
   const openFileExplorer = () => {
     fileInputRef.current?.click();
   };
 
   const handleSave = async (formData: UserProfileFormSchema) => {
-    // TODO: implement save functionality
-    // use setQueryData(['user-profile', userId], ...) to update the user profile data in the react-query cache after successful save
+    // TODO: clearErrors() ? from react-hook-form
     console.log('Saving user profile data:', formData);
+    try {
+      const { userProfile: updatedProfile } = await updateUserProfile(formData);
+      const updatedProfileData: GetUserProfileResponse = {
+        userProfile: {
+          email: updatedProfile.email,
+          displayName: updatedProfile.displayName,
+          dateOfBirth: updatedProfile.dateOfBirth,
+          phoneNumber: updatedProfile.phoneNumber,
+          gender: updatedProfile.gender,
+          bio: updatedProfile.bio,
+          firstLoginCompleted: updatedProfile.firstLoginCompleted,
+          userType: updatedProfile.userType
+        }
+      };
+      queryClient.setQueryData(['user-profile', userId], updatedProfileData);
+    } catch (error) {
+      setFormValidationErrors([(error as Error).message]);
+    }
   };
 
   // TODO: implement failure handler, don't forget to pass it to handleSubmit
@@ -282,30 +370,48 @@ export default function UserProfile() {
               ✕
             </button>
           </form>
-          <div className="avatar my-10 flex justify-center">
-            <div className="w-36 rounded-full">
-              <img
-                src={
-                  isLoadingUserProfilePicture ||
-                  getUserProfilePictureFailed ||
-                  !userProfilePictureData.avatarUrl
-                    ? defaultProfilePic
-                    : userProfilePictureData.avatarUrl
-                }
-              />
+          {imageUpdateErrors.length === 0 ? (
+            <div className="avatar my-10 flex justify-center">
+              <div className="w-36 rounded-full">
+                <img
+                  src={
+                    isLoadingUserProfilePicture ||
+                    getUserProfilePictureFailed ||
+                    !userProfilePictureData.avatarUrl
+                      ? defaultProfilePic
+                      : userProfilePictureData.avatarUrl
+                  }
+                />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="my-10">
+              <ul>
+                {imageUpdateErrors.map((error) => (
+                  <li key={error} className="text-red-600">
+                    {error}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="modal-action">
             {!isLoadingUserProfilePicture &&
               !getUserProfilePictureFailed &&
-              !!userProfilePictureData.avatarUrl && (
-                <button className="btn btn-sm border-[#e53935] bg-[#e53935] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm">
+              !!userProfilePictureData.avatarUrl &&
+              userProfilePictureData.avatarUrl !== defaultProfilePic && (
+                <button
+                  className="btn btn-sm border-[#e53935] bg-[#e53935] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
+                  onClick={handleDeleteProfilePicture}
+                  disabled={isDeletingUserProfilePicture}
+                >
                   <RiDeleteBin6Line /> {t('delete_user_profile_picture')}
                 </button>
               )}
             <button
               className="btn btn-sm border-[#4181fa] bg-[#4181fa] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
               onClick={openFileExplorer}
+              disabled={isUpdatingUserProfilePicture}
             >
               <PiUploadSimple /> {t('upload_user_profile_picture')}
             </button>

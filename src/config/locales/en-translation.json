@@ -126,6 +126,7 @@
   "update_user_profile_error": "Unable to update user profile",
   "get_user_profile_picture_error": "Unable to retrieve user profile picture",
   "update_user_profile_picture_error": "Unable to update user profile picture",
+  "delete_user_profile_picture_error": "Unable to delete user profile picture",
   "update_user_type_error": "Unable to update user type",
   "display_name": "Display Name",
   "date_of_birth": "Date of Birth",

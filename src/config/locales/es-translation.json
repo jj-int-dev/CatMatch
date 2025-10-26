@@ -126,6 +126,7 @@
   "update_user_profile_error": "No se pudo actualizar el perfil de usuario",
   "get_user_profile_picture_error": "No se pudo obtener la foto de perfil del usuario",
   "update_user_profile_picture_error": "No se pudo actualizar la foto de perfil del usuario",
+  "delete_user_profile_picture_error": "No se pudo eliminar la foto de perfil del usuario",
   "update_user_type_error": "No se pudo actualizar el tipo de usuario",
   "display_name": "Nombre",
   "date_of_birth": "Fecha de Nacimiento",

@@ -2,11 +2,16 @@ import * as z from 'zod';
 
 export const updateUserProfileResponseValidator = z.object({
   email: z.email(),
-  displayName: z.string().nullable(),
-  phoneNumber: z.e164().nullable(),
-  gender: z.literal(['Man', 'Woman', '']).nullable(),
-  bio: z.string().nullable(),
-  userType: z.string().nullable()
+  displayName: z.string().min(1),
+  phoneNumber: z.union([z.e164(), z.literal('')]), //empty string or E.164 format phone number
+  gender: z.literal(['Man', 'Woman', '']),
+  dateOfBirth: z.union([
+    z.literal(''),
+    z.iso.date().refine((date) => new Date(date) < new Date())
+  ]),
+  bio: z.string(),
+  firstLoginCompleted: z.boolean().nullable(),
+  userType: z.literal(['Rehomer', 'Adopter']).nullable()
 });
 
 export type UpdateUserProfileResponseSchema = z.infer<
