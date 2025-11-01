@@ -1,13 +1,18 @@
 import CheckmarkIcon from '../../../assets/checkmark.svg?react';
+import { useChangeUserTypeStore } from '../../../components/confirm-change-user-type/stores/change-user-type-store';
 
 type UserTypeCardProps = {
   cardTitle: string;
   cardPhrases: string[];
-  onChecked: () => void;
+  initialUserType: string;
+  userTypeForCard: string;
 };
 
 export function UserTypeCard(props: UserTypeCardProps) {
-  const { cardTitle, cardPhrases, onChecked } = props;
+  const { cardTitle, cardPhrases, initialUserType, userTypeForCard } = props;
+  const setNewUserType = useChangeUserTypeStore(
+    (state) => state.setNewUserType
+  );
 
   return (
     <div className="card w-96 rounded-4xl bg-white text-black shadow-sm">
@@ -17,7 +22,8 @@ export function UserTypeCard(props: UserTypeCardProps) {
           <input
             type="radio"
             name="radio-1"
-            onChange={onChecked}
+            defaultChecked={initialUserType === userTypeForCard}
+            onChange={() => setNewUserType(userTypeForCard)}
             className="radio radio-xl border-blue-300 bg-white checked:border-blue-600 checked:bg-blue-200 checked:text-blue-600"
           />
         </div>

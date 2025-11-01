@@ -142,5 +142,15 @@
   "invalid_image_type": "Only .jpg, .jpeg, .png and .webp files are accepted",
   "getting_profile": "Getting profile...",
   "upload_user_profile_picture": "Upload",
-  "delete_user_profile_picture": "Delete"
+  "delete_user_profile_picture": "Delete",
+  "close": "Close",
+  "adopter_confirmation_title": "Are you sure you want to become an adopter?",
+  "adopter_confirmation_desc": "All of your listings will be deleted and you will have to create new ones if you become a rehomer again in the future",
+  "rehomer_confirmation_title": "Are you sure you want to become a rehomer?",
+  "rehomer_confirmation_desc": "Your chats with rehomers and history of selected cats will be deleted",
+  "yes": "Yes",
+  "no": "No",
+  "internal_server_error": "Internal server error",
+  "internal_server_error_desc": "We are currently trying to fix the problem.",
+  "get_user_profile_picture_and_type_error": "Unable to retrieve user picture and type"
 }

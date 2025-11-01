@@ -20,8 +20,8 @@ export default async function (
       userTypeResponse.data
     );
     if (success && data) return { userType: data.userType };
-    throw new Error();
+    return Promise.reject(new Error(i18next.t('update_user_type_error')));
   } catch (error) {
-    return { error: i18next.t('update_user_type_error') };
+    return Promise.reject(new Error(i18next.t('update_user_type_error')));
   }
 }

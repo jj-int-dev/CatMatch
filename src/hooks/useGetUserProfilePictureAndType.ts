@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAuthStore } from '../../../stores/auth-store';
+import { useAuthStore } from '../stores/auth-store';
 import getUserProfilePictureAndType from '../api/getUserProfilePictureAndType';
 import type { GetUserProfilePictureAndTypeResponse } from '../types/GetUserProfilePictureAndTypeResponse';
 

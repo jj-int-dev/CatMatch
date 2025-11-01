@@ -38,7 +38,10 @@ export default function DesktopNavigation({
         <div className="flex space-x-3">
           {isAuthenticatedUserSession(userSession) && (
             <>
-              <ProfilePicture imgSrc={profilePicUrl} />
+              <ProfilePicture
+                imgSrc={profilePicUrl}
+                userId={userSession!.user.id}
+              />
               {!!userType &&
                 (userType === 'Rehomer' ? (
                   <NavLink to="/rehomer-dashboard" className={menuItemStyles}>

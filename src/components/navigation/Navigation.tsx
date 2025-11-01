@@ -6,7 +6,7 @@ import DarkModeToggle from './DarkModeToggle';
 import { LanguageNavigation } from './LanguageNavigation';
 import { useNavigationStore } from '../../stores/navigation-store';
 import { useAuthStore } from '../../stores/auth-store';
-import useGetUserProfilePictureAndType from './hooks/useGetUserProfilePictureAndType';
+import useGetUserProfilePictureAndType from '../../hooks/useGetUserProfilePictureAndType';
 import defaultProfilePic from '../../assets/default_profile_pic.jpg';
 import DesktopNavigation from './DesktopNavigation';
 

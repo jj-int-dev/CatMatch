@@ -11,7 +11,7 @@ import useGetUserProfilePicture from '../hooks/useGetUserProfilePicture';
 import useUpdateUserProfilePicture from '../hooks/useUpdateUserProfilePicture';
 import useDeleteUserProfilePicture from '../hooks/useDeleteUserProfilePicture';
 import UserProfileSkeleton from './UserProfileSkeleton';
-import { useForm } from 'react-hook-form';
+import { useForm, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   createUserProfileFormValidator,
@@ -19,15 +19,15 @@ import {
 } from '../validators/userProfileFormValidator';
 import {
   createNewUserProfilePictureValidator,
-  type NewUserProfilePictureSchema,
   ACCEPTED_IMAGE_TYPES
 } from '../validators/newUserProfilePictureValidator';
-import type { GetUserProfilePictureAndTypeResponse } from '../../../components/navigation/types/GetUserProfilePictureAndTypeResponse';
+import type { GetUserProfilePictureAndTypeResponse } from '../../../types/GetUserProfilePictureAndTypeResponse';
 import compressImage from '../../../utils/compressImage';
 import defaultProfilePic from '../../../assets/default_profile_pic.jpg';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { PiUploadSimple } from 'react-icons/pi';
 import type { GetUserProfileResponse } from '../types/GetUserProfileResponse';
+import ErrorToast from '../../../components/toasts/ErrorToast';
 
 export default function UserProfile() {
   const { i18n, t } = useTranslation();
@@ -50,8 +50,8 @@ export default function UserProfile() {
 
   const goToLoginPage = () => navigate('/login', { replace: true });
 
-  const goToUserTypeSelection = (userId: string) =>
-    navigate(`/user-type-selection/${userId}`);
+  const goToUserTypeSelection = () =>
+    navigate(`/user-type-selection/${userId!}`);
 
   useEffect(() => {
     if (!userId) {
@@ -141,7 +141,6 @@ export default function UserProfile() {
     }
   };
 
-  // TODO: handle delete profile picture functionality. will probably need a mutation for that too
   const handleDeleteProfilePicture = async () => {
     try {
       await deleteUserProfilePicture();
@@ -154,6 +153,7 @@ export default function UserProfile() {
           return { ...oldData, avatarUrl: defaultProfilePic };
         }
       );
+      setImageUpdateErrors([]);
       closeChooseProfilePicDialog();
     } catch (error) {
       setImageUpdateErrors([(error as Error).message]);
@@ -164,8 +164,7 @@ export default function UserProfile() {
     register,
     handleSubmit,
     clearErrors,
-    formState: { isSubmitting },
-    reset
+    formState: { isSubmitting }
   } = useForm<UserProfileFormSchema>({
     resolver: zodResolver(formValidator)
   });
@@ -211,7 +210,6 @@ export default function UserProfile() {
   };
 
   const handleSave = async (formData: UserProfileFormSchema) => {
-    // TODO: clearErrors() ? from react-hook-form
     console.log('Saving user profile data:', formData);
     try {
       const { userProfile: updatedProfile } = await updateUserProfile(formData);
@@ -228,15 +226,58 @@ export default function UserProfile() {
         }
       };
       queryClient.setQueryData(['user-profile', userId], updatedProfileData);
+      clearErrors();
+      setShowErrorToast(false);
+      setFormValidationErrors([]);
     } catch (error) {
       setFormValidationErrors([(error as Error).message]);
     }
   };
 
-  // TODO: implement failure handler, don't forget to pass it to handleSubmit
+  const handleProfileUpdateFailure = (
+    formErrors: FieldErrors<UserProfileFormSchema>
+  ) => {
+    const errorMsgs: string[] = [];
+
+    if (formErrors.displayName?.message != null) {
+      errorMsgs.push(formErrors.displayName.message);
+    }
+    if (formErrors.dateOfBirth?.message != null) {
+      errorMsgs.push(formErrors.dateOfBirth.message);
+    }
+    if (formErrors.phoneNumber?.message != null) {
+      errorMsgs.push(formErrors.phoneNumber.message);
+    }
+    if (formErrors.gender?.message != null) {
+      errorMsgs.push(formErrors.gender.message);
+    }
+    if (formErrors.bio?.message != null) {
+      errorMsgs.push(formErrors.bio.message);
+    }
+
+    setFormValidationErrors(errorMsgs);
+    setShowErrorToast(errorMsgs.length > 0);
+  };
+
+  const onCloseErrorToast = () => {
+    clearErrors();
+    setShowErrorToast(false);
+    setFormValidationErrors([]);
+  };
+
+  const cancelChooseProfilePic = () => {
+    setImageUpdateErrors([]);
+    closeChooseProfilePicDialog();
+  };
 
   return (
     <div className="-mt-16 flex h-screen w-screen justify-center bg-[#f9f9f9] bg-cover bg-center px-4 pt-28">
+      {showErrorToast && (
+        <ErrorToast
+          messages={formValidationErrors}
+          onCloseToast={onCloseErrorToast}
+        />
+      )}
       <div className="mx-6 h-fit w-fit rounded-2xl bg-gradient-to-r from-[#b8d2f1] to-[#fdf7e1] pt-16 shadow-md sm:mx-0">
         <div className="h-full w-full bg-[#f9f9f9] px-6 py-8">
           <div className="grid grid-cols-12 gap-y-10">
@@ -272,7 +313,7 @@ export default function UserProfile() {
               <button
                 className="btn border-[#4181fa] bg-[#4181fa] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
                 disabled={isSubmitting}
-                onClick={handleSubmit(handleSave)}
+                onClick={handleSubmit(handleSave, handleProfileUpdateFailure)}
               >
                 {t('save')}
               </button>
@@ -280,6 +321,7 @@ export default function UserProfile() {
                 <button
                   className="btn ml-3 border-[#36b37e] bg-[#36b37e] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
                   disabled={!userProfileData.userProfile?.displayName}
+                  onClick={goToUserTypeSelection}
                 >
                   {t('next')}
                 </button>
@@ -366,7 +408,7 @@ export default function UserProfile() {
         <div className="modal-box w-md bg-white">
           <form method="dialog">
             {/* if there is a button in form, it will close the modal */}
-            <button className="btn btn-sm btn-circle btn-ghost absolute top-2 right-2 text-black transition-colors duration-200 hover:border-[rgba(0,0,0,0.12)] hover:bg-[rgba(0,0,0,0.12)] hover:text-black">
+            <button className="btn btn-sm btn-circle btn-ghost absolute top-2 right-2 bg-transparent text-black transition-colors duration-200 hover:border-[rgba(0,0,0,0.12)] hover:bg-[rgba(0,0,0,0.12)] hover:text-black">
               ✕
             </button>
           </form>
@@ -396,7 +438,15 @@ export default function UserProfile() {
             </div>
           )}
           <div className="modal-action">
-            {!isLoadingUserProfilePicture &&
+            {imageUpdateErrors.length > 0 ? (
+              <button
+                className="btn btn-sm border-[#e53935] bg-[#e53935] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
+                onClick={cancelChooseProfilePic}
+              >
+                {t('close')}
+              </button>
+            ) : (
+              !isLoadingUserProfilePicture &&
               !getUserProfilePictureFailed &&
               !!userProfilePictureData.avatarUrl &&
               userProfilePictureData.avatarUrl !== defaultProfilePic && (
@@ -407,7 +457,8 @@ export default function UserProfile() {
                 >
                   <RiDeleteBin6Line /> {t('delete_user_profile_picture')}
                 </button>
-              )}
+              )
+            )}
             <button
               className="btn btn-sm border-[#4181fa] bg-[#4181fa] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
               onClick={openFileExplorer}

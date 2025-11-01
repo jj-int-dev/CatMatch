@@ -1,13 +1,15 @@
-//import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-type ProfilePictureProps = { imgSrc: string };
+type ProfilePictureProps = { imgSrc: string; userId: string };
 
-export default function ProfilePicture({ imgSrc }: ProfilePictureProps) {
-  //const navigate = useNavigate();
+export default function ProfilePicture({
+  imgSrc,
+  userId
+}: ProfilePictureProps) {
+  const navigate = useNavigate();
 
   const goToUserProfile = () => {
-    console.log(imgSrc);
-    //TODO: navigate(`/user-profile/${userId}`);
+    navigate(`/user-profile/${userId}`);
   };
 
   return (

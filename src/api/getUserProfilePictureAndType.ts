@@ -1,7 +1,8 @@
-import { axiosUsersClient } from '../../../utils/axios-client';
+import { axiosUsersClient } from '../utils/axios-client';
 import { getUserProfilePictureAndTypeResponseValidator } from '../validators/getUserProfilePictureAndTypeResponseValidator';
 import type { GetUserProfilePictureAndTypeResponse } from '../types/GetUserProfilePictureAndTypeResponse';
-import getTokenHeaders from '../../../utils/getTokenHeaders';
+import getTokenHeaders from '../utils/getTokenHeaders';
+import i18next from '../utils/i18n';
 
 export default async function (
   userId: string,
@@ -16,8 +17,12 @@ export default async function (
       getUserProfilePictureAndTypeResponseValidator.safeParse(response.data);
     if (success && data)
       return { avatarUrl: data.avatarUrl, userType: data.userType };
-    throw new Error();
+    return Promise.reject(
+      new Error(i18next.t('get_user_profile_picture_and_type_error'))
+    );
   } catch (error) {
-    return { avatarUrl: null, userType: null };
+    return Promise.reject(
+      new Error(i18next.t('get_user_profile_picture_and_type_error'))
+    );
   }
 }

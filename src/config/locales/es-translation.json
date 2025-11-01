@@ -142,5 +142,15 @@
   "invalid_image_type": "Solo se permiten archivos de .jpg, .jpeg, .png y .webp",
   "getting_profile": "Obteniendo perfil...",
   "upload_user_profile_picture": "Subir",
-  "delete_user_profile_picture": "Eliminar"
+  "delete_user_profile_picture": "Eliminar",
+  "close": "Cerrar",
+  "adopter_confirmation_title": "¿Seguro que quiere ser adoptante?",
+  "adopter_confirmation_desc": "Todas sus publicaciones se eliminarán y tendrá que crear nuevas si decide volver a dar gatos en adopción en el futuro",
+  "rehomer_confirmation_title": "¿Seguro que quiere dar gatos en adopción?",
+  "rehomer_confirmation_desc": "Sus conversaciones y historial de gatos elegidos se eliminarán",
+  "yes": "Sí",
+  "no": "No",
+  "internal_server_error": "Error interno del servidor",
+  "internal_server_error_desc": "Estamos trabajando para solucionar el problema.",
+  "get_user_profile_picture_and_type_error": "No se pudo obtener la foto de perfil y tipo del usuario"
 }
