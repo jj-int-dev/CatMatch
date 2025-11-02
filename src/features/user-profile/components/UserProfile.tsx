@@ -28,6 +28,7 @@ import type { GetUserProfileResponse } from '../types/GetUserProfileResponse';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 import getUniqueImageUrl from '../../../utils/getUniqueImageUrl';
 import { processImage } from '../../../utils/processImage';
+import { CgAsterisk } from 'react-icons/cg';
 
 export default function UserProfile() {
   const { i18n, t } = useTranslation();
@@ -332,7 +333,10 @@ export default function UserProfile() {
               {t('profile')}
             </legend>
 
-            <label className="label">{t('display_name')}</label>
+            <label className="label">
+              {t('display_name')}
+              <CgAsterisk className="text-red-600" />
+            </label>
             <input
               id="displayName"
               type="text"

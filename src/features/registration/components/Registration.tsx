@@ -65,8 +65,7 @@ export default function Registration() {
       formData.email,
       formData.password
     );
-    console.log('Registration data:', data);
-    console.log('Registration error:', error);
+
     const user = data?.user;
     const userSession = data?.session;
     const errorMessage = error?.message;
