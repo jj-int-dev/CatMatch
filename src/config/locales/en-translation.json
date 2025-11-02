@@ -5,6 +5,7 @@
   "open_main_menu": "Open main menu",
   "view_profile": "My Profile",
   "adopt_a_cat": "Adopt a Cat",
+  "preferences": "Preferences",
   "view_cat_listings": "My Cat Listings",
   "dark_mode": "Dark Mode",
   "light_mode": "Light Mode",
@@ -152,5 +153,6 @@
   "no": "No",
   "internal_server_error": "Internal server error",
   "internal_server_error_desc": "We are currently trying to fix the problem.",
-  "get_user_profile_picture_and_type_error": "Unable to retrieve user picture and type"
+  "get_user_profile_picture_and_type_error": "Unable to retrieve user picture and type",
+  "no_image_selected": "No image was selected"
 }

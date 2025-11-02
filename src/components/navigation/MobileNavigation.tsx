@@ -114,6 +114,17 @@ export function MobileNavigation({
                   )}
                 </li>
               )}
+              {!!userType && userType === 'Adopter' && (
+                <li>
+                  <NavLink
+                    to="/discovery-preferences"
+                    className={menuItemStyles}
+                    onClick={closeMenu}
+                  >
+                    {t('preferences')}
+                  </NavLink>
+                </li>
+              )}
               <li>
                 <button onClick={onLogout} className={menuItemStyles}>
                   {t('sign_out')}

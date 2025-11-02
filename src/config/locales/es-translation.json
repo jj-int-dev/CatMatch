@@ -5,6 +5,7 @@
   "open_main_menu": "Abrir menú principal",
   "view_profile": "Mi Perfil",
   "adopt_a_cat": "Adoptar un Gato",
+  "preferences": "Preferencias",
   "view_cat_listings": "Mis Gatos",
   "dark_mode": "Modo Oscuro",
   "light_mode": "Modo Claro",
@@ -152,5 +153,6 @@
   "no": "No",
   "internal_server_error": "Error interno del servidor",
   "internal_server_error_desc": "Estamos trabajando para solucionar el problema.",
-  "get_user_profile_picture_and_type_error": "No se pudo obtener la foto de perfil y tipo del usuario"
+  "get_user_profile_picture_and_type_error": "No se pudo obtener la foto de perfil y tipo del usuario",
+  "no_image_selected": "No escogió una foto"
 }

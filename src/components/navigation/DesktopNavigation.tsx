@@ -48,9 +48,17 @@ export default function DesktopNavigation({
                     {t('view_cat_listings')}
                   </NavLink>
                 ) : (
-                  <NavLink to="/discovery" className={menuItemStyles}>
-                    {t('adopt_a_cat')}
-                  </NavLink>
+                  <>
+                    <NavLink to="/discovery" className={menuItemStyles}>
+                      {t('adopt_a_cat')}
+                    </NavLink>
+                    <NavLink
+                      to="/discovery-preferences"
+                      className={menuItemStyles}
+                    >
+                      {t('preferences')}
+                    </NavLink>
+                  </>
                 ))}
               <button
                 className="btn btn-outline btn-circle text-white transition duration-300 ease-in-out hover:scale-105 hover:shadow-md"

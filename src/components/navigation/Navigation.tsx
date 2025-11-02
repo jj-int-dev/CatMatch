@@ -9,6 +9,7 @@ import { useAuthStore } from '../../stores/auth-store';
 import useGetUserProfilePictureAndType from '../../hooks/useGetUserProfilePictureAndType';
 import defaultProfilePic from '../../assets/default_profile_pic.jpg';
 import DesktopNavigation from './DesktopNavigation';
+import getUniqueImageUrl from '../../utils/getUniqueImageUrl';
 
 export default function Navigation() {
   const { t } = useTranslation();
@@ -30,7 +31,9 @@ export default function Navigation() {
   const profilePicUrl =
     isPending || isError || !data.avatarUrl
       ? defaultProfilePic
-      : data.avatarUrl!;
+      : data.avatarUrl!.includes('?timestamp=')
+        ? data.avatarUrl!
+        : getUniqueImageUrl(data.avatarUrl!);
   const userType = isPending || isError ? null : data.userType;
 
   return (

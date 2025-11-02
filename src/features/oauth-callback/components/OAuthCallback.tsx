@@ -1,28 +1,33 @@
 import { useEffect } from 'react';
-import { /*useNavigate, */ useParams, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../stores/auth-store';
+import LoadingScreen from '../../../components/loading-screen/LoadingScreen';
 
 // user gets redirected here after logging in with third part oauth provider (e.g., facebook)
 // we check if they are logged in and redirect to their profile or to login page
 export default function OAuthCallback() {
-  const location = useLocation();
-  //const navigate = useNavigate();
-  const params = useParams();
+  const navigate = useNavigate();
+  const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
   const userSession = useAuthStore((state) => state.session);
-  // const isAuthenticatedUserSession = useAuthStore(
-  //   (state) => state.isAuthenticatedUserSession
-  // );
+  const isAuthenticatedUserSession = useAuthStore(
+    (state) => state.isAuthenticatedUserSession
+  );
+
+  const goToLoginPage = () => navigate('/login', { replace: true });
+
+  const goToUserProfile = (userId: string) =>
+    navigate(`/user-profile/${userId}`);
 
   useEffect(() => {
-    console.log('OAuthCallback location:', location);
-    console.log('OAuthCallback params:', params);
-    console.log('OAuthCallback userSession:', userSession);
-    // if (isAuthenticatedUserSession(userSession)) {
-    //   navigate(`/user-profile/${userSession!.user!.id}`);
-    // } else {
-    //   navigate('/login');
-    // }
-  }, [userSession]);
+    if (!isLoadingSession) {
+      // Only check authentication after session loading is complete
+      if (!isAuthenticatedUserSession(userSession)) {
+        goToLoginPage();
+      } else {
+        goToUserProfile(userSession!.user.id);
+      }
+    }
+  }, [userSession, isLoadingSession]);
 
-  return <div>Logging in...</div>;
+  return <LoadingScreen />;
 }

@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import type { FormChangeEvent } from '../types/FormTypes';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router';
@@ -22,12 +21,13 @@ import {
   ACCEPTED_IMAGE_TYPES
 } from '../validators/newUserProfilePictureValidator';
 import type { GetUserProfilePictureAndTypeResponse } from '../../../types/GetUserProfilePictureAndTypeResponse';
-import compressImage from '../../../utils/compressImage';
 import defaultProfilePic from '../../../assets/default_profile_pic.jpg';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { PiUploadSimple } from 'react-icons/pi';
 import type { GetUserProfileResponse } from '../types/GetUserProfileResponse';
 import ErrorToast from '../../../components/toasts/ErrorToast';
+import getUniqueImageUrl from '../../../utils/getUniqueImageUrl';
+import { processImage } from '../../../utils/processImage';
 
 export default function UserProfile() {
   const { i18n, t } = useTranslation();
@@ -80,6 +80,7 @@ export default function UserProfile() {
   const {
     isPending: isLoadingUserProfilePicture,
     isError: getUserProfilePictureFailed,
+    error: getUserProfilePictureError,
     data: userProfilePictureData
   } = useGetUserProfilePicture();
   const {
@@ -110,7 +111,7 @@ export default function UserProfile() {
       queryClient.setQueryData(
         ['navigation', userId],
         (oldData: GetUserProfilePictureAndTypeResponse) => {
-          return { ...oldData, avatarUrl };
+          return { ...oldData, avatarUrl: getUniqueImageUrl(avatarUrl) };
         }
       );
       if (imageUpdateErrors.length === 0) {
@@ -129,14 +130,13 @@ export default function UserProfile() {
     });
     if (success && data?.profilePicture) {
       setImageUpdateErrors([]);
-      const { image, success } = await compressImage(data.profilePicture);
-      if (success) {
-        await saveNewProfilePicture(image!);
+      const imageProcessingResult = await processImage(data.profilePicture);
+      if (imageProcessingResult.success) {
+        await saveNewProfilePicture(imageProcessingResult.image!);
       } else {
         setImageUpdateErrors([t('update_user_profile_picture_error')]);
       }
     } else if (error?.issues?.length) {
-      // TODO: show validation errors in dialog.
       setImageUpdateErrors(error.issues.map((err) => err.message));
     }
   };
@@ -221,7 +221,6 @@ export default function UserProfile() {
           phoneNumber: updatedProfile.phoneNumber,
           gender: updatedProfile.gender,
           bio: updatedProfile.bio,
-          firstLoginCompleted: updatedProfile.firstLoginCompleted,
           userType: updatedProfile.userType
         }
       };
@@ -293,7 +292,7 @@ export default function UserProfile() {
                       getUserProfilePictureFailed ||
                       !userProfilePictureData.avatarUrl
                         ? defaultProfilePic
-                        : userProfilePictureData.avatarUrl
+                        : getUniqueImageUrl(userProfilePictureData.avatarUrl)
                     }
                   />
                 </div>
@@ -340,7 +339,7 @@ export default function UserProfile() {
               className="input w-fieldset-input-md bg-[#f9f9f9]"
               placeholder="Your name"
               {...register('displayName')}
-              value={userProfileData.userProfile?.displayName ?? ''}
+              defaultValue={userProfileData.userProfile?.displayName ?? ''}
             />
 
             <label className="label">{t('date_of_birth')}</label>
@@ -348,7 +347,7 @@ export default function UserProfile() {
               id="dateOfBirth"
               type="date"
               {...register('dateOfBirth')}
-              value={userProfileData.userProfile?.dateOfBirth ?? ''}
+              defaultValue={userProfileData.userProfile?.dateOfBirth ?? ''}
               max={dateOfBirthLimit}
               className="input w-fieldset-input-md bg-[#f9f9f9]"
             />
@@ -364,7 +363,7 @@ export default function UserProfile() {
                 {t('select_your_gender')}
               </option>
               <option value="Man">{t('Man')}</option>
-              <option value="Woman">{t('woman')}</option>
+              <option value="Woman">{t('Woman')}</option>
             </select>
 
             <label className="label">{t('phone_number')}</label>
@@ -373,7 +372,7 @@ export default function UserProfile() {
               {...register('phoneNumber')}
               type="tel"
               className="input w-fieldset-input-md bg-[#f9f9f9] tabular-nums"
-              value={userProfileData.userProfile?.phoneNumber ?? ''}
+              defaultValue={userProfileData.userProfile?.phoneNumber ?? ''}
               placeholder="+14155552671"
             />
 
@@ -421,7 +420,7 @@ export default function UserProfile() {
                     getUserProfilePictureFailed ||
                     !userProfilePictureData.avatarUrl
                       ? defaultProfilePic
-                      : userProfilePictureData.avatarUrl
+                      : getUniqueImageUrl(userProfilePictureData.avatarUrl)
                   }
                 />
               </div>
@@ -453,7 +452,9 @@ export default function UserProfile() {
                 <button
                   className="btn btn-sm border-[#e53935] bg-[#e53935] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
                   onClick={handleDeleteProfilePicture}
-                  disabled={isDeletingUserProfilePicture}
+                  disabled={
+                    isDeletingUserProfilePicture || isUpdatingUserProfilePicture
+                  }
                 >
                   <RiDeleteBin6Line /> {t('delete_user_profile_picture')}
                 </button>
@@ -462,7 +463,9 @@ export default function UserProfile() {
             <button
               className="btn btn-sm border-[#4181fa] bg-[#4181fa] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
               onClick={openFileExplorer}
-              disabled={isUpdatingUserProfilePicture}
+              disabled={
+                isUpdatingUserProfilePicture || isDeletingUserProfilePicture
+              }
             >
               <PiUploadSimple /> {t('upload_user_profile_picture')}
             </button>

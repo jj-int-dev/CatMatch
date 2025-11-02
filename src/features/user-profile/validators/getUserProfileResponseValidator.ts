@@ -10,7 +10,6 @@ export const getUserProfileResponseValidator = z.object({
   phoneNumber: z.e164().nullable(),
   gender: z.literal(['Man', 'Woman', '']).nullable(),
   bio: z.string().nullable(),
-  firstLoginCompleted: z.boolean().nullable(),
   userType: z.string().nullable()
 });
 

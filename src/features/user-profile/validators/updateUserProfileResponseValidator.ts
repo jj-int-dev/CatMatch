@@ -10,7 +10,6 @@ export const updateUserProfileResponseValidator = z.object({
     z.iso.date().refine((date) => new Date(date) < new Date())
   ]),
   bio: z.string(),
-  firstLoginCompleted: z.boolean().nullable(),
   userType: z.literal(['Rehomer', 'Adopter']).nullable()
 });
 

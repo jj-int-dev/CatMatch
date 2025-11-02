@@ -12,8 +12,54 @@
     oklch(100% 0 0) 50%,
     #0000 60% 100%
   );
+  --width-fieldset-input-md: clamp(3rem, 28rem, 100%);
 }
-html,
-body {
-  overflow: hidden;
+
+@layer base {
+  html {
+    @apply h-full;
+    @apply scroll-smooth;
+    @apply overflow-auto;
+  }
+  body {
+    @apply text-black; /* Sets default text color to black */
+    @apply min-h-full;
+  }
+}
+
+@layer utilities {
+  @keyframes dot-hover {
+    0% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-35px) scale(1.1);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes dot-shadow {
+    0% {
+      transform: scaleX(1);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scaleX(0.8);
+      opacity: 0.1;
+    }
+    100% {
+      transform: scaleX(1);
+      opacity: 0.3;
+    }
+  }
+
+  .animate-dot-hover {
+    animation: dot-hover 900ms cubic-bezier(0.82, 0, 0.26, 1) infinite;
+  }
+
+  .animate-dot-shadow {
+    animation: dot-shadow 900ms cubic-bezier(0.82, 0, 0.26, 1) infinite;
+  }
 }
