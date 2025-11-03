@@ -29,6 +29,7 @@ import ErrorToast from '../../../components/toasts/ErrorToast';
 import getUniqueImageUrl from '../../../utils/getUniqueImageUrl';
 import { processImage } from '../../../utils/processImage';
 import { CgAsterisk } from 'react-icons/cg';
+import { openSendResetPasswordLinkDialog } from '../../../components/send-reset-password-link/SendResetPasswordLinkDialog';
 
 export default function UserProfile() {
   const { i18n, t } = useTranslation();
@@ -81,7 +82,6 @@ export default function UserProfile() {
   const {
     isPending: isLoadingUserProfilePicture,
     isError: getUserProfilePictureFailed,
-    error: getUserProfilePictureError,
     data: userProfilePictureData
   } = useGetUserProfilePicture();
   const {
@@ -390,9 +390,15 @@ export default function UserProfile() {
             ></textarea>
           </fieldset>
           <div className="mt-6 flex flex-col max-sm:gap-y-3 sm:flex-row sm:justify-between">
-            <button className="w-full cursor-pointer underline hover:font-bold hover:text-[#4181fa] sm:w-auto">
-              {t('change_password')}
-            </button>
+            {isAuthenticatedUserSession(userSession) &&
+              userSession!.user.app_metadata.provider === 'email' && (
+                <button
+                  className="w-full cursor-pointer underline hover:font-bold hover:text-[#4181fa] sm:w-auto"
+                  onClick={openSendResetPasswordLinkDialog}
+                >
+                  {t('change_password')}
+                </button>
+              )}
             {userProfileData.userProfile?.userType && (
               <button className="w-full cursor-pointer underline hover:font-bold hover:text-[#4181fa] sm:w-auto">
                 {userProfileData.userProfile.userType === 'Rehomer'

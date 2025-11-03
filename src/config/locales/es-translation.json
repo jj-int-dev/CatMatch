@@ -33,7 +33,6 @@
   "log_in_with_facebook": "Iniciar sesión con Facebook",
   "log_in_with_google": "Iniciar sesión con Google",
   "or": "o",
-  "forgot_your_password": "¿Olvidó su contraseña?",
   "enter_your_email_to_reset": "Ingrese su correo para recibir el link de restablecimiento",
   "email": "Correo Electrónico",
   "reset_password": "Restablecer Contraseña",
@@ -154,5 +153,12 @@
   "internal_server_error": "Error interno del servidor",
   "internal_server_error_desc": "Estamos trabajando para solucionar el problema.",
   "get_user_profile_picture_and_type_error": "No se pudo obtener la foto de perfil y tipo del usuario",
-  "no_image_selected": "No escogió una foto"
+  "no_image_selected": "No escogió una foto",
+  "invalid_email": "Correo no válido",
+  "reset_password_link_dialog_title": "Le enviaremos un link para restablecer su contraseña",
+  "send": "Enviar",
+  "email_sent": "Correo enviado. Haga clic en el link del correo para restablecer su contraseña.",
+  "unable_to_send_email": "No se pudo enviar el correo",
+  "password_change_success": "Se actualizó su contraseña",
+  "password_change_failure": "No se pudo actualizar su contraseña"
 }

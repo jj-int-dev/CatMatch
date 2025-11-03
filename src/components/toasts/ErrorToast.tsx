@@ -10,14 +10,16 @@ export default function ErrorToast({ messages, onCloseToast }: ToastProps) {
           ))}
         </ul>
       </div>
-      <div className="flex justify-end">
-        <button
-          className="btn btn-xs btn-error btn-circle"
-          onClick={onCloseToast}
-        >
-          X
-        </button>
-      </div>
+      {!!onCloseToast && (
+        <div className="flex justify-end">
+          <button
+            className="btn btn-xs btn-error btn-circle"
+            onClick={onCloseToast}
+          >
+            X
+          </button>
+        </div>
+      )}
     </div>
   );
 }

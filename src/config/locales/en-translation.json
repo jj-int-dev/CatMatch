@@ -33,7 +33,6 @@
   "log_in_with_facebook": "Continue with Facebook",
   "log_in_with_google": "Continue with Google",
   "or": "or",
-  "forgot_your_password": "Forgot your password?",
   "enter_your_email_to_reset": "Enter email address to receive password reset link",
   "email": "Email",
   "reset_password": "Reset Password",
@@ -154,5 +153,12 @@
   "internal_server_error": "Internal server error",
   "internal_server_error_desc": "We are currently trying to fix the problem.",
   "get_user_profile_picture_and_type_error": "Unable to retrieve user picture and type",
-  "no_image_selected": "No image was selected"
+  "no_image_selected": "No image was selected",
+  "invalid_email": "Invalid email",
+  "reset_password_link_dialog_title": "We'll send a password reset link to your email",
+  "send": "Send",
+  "email_sent": "Email sent. Click the link in the email to reset your password",
+  "unable_to_send_email": "Unable to send email",
+  "password_change_success": "Password updated successfully",
+  "password_change_failure": "Password could not be updated"
 }

@@ -13,6 +13,7 @@ import {
 } from '../validators/login-form-validator';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 import WarningToast from '../../../components/toasts/WarningToast';
+import { openSendResetPasswordLinkDialog } from '../../../components/send-reset-password-link/SendResetPasswordLinkDialog';
 
 export default function Login() {
   const { i18n, t } = useTranslation();
@@ -169,12 +170,12 @@ export default function Login() {
                       {t('password')}
                     </label>
                     <div className="text-sm">
-                      <Link
-                        to="/forgot-password"
+                      <button
+                        onClick={openSendResetPasswordLinkDialog}
                         className="text-sm/6 text-white hover:font-bold hover:text-indigo-700"
                       >
                         {t('forgot_password')}
-                      </Link>
+                      </button>
                     </div>
                   </div>
                   <div className="mt-2">

@@ -6,7 +6,6 @@ import Registration from '../features/registration/components/Registration';
 import OAuthCallback from '../features/oauth-callback/components/OAuthCallback';
 import UserProfile from '../features/user-profile/components/UserProfile';
 import UserTypeSelection from '../features/user-type-selection/components/UserTypeSelection';
-import ForgotPassword from '../features/forgot-password/components/ForgotPassword';
 import NotFound from '../features/not-found/components/NotFound';
 import './App.css';
 import { Discovery } from '../features/discovery/components/Discovery';
@@ -66,7 +65,6 @@ function App() {
           path="discovery-preferences"
           element={<DiscoveryPreferences />}
         />
-        <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="*" element={<NotFound />} />

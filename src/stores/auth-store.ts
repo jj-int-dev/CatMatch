@@ -4,7 +4,8 @@ import type {
   Session,
   AuthError,
   OAuthResponse,
-  User
+  User,
+  UserResponse
 } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { supabase } from '../utils/supabase-client';
@@ -27,6 +28,10 @@ type AuthStore = {
   logUserInWithFacebook: () => Promise<OAuthResponse>;
   logUserInWithGoogle: () => Promise<OAuthResponse>;
   logUserOut: () => Promise<{ error: AuthError | null }>;
+  sendResetPasswordLink: (
+    email: string
+  ) => Promise<{ error: AuthError | null }>;
+  updateUserPassword: (newPassword: string) => Promise<UserResponse>;
 };
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -65,5 +70,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
         redirectTo: import.meta.env.VITE_REDIRECT_URL_ON_AUTH
       }
     }),
-  logUserOut: () => supabase.auth.signOut()
+  logUserOut: () => supabase.auth.signOut(),
+  sendResetPasswordLink: (email) =>
+    supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: import.meta.env.VITE_RESET_PASSWORD_URL
+    }),
+  updateUserPassword: (newPassword: string) =>
+    supabase.auth.updateUser({ password: newPassword })
 }));
