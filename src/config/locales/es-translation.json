@@ -161,7 +161,7 @@
   "unable_to_send_email": "No se pudo enviar el correo",
   "password_change_success": "Se actualizó su contraseña",
   "password_change_failure": "No se pudo actualizar su contraseña",
-  "age": "Edad",
+  "age": "Edad (semanas)",
   "max_distance_km": "Distancia Máxima (km)",
   "neutered": "Esterilizado"
 }

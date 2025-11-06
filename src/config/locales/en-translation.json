@@ -161,7 +161,7 @@
   "unable_to_send_email": "Unable to send email",
   "password_change_success": "Password updated successfully",
   "password_change_failure": "Password could not be updated",
-  "age": "Age",
+  "age": "Age (weeks)",
   "max_distance_km": "Max Distance (km)",
   "neutered": "Neutered"
 }
