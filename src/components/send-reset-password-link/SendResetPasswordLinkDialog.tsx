@@ -11,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthStore } from '../../stores/auth-store';
 
 export const openSendResetPasswordLinkDialog = () => {
+  console.log('clicked!');
   (
     document.getElementById(
       'sendResetPasswordLinkDialog'
@@ -52,6 +53,7 @@ export function SendResetPasswordLinkDialog() {
       setEmailSentMessage(t('email_sent'));
       setTimeout(() => {
         setEmailSentMessage(null);
+        reset();
         closeSendResetPasswordLinkDialog();
       }, 3000);
     }
@@ -65,6 +67,7 @@ export function SendResetPasswordLinkDialog() {
     register,
     handleSubmit,
     clearErrors,
+    reset,
     formState: { isSubmitting }
   } = useForm<EmailSchema>({
     resolver: zodResolver(emailValidator)
@@ -92,7 +95,7 @@ export function SendResetPasswordLinkDialog() {
                 <h3 className="text-md font-bold">
                   {t('reset_password_link_dialog_title')}
                 </h3>
-                <div className={`pt-6${emailError ? 'pb-2' : ''}`}>
+                <div className="pt-6">
                   <span className="px-1 text-sm text-gray-600">
                     {t('email')}
                   </span>
@@ -103,7 +106,7 @@ export function SendResetPasswordLinkDialog() {
                   />
                 </div>
                 {emailError && (
-                  <div className="py-2">
+                  <div className="mt-2">
                     <ul className="list-inside list-disc">
                       <li className="text-sm text-red-600">{emailError}</li>
                     </ul>

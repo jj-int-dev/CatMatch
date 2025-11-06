@@ -13,7 +13,10 @@ import {
 } from '../validators/login-form-validator';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 import WarningToast from '../../../components/toasts/WarningToast';
-import { openSendResetPasswordLinkDialog } from '../../../components/send-reset-password-link/SendResetPasswordLinkDialog';
+import {
+  openSendResetPasswordLinkDialog,
+  SendResetPasswordLinkDialog
+} from '../../../components/send-reset-password-link/SendResetPasswordLinkDialog';
 
 export default function Login() {
   const { i18n, t } = useTranslation();
@@ -113,6 +116,11 @@ export default function Login() {
 
   const onCloseWarningToast = () => setShowVerifyEmailToast(false);
 
+  const handleForgotPassword = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    openSendResetPasswordLinkDialog();
+  };
+
   return (
     <>
       <div className="bg-main-background h-screen bg-cover pt-7">
@@ -141,7 +149,7 @@ export default function Login() {
           </div>
 
           <div className="mt-10 rounded-xl bg-[#7289DA] p-8 shadow-2xl sm:mx-auto sm:w-full sm:max-w-sm">
-            <form action="#" method="POST">
+            <form>
               <div className="space-y-6">
                 <div>
                   <label
@@ -171,7 +179,7 @@ export default function Login() {
                     </label>
                     <div className="text-sm">
                       <button
-                        onClick={openSendResetPasswordLinkDialog}
+                        onClick={handleForgotPassword}
                         className="text-sm/6 text-white hover:font-bold hover:text-indigo-700"
                       >
                         {t('forgot_password')}
@@ -240,6 +248,7 @@ export default function Login() {
               </div>
             </form>
           </div>
+          <SendResetPasswordLinkDialog />
         </div>
       </div>
     </>

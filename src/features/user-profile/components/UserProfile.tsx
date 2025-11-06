@@ -29,7 +29,10 @@ import ErrorToast from '../../../components/toasts/ErrorToast';
 import getUniqueImageUrl from '../../../utils/getUniqueImageUrl';
 import { processImage } from '../../../utils/processImage';
 import { CgAsterisk } from 'react-icons/cg';
-import { openSendResetPasswordLinkDialog } from '../../../components/send-reset-password-link/SendResetPasswordLinkDialog';
+import {
+  openSendResetPasswordLinkDialog,
+  SendResetPasswordLinkDialog
+} from '../../../components/send-reset-password-link/SendResetPasswordLinkDialog';
 
 export default function UserProfile() {
   const { i18n, t } = useTranslation();
@@ -410,6 +413,7 @@ export default function UserProfile() {
               {t('delete_account')}
             </button>
           </div>
+          <SendResetPasswordLinkDialog />
         </div>
       </div>
 
