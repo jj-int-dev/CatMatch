@@ -53,7 +53,7 @@ export default function DesktopNavigation({
                       {t('adopt_a_cat')}
                     </NavLink>
                     <NavLink
-                      to="/discovery-preferences"
+                      to={`/discovery-preferences/${userSession?.user.id}`}
                       className={menuItemStyles}
                     >
                       {t('preferences')}

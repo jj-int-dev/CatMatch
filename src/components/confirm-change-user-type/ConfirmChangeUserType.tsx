@@ -36,14 +36,14 @@ export function ConfirmChangeUserTypeDialog() {
         </p>
         <div className="modal-action">
           <button
-            className="btn btn-sm border-[#e53935] bg-[#e53935] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
+            className="btn border-[#e53935] bg-[#e53935] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
             onClick={handleClose}
           >
             {t('no')}
           </button>
           {/* TODO: on click, go through data deletion process, log user out & navigate to login page, display success banner on login page */}
           <button
-            className="btn btn-sm border-[#36b37e] bg-[#36b37e] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
+            className="btn border-[#36b37e] bg-[#36b37e] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
             onClick={handleClose}
           >
             {t('yes')}

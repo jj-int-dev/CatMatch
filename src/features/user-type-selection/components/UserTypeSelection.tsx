@@ -37,7 +37,7 @@ export default function UserTypeSelection() {
 
   const goToNextPageBasedOnUserType = () => {
     if (newUserType === 'Adopter') {
-      navigate('/discovery-preferences');
+      navigate(`/discovery-preferences/${userId}`);
     } else if (newUserType === 'Rehomer') {
       navigate('/rehomer-dashboard');
     }
@@ -103,8 +103,8 @@ export default function UserTypeSelection() {
 
   return (
     <div className="-mt-16 flex h-screen w-screen flex-col items-center justify-center bg-[#3e98fd] bg-cover bg-center">
-      <div className="mb-25 grid grid-cols-12">
-        <div className="col-span-4 pt-8">
+      <div className="grid grid-cols-12 max-lg:mt-16 lg:mb-25">
+        <div className="col-span-12 pt-8 lg:col-span-4">
           <div className="flex flex-col">
             <div className="avatar pl-4">
               <div className="w-48 rounded-full">
@@ -127,8 +127,8 @@ export default function UserTypeSelection() {
             </div>
           </div>
         </div>
-        <div className="col-span-8 flex items-center">
-          <div className="flex flex-row gap-x-10">
+        <div className="col-span-12 flex items-center max-lg:mt-10 lg:col-span-8">
+          <div className="flex flex-col max-lg:gap-y-6 lg:flex-row lg:gap-x-10">
             <UserTypeCard
               cardTitle={`${t('adopt_a_cat')} 🐈`}
               cardPhrases={getAdopterExplanations()}
@@ -144,10 +144,12 @@ export default function UserTypeSelection() {
           </div>
         </div>
       </div>
-      <div className="flex w-full justify-center">
+      <div className="flex w-full justify-center max-lg:mt-15">
         <button
           onClick={onChooseUserType}
-          disabled={!newUserType || isUpdatingUserType}
+          disabled={
+            !userPicAndType.userType && (!newUserType || isUpdatingUserType)
+          }
           className="btn btn-xl hover:inset-shadow-xl gap-x-2 rounded-full border-white bg-white p-6 text-[#3e98fd] shadow-md ring-4 shadow-white ring-white transition-transform duration-300 ease-in-out hover:translate-y-2 hover:text-green-500 hover:shadow-sm hover:inset-shadow-white"
         >
           <span>{t('next')}</span>

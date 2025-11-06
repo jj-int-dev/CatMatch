@@ -160,5 +160,8 @@
   "email_sent": "Email sent. Click the link in the email to reset your password",
   "unable_to_send_email": "Unable to send email",
   "password_change_success": "Password updated successfully",
-  "password_change_failure": "Password could not be updated"
+  "password_change_failure": "Password could not be updated",
+  "age": "Age",
+  "max_distance_km": "Max Distance (km)",
+  "neutered": "Neutered"
 }

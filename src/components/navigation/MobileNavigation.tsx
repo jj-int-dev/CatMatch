@@ -117,7 +117,7 @@ export function MobileNavigation({
               {!!userType && userType === 'Adopter' && (
                 <li>
                   <NavLink
-                    to="/discovery-preferences"
+                    to={`/discovery-preferences/${userSession?.user.id}`}
                     className={menuItemStyles}
                     onClick={closeMenu}
                   >

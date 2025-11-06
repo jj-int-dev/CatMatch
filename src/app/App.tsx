@@ -62,7 +62,7 @@ function App() {
         <Route path="discovery" element={<Discovery />} />
         <Route path="rehomer-dashboard" element={<RehomerDashboard />} />
         <Route
-          path="discovery-preferences"
+          path="discovery-preferences/:userId"
           element={<DiscoveryPreferences />}
         />
         <Route path="reset-password" element={<ResetPassword />} />

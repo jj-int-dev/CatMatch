@@ -11,7 +11,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthStore } from '../../stores/auth-store';
 
 export const openSendResetPasswordLinkDialog = () => {
-  console.log('clicked!');
   (
     document.getElementById(
       'sendResetPasswordLinkDialog'

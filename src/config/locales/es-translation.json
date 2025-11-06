@@ -160,5 +160,8 @@
   "email_sent": "Correo enviado. Haga clic en el link del correo para restablecer su contraseña.",
   "unable_to_send_email": "No se pudo enviar el correo",
   "password_change_success": "Se actualizó su contraseña",
-  "password_change_failure": "No se pudo actualizar su contraseña"
+  "password_change_failure": "No se pudo actualizar su contraseña",
+  "age": "Edad",
+  "max_distance_km": "Distancia Máxima (km)",
+  "neutered": "Esterilizado"
 }
