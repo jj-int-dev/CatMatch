@@ -3,6 +3,7 @@ import { NavLink } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useRef } from 'react';
 import type { NavigationProps } from './types/NavigationProps';
+import { openDiscoveryPreferencesDialog } from '../../features/discovery-preferences/components/DiscoveryPreferencesDialog';
 
 export function MobileNavigation({
   userType,
@@ -49,6 +50,11 @@ export function MobileNavigation({
       }
     };
   }, [isMenuOpen]);
+
+  const handlePreferencesClick = () => {
+    closeMenu();
+    openDiscoveryPreferencesDialog();
+  };
 
   return (
     <>
@@ -116,13 +122,12 @@ export function MobileNavigation({
               )}
               {!!userType && userType === 'Adopter' && (
                 <li>
-                  <NavLink
-                    to={`/discovery-preferences/${userSession?.user.id}`}
+                  <button
                     className={menuItemStyles}
-                    onClick={closeMenu}
+                    onClick={handlePreferencesClick}
                   >
                     {t('preferences')}
-                  </NavLink>
+                  </button>
                 </li>
               )}
               <li>

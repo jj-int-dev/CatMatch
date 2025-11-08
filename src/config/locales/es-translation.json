@@ -44,6 +44,7 @@
   "please_enter_a_phone_number": "Por favor escriba su número de teléfono",
   "please_add_your_gender": "Por favor escoja su género",
   "select_your_gender": "Seleccione su género",
+  "select_a_gender": "Seleccione un género",
   "Man": "Hombre",
   "Woman": "Mujer",
   "edit": "Editar",
@@ -163,5 +164,8 @@
   "password_change_failure": "No se pudo actualizar su contraseña",
   "age": "Edad (semanas)",
   "max_distance_km": "Distancia Máxima (km)",
-  "neutered": "Esterilizado"
+  "neutered": "Esterilizado",
+  "male": "Macho",
+  "female": "Hembra",
+  "search": "Buscar"
 }

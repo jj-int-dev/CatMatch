@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { NavigationProps } from './types/NavigationProps';
 import { RiLogoutBoxRLine } from 'react-icons/ri';
+import { openDiscoveryPreferencesDialog } from '../../features/discovery-preferences/components/DiscoveryPreferencesDialog';
 
 type DesktopNavigationProps = NavigationProps & { profilePicUrl: string };
 
@@ -19,10 +20,13 @@ export default function DesktopNavigation({
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const baseMenuItemStyles =
+    'rounded-xl bg-transparent px-4 py-3 text-sm font-medium text-white hover:bg-indigo-900 hover:font-bold';
+
   const menuItemStyles = ({ isActive }: NavLinkRenderProps): string =>
     isActive
       ? 'rounded-xl bg-indigo-900 px-4 py-3 text-sm font-bold text-white'
-      : 'rounded-xl bg-transparent px-4 py-3 text-sm font-medium text-white hover:bg-indigo-900 hover:font-bold';
+      : baseMenuItemStyles;
 
   return (
     <div className="col-span-6 flex flex-row items-center pl-2 max-sm:hidden sm:justify-start md:pl-6">
@@ -52,12 +56,12 @@ export default function DesktopNavigation({
                     <NavLink to="/discovery" className={menuItemStyles}>
                       {t('adopt_a_cat')}
                     </NavLink>
-                    <NavLink
-                      to={`/discovery-preferences/${userSession?.user.id}`}
-                      className={menuItemStyles}
+                    <button
+                      onClick={openDiscoveryPreferencesDialog}
+                      className={baseMenuItemStyles}
                     >
                       {t('preferences')}
-                    </NavLink>
+                    </button>
                   </>
                 ))}
               <button

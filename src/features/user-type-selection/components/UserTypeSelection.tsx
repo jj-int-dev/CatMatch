@@ -18,6 +18,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { GetUserProfilePictureAndTypeResponse } from '../../../types/GetUserProfilePictureAndTypeResponse';
 import InternalServerError from '../../../components/internal-server-error/InternalServerError';
 import UserTypeSelectionSkeleton from './UserTypeSelectionSkeleton';
+import { openDiscoveryPreferencesDialog } from '../../discovery-preferences/components/DiscoveryPreferencesDialog';
 
 export default function UserTypeSelection() {
   useSetNavigationColor('transparent');
@@ -37,7 +38,7 @@ export default function UserTypeSelection() {
 
   const goToNextPageBasedOnUserType = () => {
     if (newUserType === 'Adopter') {
-      navigate(`/discovery-preferences/${userId}`);
+      openDiscoveryPreferencesDialog();
     } else if (newUserType === 'Rehomer') {
       navigate('/rehomer-dashboard');
     }
