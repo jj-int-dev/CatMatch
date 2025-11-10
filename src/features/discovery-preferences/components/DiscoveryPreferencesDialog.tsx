@@ -1,5 +1,11 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useMemo, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm, type FieldErrors } from 'react-hook-form';
+import {
+  createDiscoveryPreferencesValidator,
+  type DiscoveryPreferencesSchema
+} from '../validators/discovery-preferences-validator';
 
 export const openDiscoveryPreferencesDialog = () => {
   (
@@ -10,7 +16,23 @@ export const openDiscoveryPreferencesDialog = () => {
 };
 
 export function DiscoveryPreferencesDialog() {
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
+
+  // Recreate the schema whenever the language changes so that error messages are in the correct language
+  const formSchema = useMemo(
+    () => createDiscoveryPreferencesValidator(),
+    [i18n.language]
+  );
+
+  const {
+    register,
+    handleSubmit,
+    clearErrors,
+    formState: { isSubmitting },
+    reset
+  } = useForm<DiscoveryPreferencesSchema>({
+    resolver: zodResolver(formSchema)
+  });
 
   const closeDiscoveryPreferencesDialog = () =>
     (
@@ -19,10 +41,53 @@ export function DiscoveryPreferencesDialog() {
       ) as HTMLDialogElement | null
     )?.close();
 
-  const [maxDistanceKm, setMaxDistanceKm] = useState(40);
+  const [maxDistanceDisplayKm, setMaxDistanceDisplayKm] = useState(1);
+  const [preferencesErrors, setPreferencesErrors] = useState<string[]>([]);
 
   const updateDisplayedMaxDistance = (e: FormEvent<HTMLInputElement>) => {
-    setMaxDistanceKm(+(e.target as HTMLInputElement).value);
+    setMaxDistanceDisplayKm(+(e.target as HTMLInputElement).value);
+  };
+
+  const handleSaveDiscoveryPreferences = async (
+    formData: DiscoveryPreferencesSchema
+  ) => {
+    clearErrors();
+    setPreferencesErrors([]);
+    // send prefs to backend ..
+  };
+
+  const handleSaveDiscoveryPreferencesAndSearch = async (
+    formData: DiscoveryPreferencesSchema
+  ) => {
+    clearErrors();
+    setPreferencesErrors([]);
+    // send prefs to backend ..
+    reset();
+    closeDiscoveryPreferencesDialog();
+  };
+
+  const handleSaveDiscoveryPreferencesFailure = (
+    formErrors: FieldErrors<DiscoveryPreferencesSchema>
+  ) => {
+    const errorMsgs: string[] = [];
+
+    if (formErrors.minAge?.message != null) {
+      errorMsgs.push(formErrors.minAge.message);
+    }
+    if (formErrors.maxAge?.message != null) {
+      errorMsgs.push(formErrors.maxAge.message);
+    }
+    if (formErrors.gender?.message != null) {
+      errorMsgs.push(formErrors.gender.message);
+    }
+    if (formErrors.maxDistanceKm?.message != null) {
+      errorMsgs.push(formErrors.maxDistanceKm.message);
+    }
+    if (formErrors.neutered?.message != null) {
+      errorMsgs.push(formErrors.neutered.message);
+    }
+
+    setPreferencesErrors(errorMsgs);
   };
 
   return (
@@ -42,18 +107,34 @@ export function DiscoveryPreferencesDialog() {
 
             <div>
               <label className="label">{t('age')}</label>
-              <input
-                id="age"
-                type="number"
-                className="input w-fieldset-input-md mt-2 bg-[#f9f9f9]"
-                placeholder="0"
-              />
+              <div className="mt-2 flex w-40 justify-between">
+                <div>
+                  <input
+                    id="minAge"
+                    type="number"
+                    {...register('minAge')}
+                    className="input w-16 bg-[#f9f9f9]"
+                    placeholder="0"
+                  />
+                </div>
+                <div className="flex items-center">-</div>
+                <div>
+                  <input
+                    id="maxAge"
+                    type="number"
+                    {...register('maxAge')}
+                    className="input w-16 bg-[#f9f9f9]"
+                    placeholder="480"
+                  />
+                </div>
+              </div>
             </div>
 
             <div>
               <label className="label">{t('gender')}</label>
               <select
                 id="gender"
+                {...register('gender')}
                 className="select w-fieldset-input-md mt-2 bg-[#f9f9f9]"
               >
                 <option value="" disabled hidden>
@@ -67,13 +148,15 @@ export function DiscoveryPreferencesDialog() {
             <div>
               <div className="w-fieldset-input-md flex justify-between">
                 <label className="label">{t('max_distance_km')}</label>
-                <span>{`${maxDistanceKm} km`}</span>
+                <span>{`${maxDistanceDisplayKm} km`}</span>
               </div>
               <input
+                id="maxDistanceKm"
                 type="range"
                 min="1"
                 max="250"
-                value={maxDistanceKm}
+                defaultValue="1"
+                {...register('maxDistanceKm')}
                 onInput={updateDisplayedMaxDistance}
                 className="range range-neutral w-fieldset-input-md mt-2"
               />
@@ -89,6 +172,17 @@ export function DiscoveryPreferencesDialog() {
               </label>
             </div>
           </fieldset>
+          {preferencesErrors.length > 0 && (
+            <div className="mt-2">
+              <ul className="list-inside list-disc">
+                {preferencesErrors.map((errMsg) => (
+                  <li key={errMsg} className="text-sm text-red-600">
+                    {errMsg}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         <div className="modal-action">
           <button

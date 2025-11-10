@@ -162,10 +162,16 @@
   "unable_to_send_email": "No se pudo enviar el correo",
   "password_change_success": "Se actualizó su contraseña",
   "password_change_failure": "No se pudo actualizar su contraseña",
-  "age": "Edad (semanas)",
+  "age": "Edad (meses)",
   "max_distance_km": "Distancia Máxima (km)",
   "neutered": "Esterilizado",
   "male": "Macho",
   "female": "Hembra",
-  "search": "Buscar"
+  "search": "Buscar",
+  "invalid_min_age": "La edad mínima (en meses) debe ser 0 o más",
+  "invalid_max_age": "La edad máxima (en meses) debe ser 480 o más",
+  "invalid_age_range": "Rango de edad no válido",
+  "invalid_gender_discovery_preferences": "Género seleccionado no válido",
+  "invalid_max_distance": "La distancia máxima debe estar entre 1 y 250",
+  "invalid_neutered": "Estado de esterilización no válido seleccionado"
 }

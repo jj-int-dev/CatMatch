@@ -162,10 +162,16 @@
   "unable_to_send_email": "Unable to send email",
   "password_change_success": "Password updated successfully",
   "password_change_failure": "Password could not be updated",
-  "age": "Age (weeks)",
+  "age": "Age (months)",
   "max_distance_km": "Max Distance (km)",
   "neutered": "Neutered",
   "male": "Male",
   "female": "Female",
-  "search": "Search"
+  "search": "Search",
+  "invalid_min_age": "Minimum age in months must be at 0 or older",
+  "invalid_max_age": "Maximum age in months must be 480 or younger",
+  "invalid_age_range": "Invalid age range",
+  "invalid_gender_discovery_preferences": "Invalid gender selected",
+  "invalid_max_distance": "Max distance must be between 1 and 250",
+  "invalid_neutered": "Invalid neutered status selected"
 }
