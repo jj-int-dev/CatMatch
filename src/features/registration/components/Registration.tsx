@@ -8,7 +8,7 @@ import { useForm, type FieldErrors } from 'react-hook-form';
 import {
   createRegistrationFormValidator,
   type RegistrationFormSchema
-} from '../validators/registration-form-validator';
+} from '../validators/registrationFormValidator';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useState, useMemo, type MouseEvent } from 'react';
 import ErrorToast from '../../../components/toasts/ErrorToast';

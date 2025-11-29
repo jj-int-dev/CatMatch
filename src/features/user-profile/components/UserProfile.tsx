@@ -214,7 +214,6 @@ export default function UserProfile() {
   };
 
   const handleSave = async (formData: UserProfileFormSchema) => {
-    console.log('Saving user profile data:', formData);
     try {
       const { userProfile: updatedProfile } = await updateUserProfile(formData);
       const updatedProfileData: GetUserProfileResponse = {

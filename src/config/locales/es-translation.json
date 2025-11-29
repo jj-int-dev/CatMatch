@@ -173,5 +173,7 @@
   "invalid_age_range": "Rango de edad no válido",
   "invalid_gender_discovery_preferences": "Género seleccionado no válido",
   "invalid_max_distance": "La distancia máxima debe estar entre 1 y 250",
-  "invalid_neutered": "Estado de esterilización no válido seleccionado"
+  "invalid_neutered": "Estado de esterilización no válido seleccionado",
+  "get_discovery_preferences_error": "No se pudieron obtener las preferencias de descubrimiento",
+  "update_discovery_preferences_error": "No se pudieron actualizar las preferencias de descubrimiento"
 }

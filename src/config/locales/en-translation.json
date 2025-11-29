@@ -173,5 +173,7 @@
   "invalid_age_range": "Invalid age range",
   "invalid_gender_discovery_preferences": "Invalid gender selected",
   "invalid_max_distance": "Max distance must be between 1 and 250",
-  "invalid_neutered": "Invalid neutered status selected"
+  "invalid_neutered": "Invalid neutered status selected",
+  "get_discovery_preferences_error": "Unable to retrieve discovery preferences",
+  "update_discovery_preferences_error": "Unable to update discovery preferences"
 }

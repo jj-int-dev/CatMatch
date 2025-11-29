@@ -3,7 +3,7 @@ import { NavLink } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useRef } from 'react';
 import type { NavigationProps } from './types/NavigationProps';
-import { openDiscoveryPreferencesDialog } from '../../features/discovery-preferences/components/DiscoveryPreferencesDialog';
+import { useDiscoveryPreferencesStore } from '../discovery-preferences/stores/discovery-preferences-store';
 
 export function MobileNavigation({
   userType,
@@ -20,6 +20,10 @@ export function MobileNavigation({
   const menuRef = useRef<HTMLUListElement>(null);
 
   const closeMenu = () => setIsMenuOpen(false);
+
+  const setShowDiscoveryPreferencesDialog = useDiscoveryPreferencesStore(
+    (state) => state.setShowDiscoveryPreferencesDialog
+  );
 
   // Handle click outside to close menu and update state
   useEffect(() => {
@@ -53,7 +57,7 @@ export function MobileNavigation({
 
   const handlePreferencesClick = () => {
     closeMenu();
-    openDiscoveryPreferencesDialog();
+    setShowDiscoveryPreferencesDialog(true);
   };
 
   return (
