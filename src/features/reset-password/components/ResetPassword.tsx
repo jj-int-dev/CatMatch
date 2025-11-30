@@ -25,8 +25,7 @@ export default function ResetPassword() {
 
   const goToLoginPage = () => navigate('/login', { replace: true });
 
-  const goToUserProfile = (userId: string) =>
-    navigate(`/user-profile/${userId}`);
+  const goToUserProfile = () => navigate(`/user-profile`);
 
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [formValidationErrors, setFormValidationErrors] = useState<string[]>(
@@ -62,7 +61,7 @@ export default function ResetPassword() {
       setPasswordChangedMessage(t('password_change_success'));
       setTimeout(() => {
         setPasswordChangedMessage(null);
-        goToUserProfile(userSession!.user.id);
+        goToUserProfile();
       }, 3000);
     }
   };

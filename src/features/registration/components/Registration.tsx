@@ -53,8 +53,7 @@ export default function Registration() {
     resolver: zodResolver(formSchema)
   });
 
-  const goToUserProfile = (userId: string) =>
-    navigate(`/user-profile/${userId}`);
+  const goToUserProfile = () => navigate(`/user-profile`);
 
   const goToLoginPage = () => navigate('/login');
 
@@ -85,7 +84,7 @@ export default function Registration() {
       setFormValidationErrors([]);
 
       if (isAuthenticatedUserSession(userSession)) {
-        goToUserProfile(userSession!.user.id);
+        goToUserProfile();
       } else if (isAuthenticatedUser(user)) {
         // user hasn't confirmed email yet
         goToLoginPage();

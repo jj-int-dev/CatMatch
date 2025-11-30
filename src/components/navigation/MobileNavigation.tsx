@@ -96,7 +96,7 @@ export function MobileNavigation({
             <>
               <li>
                 <NavLink
-                  to={`/user-profile/${userSession!.user!.id}`}
+                  to={`/user-profile`}
                   className={menuItemStyles}
                   onClick={closeMenu}
                 >

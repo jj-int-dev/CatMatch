@@ -1,16 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 
-type ProfilePictureProps = { imgSrc: string; userId: string };
+type ProfilePictureProps = { imgSrc: string };
 
-export default function ProfilePicture({
-  imgSrc,
-  userId
-}: ProfilePictureProps) {
+export default function ProfilePicture({ imgSrc }: ProfilePictureProps) {
   const navigate = useNavigate();
 
-  const goToUserProfile = () => {
-    navigate(`/user-profile/${userId}`);
-  };
+  const goToUserProfile = () => navigate(`/user-profile`);
 
   return (
     <div className="avatar">

@@ -9,13 +9,16 @@ import UserTypeSelection from '../features/user-type-selection/components/UserTy
 import NotFound from '../features/not-found/components/NotFound';
 import './App.css';
 import { Discovery } from '../features/discovery/components/Discovery';
-import { RehomerDashboard } from '../features/rehomer-dashboard/components/RehomerDashboard';
+import RehomerDashboard from '../features/rehomer-dashboard/components/RehomerDashboard';
 import ResetPassword from '../features/reset-password/components/ResetPassword';
 import { useEffect } from 'react';
 import { supabase } from '../utils/supabase-client';
 import { useAuthStore } from '../stores/auth-store';
 import PrivacyPolicy from '../features/privacy-policy/components/PrivacyPolicy';
 import UserDataDeletion from '../features/user-data-deletion/components/UserDataDeletion';
+import ViewAnimalListing from '../features/discovery/components/ViewAnimalListing';
+import EditAnimalListing from '../features/rehomer-dashboard/components/EditAnimalListing';
+import AddAnimalListing from '../features/rehomer-dashboard/components/AddAnimalListing';
 
 function App() {
   const setSession = useAuthStore((state) => state.setSession);
@@ -53,13 +56,19 @@ function App() {
         <Route path="oauth-callback" element={<OAuthCallback />} />
         <Route path="privacy-policy" element={<PrivacyPolicy />} />
         <Route path="user-data-deletion" element={<UserDataDeletion />} />
-        <Route path="user-profile/:userId" element={<UserProfile />} />
-        <Route
-          path="user-type-selection/:userId"
-          element={<UserTypeSelection />}
-        />
+        <Route path="user-profile" element={<UserProfile />} />
+        <Route path="user-type-selection" element={<UserTypeSelection />} />
         <Route path="discovery" element={<Discovery />} />
-        <Route path="rehomer-dashboard" element={<RehomerDashboard />} />
+        <Route
+          path="discovery/animal/:animalId"
+          element={<ViewAnimalListing />}
+        />
+        <Route path="rehomer/dashboard" element={<RehomerDashboard />} />
+        <Route path="rehomer/animal/add" element={<AddAnimalListing />} />
+        <Route
+          path="rehomer/animal/edit/:animalId"
+          element={<EditAnimalListing />}
+        />
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="*" element={<NotFound />} />

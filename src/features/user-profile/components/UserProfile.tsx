@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
 import { useNavigate } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useQueryClient } from '@tanstack/react-query';
@@ -36,8 +35,6 @@ import {
 
 export default function UserProfile() {
   const { i18n, t } = useTranslation();
-  const params = useParams();
-  const userId = params['userId'];
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const userSession = useAuthStore((state) => state.session);
@@ -45,7 +42,6 @@ export default function UserProfile() {
   const isAuthenticatedUserSession = useAuthStore(
     (state) => state.isAuthenticatedUserSession
   );
-  const logUserOut = useAuthStore((state) => state.logUserOut);
 
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [formValidationErrors, setFormValidationErrors] = useState<string[]>(
@@ -55,22 +51,18 @@ export default function UserProfile() {
 
   const goToLoginPage = () => navigate('/login', { replace: true });
 
-  const goToUserTypeSelection = () =>
-    navigate(`/user-type-selection/${userId!}`);
+  const goToUserTypeSelection = () => {
+    if (isAuthenticatedUserSession(userSession)) {
+      navigate(`/user-type-selection`);
+    }
+  };
 
   useEffect(() => {
-    if (!userId) {
-      goToLoginPage();
-    } else if (!isLoadingSession) {
+    if (!isLoadingSession && !isAuthenticatedUserSession(userSession)) {
       // Only check authentication after session loading is complete
-      if (!isAuthenticatedUserSession(userSession)) {
-        goToLoginPage();
-      } else if (userId !== userSession?.user?.id) {
-        // The currently logged in user can only access their own profile
-        logUserOut().then(goToLoginPage);
-      }
+      goToLoginPage();
     }
-  }, [userId, userSession, isLoadingSession]);
+  }, [userSession, isLoadingSession]);
 
   // Recreate the schema whenever the language changes so that error messages are in the correct language
   const formValidator = useMemo(
@@ -107,13 +99,17 @@ export default function UserProfile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const saveNewProfilePicture = async (newPicture: File) => {
+    if (!isAuthenticatedUserSession(userSession)) return;
+
     try {
       const formData = new FormData();
       formData.append('profile_picture', newPicture);
       const { avatarUrl } = await updateUserProfilePicture(formData);
-      queryClient.setQueryData(['user-profile-picture', userId], { avatarUrl });
+      queryClient.setQueryData(['user-profile-picture', userSession!.user.id], {
+        avatarUrl
+      });
       queryClient.setQueryData(
-        ['navigation', userId],
+        ['navigation', userSession!.user.id],
         (oldData: GetUserProfilePictureAndTypeResponse) => {
           return { ...oldData, avatarUrl: getUniqueImageUrl(avatarUrl) };
         }
@@ -146,13 +142,15 @@ export default function UserProfile() {
   };
 
   const handleDeleteProfilePicture = async () => {
+    if (!isAuthenticatedUserSession(userSession)) return;
+
     try {
       await deleteUserProfilePicture();
-      queryClient.setQueryData(['user-profile-picture', userId], {
+      queryClient.setQueryData(['user-profile-picture', userSession!.user.id], {
         avatarUrl: defaultProfilePic
       });
       queryClient.setQueryData(
-        ['navigation', userId],
+        ['navigation', userSession!.user.id],
         (oldData: GetUserProfilePictureAndTypeResponse) => {
           return { ...oldData, avatarUrl: defaultProfilePic };
         }
@@ -214,6 +212,8 @@ export default function UserProfile() {
   };
 
   const handleSave = async (formData: UserProfileFormSchema) => {
+    if (!isAuthenticatedUserSession(userSession)) return;
+
     try {
       const { userProfile: updatedProfile } = await updateUserProfile(formData);
       const updatedProfileData: GetUserProfileResponse = {
@@ -227,7 +227,10 @@ export default function UserProfile() {
           userType: updatedProfile.userType
         }
       };
-      queryClient.setQueryData(['user-profile', userId], updatedProfileData);
+      queryClient.setQueryData(
+        ['user-profile', userSession!.user.id],
+        updatedProfileData
+      );
       clearErrors();
       setShowErrorToast(false);
       setFormValidationErrors([]);
@@ -314,7 +317,9 @@ export default function UserProfile() {
             <div className="col-span-12 sm:col-span-6 sm:justify-self-end sm:text-right">
               <button
                 className="btn border-[#4181fa] bg-[#4181fa] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
-                disabled={isSubmitting}
+                disabled={
+                  isSubmitting || !isAuthenticatedUserSession(userSession)
+                }
                 onClick={handleSubmit(handleSave, handleProfileUpdateFailure)}
               >
                 {t('save')}
@@ -322,7 +327,10 @@ export default function UserProfile() {
               {!userProfileData.userProfile?.userType && (
                 <button
                   className="btn ml-3 border-[#36b37e] bg-[#36b37e] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
-                  disabled={!userProfileData.userProfile?.displayName}
+                  disabled={
+                    !userProfileData.userProfile?.displayName ||
+                    !isAuthenticatedUserSession(userSession)
+                  }
                   onClick={goToUserTypeSelection}
                 >
                   {t('next')}

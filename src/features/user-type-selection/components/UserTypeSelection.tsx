@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useSetNavigationColor } from '../../../hooks/useSetNavigationColor';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
 import { UserTypeCard } from './UserTypeCard';
 import { FaArrowRight } from 'react-icons/fa';
@@ -22,8 +22,6 @@ import { useDiscoveryPreferencesStore } from '../../../components/discovery-pref
 
 export default function UserTypeSelection() {
   useSetNavigationColor('transparent');
-  const params = useParams();
-  const userId = params['userId'];
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -49,18 +47,11 @@ export default function UserTypeSelection() {
   };
 
   useEffect(() => {
-    if (!userId) {
-      goToLoginPage();
-    } else if (!isLoadingSession) {
+    if (!isLoadingSession && !isAuthenticatedUserSession(userSession)) {
       // Only check authentication after session loading is complete
-      if (!isAuthenticatedUserSession(userSession)) {
-        goToLoginPage();
-      } else if (userId !== userSession?.user?.id) {
-        // The currently logged in user can only access their own profile
-        logUserOut().then(goToLoginPage);
-      }
+      goToLoginPage();
     }
-  }, [userId, userSession, isLoadingSession]);
+  }, [userSession, isLoadingSession]);
 
   const {
     isPending: isLoadingUserPicAndType,
@@ -80,6 +71,8 @@ export default function UserTypeSelection() {
   );
 
   const onChooseUserType = async () => {
+    if (!isAuthenticatedUserSession(userSession)) return;
+
     if (userPicAndType?.userType) {
       if (userPicAndType.userType !== newUserType) {
         setShowChangeUserTypeDialog(true);
@@ -89,7 +82,7 @@ export default function UserTypeSelection() {
     } else {
       await updateUserType(newUserType!);
       queryClient.setQueryData(
-        ['navigation', userId],
+        ['navigation', userSession!.user.id],
         (oldData: GetUserProfilePictureAndTypeResponse) => {
           return { ...oldData, userType: newUserType };
         }
@@ -153,7 +146,8 @@ export default function UserTypeSelection() {
         <button
           onClick={onChooseUserType}
           disabled={
-            !userPicAndType.userType && (!newUserType || isUpdatingUserType)
+            !isAuthenticatedUserSession(userSession) ||
+            (!userPicAndType.userType && (!newUserType || isUpdatingUserType))
           }
           className="btn btn-xl hover:inset-shadow-xl gap-x-2 rounded-full border-white bg-white p-6 text-[#3e98fd] shadow-md ring-4 shadow-white ring-white transition-transform duration-300 ease-in-out hover:translate-y-2 hover:text-green-500 hover:shadow-sm hover:inset-shadow-white"
         >

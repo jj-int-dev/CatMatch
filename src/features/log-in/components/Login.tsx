@@ -53,16 +53,13 @@ export default function Login() {
     resolver: zodResolver(formSchema)
   });
 
-  const goToUserProfile = (userId: string) =>
-    navigate(`/user-profile/${userId}`);
+  const goToUserProfile = () => navigate(`/user-profile`);
 
   const onEmailPasswordLogin = async (formData: LoginFormSchema) => {
     const { error, data } = await logUserInWithEmailAndPassword(
       formData.email,
       formData.password
     );
-    console.log('Login data:', data);
-    console.log('Login error:', error);
     const userSession = data?.session;
     const errorMessage = error?.message;
 
@@ -79,7 +76,7 @@ export default function Login() {
       onCloseWarningToast();
       setShowErrorToast(false);
       setFormValidationErrors([]);
-      goToUserProfile(userSession!.user.id);
+      goToUserProfile();
     }
   };
 

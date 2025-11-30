@@ -15,8 +15,7 @@ export default function OAuthCallback() {
 
   const goToLoginPage = () => navigate('/login', { replace: true });
 
-  const goToUserProfile = (userId: string) =>
-    navigate(`/user-profile/${userId}`);
+  const goToUserProfile = () => navigate(`/user-profile`);
 
   useEffect(() => {
     if (!isLoadingSession) {
@@ -24,7 +23,7 @@ export default function OAuthCallback() {
       if (!isAuthenticatedUserSession(userSession)) {
         goToLoginPage();
       } else {
-        goToUserProfile(userSession!.user.id);
+        goToUserProfile();
       }
     }
   }, [userSession, isLoadingSession]);
