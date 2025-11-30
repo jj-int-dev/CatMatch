@@ -1,7 +1,8 @@
 {
-  "name": "package.json",
-  "private": true,
-  "version": "0.0.0",
+  "name": "catmatch",
+  "version": "1.0.0",
+  "description": "CatMatch Frontend Web Application",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
