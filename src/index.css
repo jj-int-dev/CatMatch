@@ -1,17 +1,14 @@
 @import 'tailwindcss';
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark;
+}
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-skeleton-base: oklch(95% 0 0);
   --background-image-main-background: url('/src/assets/background.svg');
   --background-image-purple-gradient: url('/src/assets/purple_gradient.jpg');
-  --background-image-skeleton: linear-gradient(
-    105deg,
-    #0000 0% 40%,
-    oklch(100% 0 0) 50%,
-    #0000 60% 100%
-  );
   --width-fieldset-input-md: clamp(3rem, 28rem, 100%);
 }
 
@@ -22,7 +19,6 @@
     @apply overflow-auto;
   }
   body {
-    @apply text-black; /* Sets default text color to black */
     @apply min-h-full;
   }
 }
