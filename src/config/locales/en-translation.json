@@ -175,5 +175,13 @@
   "invalid_max_distance": "Max distance must be between 1 and 250",
   "invalid_neutered": "Invalid neutered status selected",
   "get_discovery_preferences_error": "Unable to retrieve discovery preferences",
-  "update_discovery_preferences_error": "Unable to update discovery preferences"
+  "update_discovery_preferences_error": "Unable to update discovery preferences",
+  "rehomer_dashboard_title": "Your Cats",
+  "add": "Add",
+  "get_animal_listings_error": "Unable to retrieve animal listings",
+  "get_animal_listing_error": "Unable to retrieve animal listing",
+  "no_cat_listings_title": "No Cat Listings Yet",
+  "no_cat_listings_desc": "You haven't added any cats to your listings yet. Start by adding your first cat to find them a loving forever home.",
+  "add_first_cat": "Add Your First Cat",
+  "cats": "Cats"
 }

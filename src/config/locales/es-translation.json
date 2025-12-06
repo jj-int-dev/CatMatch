@@ -175,5 +175,13 @@
   "invalid_max_distance": "La distancia máxima debe estar entre 1 y 250",
   "invalid_neutered": "Estado de esterilización no válido seleccionado",
   "get_discovery_preferences_error": "No se pudieron obtener las preferencias de descubrimiento",
-  "update_discovery_preferences_error": "No se pudieron actualizar las preferencias de descubrimiento"
+  "update_discovery_preferences_error": "No se pudieron actualizar las preferencias de descubrimiento",
+  "rehomer_dashboard_title": "Sus Gatos",
+  "add": "Crear",
+  "get_animal_listings_error": "No se pudieron obtener los animales",
+  "get_animal_listing_error": "No se pudo obtener el animal",
+  "no_cat_listings_title": "No Ha Publicado Gatos",
+  "no_cat_listings_desc": "Aún no ha publicado un gato. Publique su primer gato para buscarle su hogar de ensueño.",
+  "add_first_cat": "Publicar su Primer Gato",
+  "cats": "Gatos"
 }

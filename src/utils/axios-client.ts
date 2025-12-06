@@ -6,4 +6,16 @@ const axiosUsersClient = axios.create({
   withCredentials: true
 });
 
-export { axiosUsersClient };
+const axiosRehomersClient = axios.create({
+  baseURL: import.meta.env.VITE_ANIMALS_MICROSERVICE_REHOMER_BASE_URL,
+  timeout: 30000,
+  withCredentials: true
+});
+
+const axiosAnimalsClient = axios.create({
+  baseURL: import.meta.env.VITE_ANIMALS_MICROSERVICE_BASE_URL,
+  timeout: 30000,
+  withCredentials: true
+});
+
+export { axiosUsersClient, axiosRehomersClient, axiosAnimalsClient };
