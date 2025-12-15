@@ -32,7 +32,7 @@ export function DiscoveryPreferencesDialog() {
     formState: { isSubmitting },
     reset
   } = useForm<DiscoveryPreferencesSchema>({
-    resolver: zodResolver(formSchema)
+    resolver: zodResolver(formSchema) as any
   });
 
   const closeDiscoveryPreferencesDialog = () =>
@@ -70,8 +70,8 @@ export function DiscoveryPreferencesDialog() {
     clearErrors();
     setPreferencesErrors([]);
     const requestBody: DiscoveryPreferencesSchema = {
-      minAge: formData.minAge === '' ? 0 : formData.minAge,
-      maxAge: formData.maxAge === '' ? 480 : formData.maxAge,
+      minAge: formData.minAge,
+      maxAge: formData.maxAge,
       gender: formData.gender,
       maxDistanceKm: formData.maxDistanceKm,
       neutered: formData.neutered

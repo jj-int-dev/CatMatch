@@ -5,14 +5,20 @@ import i18next from '../../../utils/i18n';
 export const createDiscoveryPreferencesValidator = () =>
   z
     .object({
-      minAge: z.union([
-        z.literal(''),
-        z.number().min(0, i18next.t('invalid_min_age'))
-      ]),
-      maxAge: z.union([
-        z.literal(''),
-        z.number().max(480, i18next.t('invalid_max_age'))
-      ]),
+      minAge: z.preprocess(
+        (val) => (val === '' ? undefined : Number(val)),
+        z
+          .number()
+          .min(0, i18next.t('invalid_min_age'))
+          .max(480, i18next.t('invalid_min_age'))
+      ),
+      maxAge: z.preprocess(
+        (val) => (val === '' ? undefined : Number(val)),
+        z
+          .number()
+          .min(0, i18next.t('invalid_max_age'))
+          .max(480, i18next.t('invalid_max_age'))
+      ),
       gender: z.literal(
         ['', 'Male', 'Female'],
         i18next.t('invalid_gender_discovery_preferences')

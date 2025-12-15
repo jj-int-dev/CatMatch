@@ -7,7 +7,10 @@ export const getDiscoveryPreferencesResponseValidator = z.object({
       maxAge: z.number().max(480),
       gender: z.literal(['', 'Male', 'Female']),
       maxDistanceKm: z.number().min(1).max(250),
-      neutered: z.boolean()
+      neutered: z.boolean(),
+      locationDisplayName: z.string().nullable(),
+      searchLocLatitude: z.number(),
+      searchLocLongitude: z.number()
     })
     .nullish()
 });
