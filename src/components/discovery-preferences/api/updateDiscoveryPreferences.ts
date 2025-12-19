@@ -1,11 +1,11 @@
 import { axiosUsersClient } from '../../../utils/axios-client';
 import i18next from '../../../utils/i18n';
 import getTokenHeaders from '../../../utils/getTokenHeaders';
-import type { DiscoveryPreferencesSchema } from '../validators/discoveryPreferencesValidator';
+import type { UpdateDiscoveryPreferencesRequestBody } from '../types/UpdateDiscoveryPreferencesRequestBody';
 
 export default async function (
   userId: string,
-  discoveryPreferences: DiscoveryPreferencesSchema,
+  discoveryPreferences: UpdateDiscoveryPreferencesRequestBody,
   accessToken: string,
   refreshToken: string
 ): Promise<void> {

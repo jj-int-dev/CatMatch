@@ -7,6 +7,7 @@ import {
   createDiscoveryPreferencesValidator,
   type DiscoveryPreferencesSchema
 } from './validators/discoveryPreferencesValidator';
+import type { UpdateDiscoveryPreferencesRequestBody } from './types/UpdateDiscoveryPreferencesRequestBody';
 import { useDiscoveryPreferencesStore } from './stores/discovery-preferences-store';
 import useGetDiscoveryPreferences from './hooks/useGetDiscoveryPreferences';
 import useUpdateDiscoveryPreferences from './hooks/useUpdateDiscoveryPreferences';
@@ -52,6 +53,13 @@ export function DiscoveryPreferencesDialog() {
     discoveryPreferences?.maxDistanceKm ?? 1
   );
   const [preferencesErrors, setPreferencesErrors] = useState<string[]>([]);
+  const [locationDisplayName, setLocationDisplayName] = useState<string>('');
+  const [searchLocLatitude, setSearchLocLatitude] = useState<number | null>(
+    null
+  );
+  const [searchLocLongitude, setSearchLocLongitude] = useState<number | null>(
+    null
+  );
 
   // Sync maxDistanceDisplayKm with fetched data when it becomes available
   useEffect(() => {
@@ -68,13 +76,22 @@ export function DiscoveryPreferencesDialog() {
     formData: DiscoveryPreferencesSchema
   ) => {
     clearErrors();
+
+    if (searchLocLatitude === null || searchLocLongitude === null) {
+      setPreferencesErrors([t('invalid_location')]);
+      return;
+    }
+
     setPreferencesErrors([]);
-    const requestBody: DiscoveryPreferencesSchema = {
+    const requestBody: UpdateDiscoveryPreferencesRequestBody = {
       minAge: formData.minAge,
       maxAge: formData.maxAge,
       gender: formData.gender,
       maxDistanceKm: formData.maxDistanceKm,
-      neutered: formData.neutered
+      neutered: formData.neutered,
+      locationDisplayName: locationDisplayName.trim(),
+      searchLocLatitude: searchLocLatitude,
+      searchLocLongitude: searchLocLongitude
     };
 
     try {
@@ -116,124 +133,218 @@ export function DiscoveryPreferencesDialog() {
     <dialog
       id="discoveryPreferencesDialog"
       open={showDiscoveryPreferencesDialog}
-      className="modal"
+      className="modal modal-bottom sm:modal-middle"
     >
-      <div className="modal-box w-md bg-white">
-        <form method="dialog">
-          <button
-            className="btn btn-sm btn-circle btn-ghost absolute top-2 right-2 bg-transparent text-black transition-colors duration-200 hover:border-[rgba(0,0,0,0.12)] hover:bg-[rgba(0,0,0,0.12)] hover:text-black"
-            onClick={closeDiscoveryPreferencesDialog}
-          >
-            ✕
-          </button>
-        </form>
-        {isLoadingDiscoveryPrefs || isUpdatingDiscoveryPrefs ? (
-          <DiscoveryPreferencesSkeleton />
-        ) : (
-          <>
-            <div className="mt-6 mb-8">
-              <fieldset className="fieldset rounded-box mt-6 gap-y-4 border border-[#b8d2f1] bg-white p-4">
-                <legend className="fieldset-legend text-black">
-                  {t('preferences')}
-                </legend>
+      {isLoadingDiscoveryPrefs || isUpdatingDiscoveryPrefs ? (
+        <DiscoveryPreferencesSkeleton />
+      ) : (
+        <div className="modal-box mx-auto w-full max-w-md overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50 p-0 shadow-2xl">
+          <div className="sticky top-0 z-10 border-b border-gray-100 bg-white/90 px-6 py-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold text-gray-800">
+                {t('preferences')}
+              </h3>
+              <form method="dialog">
+                <button
+                  onClick={closeDiscoveryPreferencesDialog}
+                  className="btn btn-circle btn-ghost btn-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </form>
+            </div>
+            <p className="mt-1 text-sm text-gray-500">
+              {t('preferences_modal_subtitle')}
+            </p>
+          </div>
 
-                <div>
-                  <label className="label">{t('age')}</label>
-                  <div className="mt-2 flex w-40 justify-between">
-                    <div>
-                      <input
-                        id="minAge"
-                        type="number"
-                        defaultValue={discoveryPreferences?.minAge ?? 0}
-                        {...register('minAge')}
-                        className="input w-16 bg-[#f9f9f9]"
-                        placeholder="0"
+          <div className="max-h-[60vh] overflow-y-auto px-6 py-5">
+            {/* Error Messages Display */}
+            {preferencesErrors.length > 0 && (
+              <div className="border-error/20 bg-error/5 mb-6 rounded-xl border p-4 shadow-sm">
+                <div className="flex items-start">
+                  <div className="mt-0.5 mr-3 flex-shrink-0">
+                    <svg
+                      className="text-error h-5 w-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clipRule="evenodd"
                       />
-                    </div>
-                    <div className="flex items-center">-</div>
-                    <div>
-                      <input
-                        id="maxAge"
-                        type="number"
-                        defaultValue={discoveryPreferences?.maxAge ?? 480}
-                        {...register('maxAge')}
-                        className="input w-16 bg-[#f9f9f9]"
-                        placeholder="480"
-                      />
-                    </div>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-error mb-2 text-sm font-semibold">
+                      {t('prefs_form_errors_title')}
+                    </h4>
+                    <ul className="space-y-1">
+                      {preferencesErrors.map((error, index) => (
+                        <li
+                          key={index}
+                          className="text-error flex items-center text-sm"
+                        >
+                          <span className="bg-error mr-2 h-1.5 w-1.5 flex-shrink-0 rounded-full"></span>
+                          <span>{error}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
+              </div>
+            )}
 
-                <div>
-                  <label className="label">{t('gender')}</label>
-                  <select
-                    id="gender"
-                    defaultValue={discoveryPreferences?.gender ?? ''}
-                    {...register('gender')}
-                    className="select w-fieldset-input-md mt-2 bg-[#f9f9f9]"
-                  >
-                    <option value="" disabled hidden>
-                      {t('select_a_gender')}
-                    </option>
-                    <option value="Male">{t('male')}</option>
-                    <option value="Female">{t('female')}</option>
-                  </select>
-                </div>
-
-                <div>
-                  <div className="w-fieldset-input-md flex justify-between">
-                    <label className="label">{t('max_distance_km')}</label>
-                    <span>{`${maxDistanceDisplayKm} km`}</span>
-                  </div>
-                  <input
-                    id="maxDistanceKm"
-                    type="range"
-                    min="1"
-                    max="250"
-                    defaultValue={discoveryPreferences?.maxDistanceKm ?? 1}
-                    {...register('maxDistanceKm')}
-                    onInput={updateDisplayedMaxDistance}
-                    className="range range-neutral w-fieldset-input-md mt-2"
-                  />
-                </div>
-
-                <div className="mt-2">
-                  <label className="label text-[13px]">
-                    {t('neutered')}
+            <div className="space-y-6">
+              {/* Age Section */}
+              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <label className="mb-3 block text-sm font-semibold text-gray-700">
+                  {t('age_range_months')}
+                </label>
+                <div className="flex items-center justify-between space-x-4">
+                  <div className="flex-1">
+                    <label className="mb-1 block text-xs text-gray-500">
+                      {t('min_age')}
+                    </label>
                     <input
-                      type="checkbox"
-                      className="checkbox checkbox-success checkbox-xs mt-0.5 ml-2"
+                      id="minAge"
+                      type="number"
+                      className="input input-bordered focus:border-primary focus:ring-primary/20 w-full bg-gray-50 transition-all focus:bg-white focus:ring-2"
+                      defaultValue={discoveryPreferences?.minAge ?? 0}
+                      {...register('minAge')}
+                      placeholder="0"
                     />
+                  </div>
+                  <div className="pt-5 font-medium text-gray-400">-</div>
+                  <div className="flex-1">
+                    <label className="mb-1 block text-xs text-gray-500">
+                      {t('max_age')}
+                    </label>
+                    <input
+                      id="maxAge"
+                      type="number"
+                      defaultValue={discoveryPreferences?.maxAge ?? 480}
+                      {...register('maxAge')}
+                      className="input input-bordered focus:border-primary focus:ring-primary/20 w-full bg-gray-50 transition-all focus:bg-white focus:ring-2"
+                      placeholder="480"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Gender Section */}
+              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <label className="mb-3 block text-sm font-semibold text-gray-700">
+                  {t('gender')}
+                </label>
+                <select
+                  id="gender"
+                  defaultValue={discoveryPreferences?.gender ?? ''}
+                  {...register('gender')}
+                  className="select select-bordered focus:border-primary focus:ring-primary/20 w-full bg-gray-50 transition-all focus:bg-white focus:ring-2"
+                >
+                  <option value="" disabled hidden>
+                    {t('select_a_gender')}
+                  </option>
+                  <option value="Male">{t('male')}</option>
+                  <option value="Female">{t('female')}</option>
+                </select>
+              </div>
+
+              {/* Location Section */}
+              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <label className="mb-3 block text-sm font-semibold text-gray-700">
+                  {t('location')}
+                </label>
+                <input
+                  id="location"
+                  type="text"
+                  className="input input-bordered focus:border-primary focus:ring-primary/20 mb-3 w-full bg-gray-50 transition-all focus:bg-white focus:ring-2"
+                  placeholder={t('location_field_placeholder')}
+                />
+                <div className="flex items-center">
+                  <input
+                    id="useMyLocation"
+                    type="checkbox"
+                    className="checkbox checkbox-primary checkbox-sm"
+                  />
+                  <label
+                    htmlFor="useMyLocation"
+                    className="ml-2 cursor-pointer text-sm text-gray-700"
+                  >
+                    {t('use_current_location')}
                   </label>
                 </div>
-              </fieldset>
-              {preferencesErrors.length > 0 && (
-                <div className="mt-2">
-                  <ul className="list-inside list-disc">
-                    {preferencesErrors.map((errMsg) => (
-                      <li key={errMsg} className="text-sm text-red-600">
-                        {errMsg}
-                      </li>
-                    ))}
-                  </ul>
+              </div>
+
+              {/* Max Distance Section */}
+              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    {t('max_distance')}
+                  </label>
+                  <span className="text-primary text-lg font-bold">{`${maxDistanceDisplayKm} km`}</span>
                 </div>
-              )}
+                <input
+                  id="maxDistanceKm"
+                  type="range"
+                  min="1"
+                  max="250"
+                  defaultValue={discoveryPreferences?.maxDistanceKm ?? 1}
+                  {...register('maxDistanceKm')}
+                  onInput={updateDisplayedMaxDistance}
+                  className="range range-primary w-full"
+                />
+                <div className="mt-2 flex justify-between text-xs text-gray-500">
+                  <span>1 km</span>
+                  <span>250 km</span>
+                </div>
+              </div>
+
+              {/* Neutered Section */}
+              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700">
+                      {t('neutered')}
+                    </label>
+                    <p className="mt-1 text-xs text-gray-500">
+                      {t('neutered_modal_desc')}
+                    </p>
+                  </div>
+                  <input type="checkbox" className="toggle toggle-success" />
+                </div>
+              </div>
             </div>
-            <div className="modal-action">
+          </div>
+
+          <div className="sticky bottom-0 border-t border-gray-100 bg-white/90 px-6 py-4 backdrop-blur-sm">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <button
-                className="btn btn-sm border-[#36b37e] bg-[#36b37e] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
+                className="btn btn-outline btn-gray flex-1 rounded-xl border-gray-300 py-3 font-medium text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-50"
+                onClick={closeDiscoveryPreferencesDialog}
+              >
+                {t('btn_cancel')}
+              </button>
+              <button
                 disabled={isSubmitting}
                 onClick={handleSubmit(
                   handleSaveDiscoveryPreferences,
                   handleSaveDiscoveryPreferencesFailure
                 )}
+                className="btn btn-success from-success to-success/90 flex-1 rounded-xl border-none bg-gradient-to-r py-3 font-medium text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
               >
                 {t('search')} 🐈
               </button>
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
+      <form method="dialog" className="modal-backdrop">
+        <button onClick={closeDiscoveryPreferencesDialog}>close</button>
+      </form>
     </dialog>
   );
 }

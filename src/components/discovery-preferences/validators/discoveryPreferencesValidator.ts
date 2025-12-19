@@ -6,14 +6,14 @@ export const createDiscoveryPreferencesValidator = () =>
   z
     .object({
       minAge: z.preprocess(
-        (val) => (val === '' ? undefined : Number(val)),
+        (val) => (val === '' ? 0 : Number(val)),
         z
           .number()
           .min(0, i18next.t('invalid_min_age'))
           .max(480, i18next.t('invalid_min_age'))
       ),
       maxAge: z.preprocess(
-        (val) => (val === '' ? undefined : Number(val)),
+        (val) => (val === '' ? 480 : Number(val)),
         z
           .number()
           .min(0, i18next.t('invalid_max_age'))
@@ -31,21 +31,8 @@ export const createDiscoveryPreferencesValidator = () =>
     })
     .refine(
       (formData) => {
-        if (typeof formData.maxAge === 'number') {
-          if (
-            typeof formData.minAge !== 'number' ||
-            formData.maxAge < formData.minAge
-          ) {
-            return false;
-          }
-        }
-        if (typeof formData.minAge === 'number') {
-          if (
-            typeof formData.maxAge === 'number' &&
-            formData.maxAge < formData.minAge
-          ) {
-            return false;
-          }
+        if (formData.maxAge < formData.minAge) {
+          return false;
         }
       },
       {

@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/auth-store';
 import updateDiscoveryPreferences from '../api/updateDiscoveryPreferences';
-import type { DiscoveryPreferencesSchema } from '../validators/discoveryPreferencesValidator';
+import type { UpdateDiscoveryPreferencesRequestBody } from '../types/UpdateDiscoveryPreferencesRequestBody';
 
 export default function () {
   const userSession = useAuthStore((state) => state.session);
@@ -11,7 +11,7 @@ export default function () {
 
   return useMutation({
     mutationFn: async (
-      discoveryPreferences: DiscoveryPreferencesSchema
+      discoveryPreferences: UpdateDiscoveryPreferencesRequestBody
     ): Promise<void> =>
       await updateDiscoveryPreferences(
         userId!,

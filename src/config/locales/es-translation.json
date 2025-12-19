@@ -162,8 +162,8 @@
   "unable_to_send_email": "No se pudo enviar el correo",
   "password_change_success": "Se actualizó su contraseña",
   "password_change_failure": "No se pudo actualizar su contraseña",
-  "age": "Edad (meses)",
-  "max_distance_km": "Distancia Máxima (km)",
+  "age_range_months": "Rango de Edad (meses)",
+  "max_distance": "Distancia Máxima",
   "neutered": "Esterilizado",
   "male": "Macho",
   "female": "Hembra",
@@ -183,5 +183,16 @@
   "no_cat_listings_title": "No Ha Publicado Gatos",
   "no_cat_listings_desc": "Aún no ha publicado un gato. Publique su primer gato para buscarle su hogar de ensueño.",
   "add_first_cat": "Publicar su Primer Gato",
-  "cats": "Gatos"
+  "cats": "Gatos",
+  "preferences_modal_subtitle": "Personalice su búsqueda de gatos",
+  "min_age": "Edad Mínima",
+  "max_age": "Edad Máxima",
+  "location": "Ubicación",
+  "use_current_location": "Usar mi ubicación actual",
+  "neutered_modal_desc": "Solo mostrar gatos que estén esterilizados",
+  "prefs_form_errors_title": "Por favor corrija los siguientes errores:",
+  "btn_cancel": "Cerrar",
+  "location_field_placeholder": "Ingrese un lugar, dirección o código postal",
+  "get_address_suggestions_error": "No se pudieron obtener sugerencias de direcciones",
+  "invalid_location": "Ubicación no válida"
 }
