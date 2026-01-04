@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import landingPageCat from '../../../assets/landing_page_cat.png';
+import landingPageCat from '../../../assets/landing_page_cat.webp';
 import CatIcon from '../../../assets/cat_icon.svg?react';
 import HouseIcon from '../../../assets/house_icon.svg?react';
 import CatTestimonialPic1 from '../../../assets/cat_testimonial_1.jpg';

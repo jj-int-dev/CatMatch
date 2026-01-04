@@ -19,6 +19,7 @@ import UserDataDeletion from '../features/user-data-deletion/components/UserData
 import ViewAnimalListing from '../features/discovery/components/ViewAnimalListing';
 import EditAnimalListing from '../features/rehomer-dashboard/components/EditAnimalListing';
 import AddAnimalListing from '../features/rehomer-dashboard/components/AddAnimalListing';
+import { SendResetPasswordLinkDialog } from '../components/send-reset-password-link/SendResetPasswordLinkDialog';
 
 function App() {
   const setSession = useAuthStore((state) => state.setSession);
@@ -50,6 +51,7 @@ function App() {
   return (
     <BrowserRouter>
       <Navigation />
+      <SendResetPasswordLinkDialog />
       <Routes>
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Registration />} />

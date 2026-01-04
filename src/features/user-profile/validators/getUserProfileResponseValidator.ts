@@ -8,7 +8,7 @@ export const getUserProfileResponseValidator = z.object({
     .refine((date) => new Date(date) < new Date())
     .nullable(),
   phoneNumber: z.e164().nullable(),
-  gender: z.literal(['Man', 'Woman', '']).nullable(),
+  gender: z.enum(['Man', 'Woman', '']).nullable(),
   bio: z.string().nullable(),
   userType: z.string().nullable()
 });

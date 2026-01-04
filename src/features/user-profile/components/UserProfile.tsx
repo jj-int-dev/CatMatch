@@ -20,7 +20,7 @@ import {
   ACCEPTED_IMAGE_TYPES
 } from '../validators/newUserProfilePictureValidator';
 import type { GetUserProfilePictureAndTypeResponse } from '../../../types/GetUserProfilePictureAndTypeResponse';
-import defaultProfilePic from '../../../assets/default_profile_pic.jpg';
+import defaultProfilePic from '../../../assets/default_profile_pic.webp';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { PiUploadSimple } from 'react-icons/pi';
 import type { GetUserProfileResponse } from '../types/GetUserProfileResponse';
@@ -28,10 +28,7 @@ import ErrorToast from '../../../components/toasts/ErrorToast';
 import getUniqueImageUrl from '../../../utils/getUniqueImageUrl';
 import { processImage } from '../../../utils/processImage';
 import { CgAsterisk } from 'react-icons/cg';
-import {
-  openSendResetPasswordLinkDialog,
-  SendResetPasswordLinkDialog
-} from '../../../components/send-reset-password-link/SendResetPasswordLinkDialog';
+import { useSendResetPasswordLinkStore } from '../../../components/send-reset-password-link/stores/send-reset-password-link-store';
 
 export default function UserProfile() {
   const { i18n, t } = useTranslation();
@@ -275,6 +272,9 @@ export default function UserProfile() {
     closeChooseProfilePicDialog();
   };
 
+  const { setShowSendResetPasswordLinkDialog } =
+    useSendResetPasswordLinkStore();
+
   return (
     <div className="-mt-16 flex h-screen w-screen justify-center bg-[#f9f9f9] bg-cover bg-center px-4 pt-28">
       {showErrorToast && (
@@ -404,7 +404,7 @@ export default function UserProfile() {
               userSession!.user.app_metadata.provider === 'email' && (
                 <button
                   className="w-full cursor-pointer underline hover:font-bold hover:text-[#4181fa] sm:w-auto"
-                  onClick={openSendResetPasswordLinkDialog}
+                  onClick={() => setShowSendResetPasswordLinkDialog(true)}
                 >
                   {t('change_password')}
                 </button>
@@ -420,7 +420,6 @@ export default function UserProfile() {
               {t('delete_account')}
             </button>
           </div>
-          <SendResetPasswordLinkDialog />
         </div>
       </div>
 

@@ -41,7 +41,7 @@ export function ConfirmChangeUserTypeDialog() {
           >
             {t('no')}
           </button>
-          {/* TODO: on click, go through data deletion process, log user out & navigate to login page, display success banner on login page */}
+          {/* TODO: on click, go through data deletion process, log user out & navigate to login page, display success banner on login page. THIS IS NOT READY TO BE IMPLEMENTED YET */}
           <button
             className="btn border-[#36b37e] bg-[#36b37e] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
             onClick={handleClose}

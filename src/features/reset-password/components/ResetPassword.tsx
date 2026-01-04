@@ -1,4 +1,4 @@
-import catLogo from '../../../assets/cat_logo.png';
+import catLogo from '../../../assets/cat_logo.webp';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';

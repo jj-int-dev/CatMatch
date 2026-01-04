@@ -19,9 +19,9 @@ export const createDiscoveryPreferencesValidator = () =>
           .min(0, i18next.t('invalid_max_age'))
           .max(480, i18next.t('invalid_max_age'))
       ),
-      gender: z.literal(
+      gender: z.enum(
         ['', 'Male', 'Female'],
-        i18next.t('invalid_gender_discovery_preferences')
+        i18next.t('invalid_gender_selected')
       ),
       maxDistanceKm: z
         .number()

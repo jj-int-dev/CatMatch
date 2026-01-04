@@ -1,4 +1,4 @@
-import catLogo from '../../assets/cat_logo.png';
+import catLogo from '../../assets/cat_logo.webp';
 import ProfilePicture from './ProfilePicture';
 import { NavLink, type NavLinkRenderProps } from 'react-router';
 import { useTranslation } from 'react-i18next';

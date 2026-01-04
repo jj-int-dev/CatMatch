@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/auth-store';
+import i18next from '../../../utils/i18n';
 import updateUserType from '../api/updateUserType';
 import type { UpdateUserTypeResponse } from '../types/UpdateUserTypeResponse';
 
@@ -10,7 +11,11 @@ export default function () {
   const refreshToken = userSession?.refresh_token ?? null;
 
   return useMutation({
-    mutationFn: async (userType: string): Promise<UpdateUserTypeResponse> =>
-      await updateUserType(userId!, userType, accessToken!, refreshToken!)
+    mutationFn: async (userType: string): Promise<UpdateUserTypeResponse> => {
+      if (!userId || !accessToken || !refreshToken) {
+        throw new Error(i18next.t('auth_required'));
+      }
+      return await updateUserType(userId, userType, accessToken, refreshToken);
+    }
   });
 }

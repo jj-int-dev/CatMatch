@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/auth-store';
+import i18next from '../../../utils/i18n';
 import updateDiscoveryPreferences from '../api/updateDiscoveryPreferences';
 import type { UpdateDiscoveryPreferencesRequestBody } from '../types/UpdateDiscoveryPreferencesRequestBody';
 
@@ -12,12 +13,16 @@ export default function () {
   return useMutation({
     mutationFn: async (
       discoveryPreferences: UpdateDiscoveryPreferencesRequestBody
-    ): Promise<void> =>
+    ): Promise<void> => {
+      if (!userId || !accessToken || !refreshToken) {
+        throw new Error(i18next.t('auth_required'));
+      }
       await updateDiscoveryPreferences(
-        userId!,
+        userId,
         discoveryPreferences,
-        accessToken!,
-        refreshToken!
-      )
+        accessToken,
+        refreshToken
+      );
+    }
   });
 }

@@ -15,7 +15,7 @@ export const createUserProfileFormValidator = () =>
     phoneNumber: z.union([z.e164(), z.literal('')], {
       message: i18next.t('invalid_phone_number')
     }),
-    gender: z.literal(['Man', 'Woman', ''], {
+    gender: z.enum(['Man', 'Woman', ''], {
       message: i18next.t('invalid_gender')
     }),
     bio: z.string()

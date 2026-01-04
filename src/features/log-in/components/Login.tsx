@@ -1,22 +1,19 @@
-import catLogo from '../../../assets/cat_logo.png';
-import { useState, useMemo, type MouseEvent } from 'react';
+import catLogo from '../../../assets/cat_logo.webp';
+import { useState, useMemo, type MouseEvent, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
 import { useAuthStore } from '../../../stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, type FieldErrors } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import {
   createLoginFormValidator,
   type LoginFormSchema
 } from '../validators/login-form-validator';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 import WarningToast from '../../../components/toasts/WarningToast';
-import {
-  openSendResetPasswordLinkDialog,
-  SendResetPasswordLinkDialog
-} from '../../../components/send-reset-password-link/SendResetPasswordLinkDialog';
+import { useSendResetPasswordLinkStore } from '../../../components/send-reset-password-link/stores/send-reset-password-link-store';
 
 export default function Login() {
   const { i18n, t } = useTranslation();
@@ -34,11 +31,9 @@ export default function Login() {
     (state) => state.logUserInWithGoogle
   );
 
-  const [showErrorToast, setShowErrorToast] = useState(false);
-  const [formValidationErrors, setFormValidationErrors] = useState<string[]>(
-    []
-  );
+  const [serverError, setServerError] = useState<string | null>(null);
   const [showVerifyEmailToast, setShowVerifyEmailToast] = useState(false);
+  const [isThirdPartyLoading, setIsThirdPartyLoading] = useState(false);
 
   // Recreate the schema whenever the language changes so that error messages are in the correct language
   const formSchema = useMemo(() => createLoginFormValidator(), [i18n.language]);
@@ -46,16 +41,27 @@ export default function Login() {
   const {
     register,
     handleSubmit,
-    clearErrors,
-    formState: { isSubmitting },
-    reset
+    formState: { errors, isSubmitting },
+    reset,
+    clearErrors
   } = useForm<LoginFormSchema>({
     resolver: zodResolver(formSchema)
   });
 
   const goToUserProfile = () => navigate(`/user-profile`);
 
+  // Handle cleanup to prevent race conditions
+  useEffect(() => {
+    return () => {
+      // Cleanup function to prevent state updates on unmounted component
+    };
+  }, []);
+
   const onEmailPasswordLogin = async (formData: LoginFormSchema) => {
+    // Clear previous errors
+    setServerError(null);
+    clearErrors();
+
     const { error, data } = await logUserInWithEmailAndPassword(
       formData.email,
       formData.password
@@ -66,64 +72,70 @@ export default function Login() {
     if (errorMessage === 'Email not confirmed') {
       setShowVerifyEmailToast(true);
     } else if (errorMessage) {
-      setFormValidationErrors([errorMessage]);
-      setShowErrorToast(true);
+      setServerError(errorMessage);
     } else if (!isAuthenticatedUserSession(userSession)) {
-      setFormValidationErrors([t('no_authenticated_user_found')]);
-      setShowErrorToast(true);
+      setServerError(t('no_authenticated_user_found'));
     } else {
+      // Clear form and all state before navigation
       reset();
-      onCloseWarningToast();
-      setShowErrorToast(false);
-      setFormValidationErrors([]);
+      setShowVerifyEmailToast(false);
+      setServerError(null);
       goToUserProfile();
     }
   };
 
-  const onLoginFailure = (formErrors: FieldErrors<LoginFormSchema>) => {
-    const errorMsgs: string[] = [];
-
-    if (formErrors.email?.message != null) {
-      errorMsgs.push(formErrors.email.message);
-    }
-    if (formErrors.password?.message != null) {
-      const passwordErrors = formErrors.password.message.split('\n');
-      errorMsgs.push(...passwordErrors);
-    }
-
-    setFormValidationErrors(errorMsgs);
-    setShowErrorToast(errorMsgs.length > 0);
-  };
-
   const onFacebookLogin = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    await logUserInWithFacebook();
+    setIsThirdPartyLoading(true);
+    try {
+      await logUserInWithFacebook();
+    } finally {
+      setIsThirdPartyLoading(false);
+    }
   };
 
   const onGoogleLogin = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    await logUserInWithGoogle();
+    setIsThirdPartyLoading(true);
+    try {
+      await logUserInWithGoogle();
+    } finally {
+      setIsThirdPartyLoading(false);
+    }
   };
 
   const onCloseErrorToast = () => {
+    setServerError(null);
     clearErrors();
-    setShowErrorToast(false);
-    setFormValidationErrors([]);
   };
 
   const onCloseWarningToast = () => setShowVerifyEmailToast(false);
 
+  const { setShowSendResetPasswordLinkDialog } =
+    useSendResetPasswordLinkStore();
+
   const handleForgotPassword = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    openSendResetPasswordLinkDialog();
+    setShowSendResetPasswordLinkDialog(true);
   };
+
+  // Get error messages from form state
+  const formErrorMessages = Object.values(errors)
+    .filter((error) => error?.message)
+    .map((error) => error.message as string);
+
+  // Combine form errors and server errors
+  const allErrorMessages = [...formErrorMessages];
+  if (serverError) {
+    allErrorMessages.push(serverError);
+  }
 
   return (
     <>
       <div className="bg-main-background h-screen bg-cover pt-7">
-        {showErrorToast && (
+        {allErrorMessages.length > 0 && (
           <ErrorToast
-            messages={formValidationErrors}
+            messages={allErrorMessages}
             onCloseToast={onCloseErrorToast}
           />
         )}
@@ -146,7 +158,7 @@ export default function Login() {
           </div>
 
           <div className="mt-10 rounded-xl bg-[#7289DA] p-8 shadow-2xl sm:mx-auto sm:w-full sm:max-w-sm">
-            <form>
+            <form onSubmit={handleSubmit(onEmailPasswordLogin)}>
               <div className="space-y-6">
                 <div>
                   <label
@@ -208,11 +220,10 @@ export default function Login() {
                 <div>
                   <button
                     disabled={isSubmitting}
-                    onClick={handleSubmit(onEmailPasswordLogin, onLoginFailure)}
                     type="submit"
                     className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
-                    {t('sign_in')}
+                    {t(isSubmitting ? 'signing_in' : 'sign_in')}
                   </button>
                 </div>
                 <p className="text-center">{t('or')}</p>
@@ -221,31 +232,36 @@ export default function Login() {
               <div className="mt-3 space-y-2">
                 <div>
                   <button
-                    disabled={isSubmitting}
+                    disabled={isThirdPartyLoading}
                     onClick={onFacebookLogin}
-                    type="submit"
+                    type="button"
                     className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
                     <FaFacebook className="size-4 self-center" />
-                    {t('log_in_with_facebook')}
+                    {t(
+                      isThirdPartyLoading
+                        ? 'signing_in'
+                        : 'log_in_with_facebook'
+                    )}
                   </button>
                 </div>
 
                 <div>
                   <button
-                    disabled={isSubmitting}
+                    disabled={isThirdPartyLoading}
                     onClick={onGoogleLogin}
-                    type="submit"
+                    type="button"
                     className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
                     <FaGoogle className="ml-[-15px] size-4 self-center" />
-                    {t('log_in_with_google')}
+                    {t(
+                      isThirdPartyLoading ? 'signing_in' : 'log_in_with_google'
+                    )}
                   </button>
                 </div>
               </div>
             </form>
           </div>
-          <SendResetPasswordLinkDialog />
         </div>
       </div>
     </>

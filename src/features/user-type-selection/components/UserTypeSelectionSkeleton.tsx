@@ -1,5 +1,5 @@
 import { useSetNavigationColor } from '../../../hooks/useSetNavigationColor';
-import defaultProfilePic from '../../../assets/default_profile_pic.jpg';
+import defaultProfilePic from '../../../assets/default_profile_pic.webp';
 
 export default function UserTypeSelection() {
   useSetNavigationColor('transparent');

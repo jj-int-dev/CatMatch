@@ -12,7 +12,7 @@ import {
   getRehomerExplanations
 } from '../utils/getUserTypeExplanations';
 import useGetUserProfilePictureAndType from '../../../hooks/useGetUserProfilePictureAndType';
-import defaultProfilePic from '../../../assets/default_profile_pic.jpg';
+import defaultProfilePic from '../../../assets/default_profile_pic.webp';
 import useUpdateUserType from '../hooks/useUpdateUserType';
 import { useQueryClient } from '@tanstack/react-query';
 import type { GetUserProfilePictureAndTypeResponse } from '../../../types/GetUserProfilePictureAndTypeResponse';

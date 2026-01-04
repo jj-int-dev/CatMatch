@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/auth-store';
+import i18next from '../../../utils/i18n';
 import deleteUserProfilePicture from '../api/deleteUserProfilePicture';
 
 export default function () {
@@ -9,7 +10,11 @@ export default function () {
   const refreshToken = userSession?.refresh_token ?? null;
 
   return useMutation({
-    mutationFn: async (): Promise<void> =>
-      await deleteUserProfilePicture(userId!, accessToken!, refreshToken!)
+    mutationFn: async (): Promise<void> => {
+      if (!userId || !accessToken || !refreshToken) {
+        throw new Error(i18next.t('auth_required'));
+      }
+      await deleteUserProfilePicture(userId, accessToken, refreshToken);
+    }
   });
 }

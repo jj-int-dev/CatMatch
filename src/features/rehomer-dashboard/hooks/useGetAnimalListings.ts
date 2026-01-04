@@ -3,7 +3,7 @@ import { useAuthStore } from '../../../stores/auth-store';
 import type { GetAnimalListingsResponseSchema } from '../validators/getAnimalListingsResponseValidator';
 import getAnimalListings from '../api/getAnimalListings';
 
-export default function () {
+export default function (page: number = 1, pageSize: number = 10) {
   const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
   const userSession = useAuthStore((state) => state.session);
   const userId = userSession?.user?.id ?? null;
@@ -11,9 +11,15 @@ export default function () {
   const refreshToken = userSession?.refresh_token ?? null;
 
   return useQuery({
-    queryKey: ['animal-listings', userId],
+    queryKey: ['animal-listings', userId, page, pageSize],
     queryFn: async (): Promise<GetAnimalListingsResponseSchema> =>
-      await getAnimalListings(userId!, accessToken!, refreshToken!),
+      await getAnimalListings(
+        userId!,
+        accessToken!,
+        refreshToken!,
+        page,
+        pageSize
+      ),
     enabled: !isLoadingSession && !!userId && !!accessToken && !!refreshToken
   });
 }

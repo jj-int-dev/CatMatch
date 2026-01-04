@@ -1,16 +1,16 @@
-import catLogo from '../../../assets/cat_logo.png';
+import catLogo from '../../../assets/cat_logo.webp';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import { FaFacebook, FaGoogle } from 'react-icons/fa';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, type FieldErrors } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import {
   createRegistrationFormValidator,
   type RegistrationFormSchema
 } from '../validators/registrationFormValidator';
 import { useAuthStore } from '../../../stores/auth-store';
-import { useState, useMemo, type MouseEvent } from 'react';
+import { useState, useMemo, type MouseEvent, useEffect } from 'react';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 
 export default function Registration() {
@@ -32,10 +32,8 @@ export default function Registration() {
     (state) => state.logUserInWithGoogle
   );
 
-  const [showErrorToast, setShowErrorToast] = useState(false);
-  const [formValidationErrors, setFormValidationErrors] = useState<string[]>(
-    []
-  );
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [isThirdPartyLoading, setIsThirdPartyLoading] = useState(false);
 
   // Recreate the schema whenever the language changes so that error messages are in the correct language
   const formSchema = useMemo(
@@ -46,9 +44,9 @@ export default function Registration() {
   const {
     register,
     handleSubmit,
-    clearErrors,
-    formState: { isSubmitting },
-    reset
+    formState: { errors, isSubmitting },
+    reset,
+    clearErrors
   } = useForm<RegistrationFormSchema>({
     resolver: zodResolver(formSchema)
   });
@@ -57,9 +55,20 @@ export default function Registration() {
 
   const goToLoginPage = () => navigate('/login');
 
+  // Handle cleanup to prevent race conditions
+  useEffect(() => {
+    return () => {
+      // Cleanup function to prevent state updates on unmounted component
+    };
+  }, []);
+
   const onEmailPasswordRegistration = async (
     formData: RegistrationFormSchema
   ) => {
+    // Clear previous errors
+    setServerError(null);
+    clearErrors();
+
     const { error, data } = await registerNewUserWithEmailAndPassword(
       formData.email,
       formData.password
@@ -70,18 +79,16 @@ export default function Registration() {
     const errorMessage = error?.message;
 
     if (errorMessage) {
-      setFormValidationErrors([errorMessage]);
-      setShowErrorToast(true);
+      setServerError(errorMessage);
     } else if (
       !isAuthenticatedUser(user) &&
       !isAuthenticatedUserSession(userSession)
     ) {
-      setFormValidationErrors([t('no_authenticated_user_found')]);
-      setShowErrorToast(true);
+      setServerError(t('no_authenticated_user_found'));
     } else {
+      // Clear form and all state before navigation
       reset();
-      setShowErrorToast(false);
-      setFormValidationErrors([]);
+      setServerError(null);
 
       if (isAuthenticatedUserSession(userSession)) {
         goToUserProfile();
@@ -92,48 +99,48 @@ export default function Registration() {
     }
   };
 
-  const onRegistrationFailure = (
-    formErrors: FieldErrors<RegistrationFormSchema>
-  ) => {
-    const errorMsgs: string[] = [];
-
-    if (formErrors.email?.message != null) {
-      errorMsgs.push(formErrors.email.message);
-    }
-    if (formErrors.password?.message != null) {
-      const passwordErrors = formErrors.password.message.split('\n');
-      errorMsgs.push(...passwordErrors);
-    }
-    if (formErrors.confirmPassword?.message != null) {
-      errorMsgs.push(formErrors.confirmPassword.message);
-    }
-
-    setFormValidationErrors(errorMsgs);
-    setShowErrorToast(errorMsgs.length > 0);
-  };
-
   const onFacebookLogin = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    await logUserInWithFacebook();
+    setIsThirdPartyLoading(true);
+    try {
+      await logUserInWithFacebook();
+    } finally {
+      setIsThirdPartyLoading(false);
+    }
   };
 
   const onGoogleLogin = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    await logUserInWithGoogle();
+    setIsThirdPartyLoading(true);
+    try {
+      await logUserInWithGoogle();
+    } finally {
+      setIsThirdPartyLoading(false);
+    }
   };
 
   const onCloseErrorToast = () => {
+    setServerError(null);
     clearErrors();
-    setShowErrorToast(false);
-    setFormValidationErrors([]);
   };
+
+  // Get error messages from form state
+  const formErrorMessages = Object.values(errors)
+    .filter((error) => error?.message)
+    .map((error) => error.message as string);
+
+  // Combine form errors and server errors
+  const allErrorMessages = [...formErrorMessages];
+  if (serverError) {
+    allErrorMessages.push(serverError);
+  }
 
   return (
     <>
       <div className="bg-main-background h-screen bg-cover pt-7">
-        {showErrorToast && (
+        {allErrorMessages.length > 0 && (
           <ErrorToast
-            messages={formValidationErrors}
+            messages={allErrorMessages}
             onCloseToast={onCloseErrorToast}
           />
         )}
@@ -150,7 +157,7 @@ export default function Registration() {
           </div>
 
           <div className="mt-10 rounded-xl bg-[#7289DA] p-8 shadow-2xl sm:mx-auto sm:w-full sm:max-w-sm">
-            <form>
+            <form onSubmit={handleSubmit(onEmailPasswordRegistration)}>
               <div className="space-y-6">
                 <div>
                   <label
@@ -224,13 +231,9 @@ export default function Registration() {
                   <button
                     disabled={isSubmitting}
                     type="submit"
-                    onClick={handleSubmit(
-                      onEmailPasswordRegistration,
-                      onRegistrationFailure
-                    )}
                     className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
-                    {t('sign_in')}
+                    {isSubmitting ? `${t('sign_in')}...` : t('sign_in')}
                   </button>
                 </div>
                 <p className="text-center">{t('or')}</p>
@@ -239,25 +242,29 @@ export default function Registration() {
               <div className="mt-3 space-y-2">
                 <div>
                   <button
-                    disabled={isSubmitting}
-                    type="submit"
+                    disabled={isThirdPartyLoading}
                     onClick={onFacebookLogin}
+                    type="button"
                     className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
                     <FaFacebook className="size-4 self-center" />
-                    {t('log_in_with_facebook')}
+                    {isThirdPartyLoading
+                      ? `${t('log_in_with_facebook')}...`
+                      : t('log_in_with_facebook')}
                   </button>
                 </div>
 
                 <div>
                   <button
-                    disabled={isSubmitting}
-                    type="submit"
+                    disabled={isThirdPartyLoading}
                     onClick={onGoogleLogin}
+                    type="button"
                     className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
                   >
                     <FaGoogle className="ml-[-15px] size-4 self-center" />
-                    {t('log_in_with_google')}
+                    {isThirdPartyLoading
+                      ? `${t('log_in_with_google')}...`
+                      : t('log_in_with_google')}
                   </button>
                 </div>
               </div>

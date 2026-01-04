@@ -1,9 +1,6 @@
 import imageCompression from 'browser-image-compression';
 
-// if an image is a png file, we convert it to jpeg to make compression easier
-// then we compress the image
-
-async function convertPngToJpeg(pngFile: File): Promise<File> {
+async function convertImageToWebp(imageFile: File): Promise<File> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();
@@ -19,39 +16,39 @@ async function convertPngToJpeg(pngFile: File): Promise<File> {
 
       const ctx = canvas.getContext('2d');
       if (!ctx) return reject('Failed to get 2D context');
-      // a png file might have some transparency in it. since jpeg does not
-      // support transparency, we replace any transparency with white
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Clear canvas to preserve transparency (important for PNG → WEBP)
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
 
       canvas.toBlob(
         (blob) => {
-          if (!blob) return reject('Conversion failed');
-          const jpegFile = new File(
+          if (!blob) return reject('WEBP conversion failed');
+
+          const webpFile = new File(
             [blob],
-            pngFile.name.replace(/\.png$/i, '.jpg'),
-            {
-              type: 'image/jpeg'
-            }
+            imageFile.name.replace(/\.(jpe?g|png|webp)$/i, '.webp'),
+            { type: 'image/webp' }
           );
-          resolve(jpegFile);
+
+          resolve(webpFile);
         },
-        'image/jpeg',
-        0.9
+        'image/webp',
+        0.9 // quality: 0–1 (adjust if needed)
       );
     };
 
     img.onerror = reject;
-    reader.readAsDataURL(pngFile);
+    reader.readAsDataURL(imageFile);
   });
 }
 
-async function compressImage(imageFile: File): Promise<File> {
+async function compressWebpImage(imageFile: File): Promise<File> {
   const options = {
     maxSizeMB: 1,
-    maxWidthOrHeight: 1920, // downscale larger images
-    useWebWorker: true
+    maxWidthOrHeight: 1920,
+    useWebWorker: true,
+    fileType: 'image/webp'
   };
 
   return await imageCompression(imageFile, options);
@@ -63,11 +60,16 @@ export async function processImage(
   image: File
 ): Promise<ImageProcessingResult> {
   try {
-    const imageToCompress =
-      image.type === 'image/png' ? await convertPngToJpeg(image) : image;
-    const compressedImage = await compressImage(imageToCompress);
+    // Convert everything to WEBP
+    const webpImage =
+      image.type === 'image/webp' ? image : await convertImageToWebp(image);
+
+    // Compress WEBP
+    const compressedImage = await compressWebpImage(webpImage);
+
     return { image: compressedImage, success: true };
   } catch (err) {
+    console.error(err);
     return { success: false };
   }
 }

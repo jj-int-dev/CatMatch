@@ -1,4 +1,4 @@
-import { useState, useMemo, type FormEvent, useEffect } from 'react';
+import { useState, useMemo, type FormEvent, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,6 +11,7 @@ import type { UpdateDiscoveryPreferencesRequestBody } from './types/UpdateDiscov
 import { useDiscoveryPreferencesStore } from './stores/discovery-preferences-store';
 import useGetDiscoveryPreferences from './hooks/useGetDiscoveryPreferences';
 import useUpdateDiscoveryPreferences from './hooks/useUpdateDiscoveryPreferences';
+import useAddressSuggestions from '../../hooks/useGetAddressSuggestions';
 import DiscoveryPreferencesSkeleton from './DiscoveryPreferencesSkeleton';
 
 export function DiscoveryPreferencesDialog() {
@@ -31,7 +32,9 @@ export function DiscoveryPreferencesDialog() {
     handleSubmit,
     clearErrors,
     formState: { isSubmitting },
-    reset
+    reset,
+    setValue,
+    watch
   } = useForm<DiscoveryPreferencesSchema>({
     resolver: zodResolver(formSchema) as any
   });
@@ -60,6 +63,18 @@ export function DiscoveryPreferencesDialog() {
   const [searchLocLongitude, setSearchLocLongitude] = useState<number | null>(
     null
   );
+  const [locationInput, setLocationInput] = useState<string>('');
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const [useMyLocation, setUseMyLocation] = useState<boolean>(false);
+  const [isGettingLocation, setIsGettingLocation] = useState<boolean>(false);
+  const [locationError, setLocationError] = useState<string>('');
+
+  const locationInputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Use address suggestions hook
+  const { data: suggestionsData, isLoading: isLoadingSuggestions } =
+    useAddressSuggestions(locationInput, i18n.language);
 
   // Sync maxDistanceDisplayKm with fetched data when it becomes available
   useEffect(() => {
@@ -68,8 +83,114 @@ export function DiscoveryPreferencesDialog() {
     }
   }, [discoveryPreferences?.maxDistanceKm]);
 
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node) &&
+        locationInputRef.current &&
+        !locationInputRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const updateDisplayedMaxDistance = (e: FormEvent<HTMLInputElement>) => {
     setMaxDistanceDisplayKm(+(e.target as HTMLInputElement).value);
+  };
+
+  const handleLocationInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    setLocationInput(value);
+    setShowSuggestions(true);
+    setLocationError('');
+
+    // Clear coordinates when user types
+    if (value.trim() === '') {
+      setSearchLocLatitude(null);
+      setSearchLocLongitude(null);
+      setLocationDisplayName('');
+    }
+  };
+
+  const handleSelectSuggestion = (suggestion: any) => {
+    setLocationInput(suggestion.formatted);
+    setLocationDisplayName(suggestion.formatted);
+    setSearchLocLatitude(suggestion.lat);
+    setSearchLocLongitude(suggestion.lon);
+    setShowSuggestions(false);
+    setLocationError('');
+  };
+
+  const handleUseMyLocationChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const checked = e.target.checked;
+    setUseMyLocation(checked);
+
+    if (checked) {
+      // Get user's current location
+      setIsGettingLocation(true);
+      setLocationError('');
+      setLocationInput('');
+      setLocationDisplayName('');
+      setShowSuggestions(false);
+
+      if (!navigator.geolocation) {
+        setLocationError(t('geolocation_not_supported'));
+        setUseMyLocation(false);
+        setIsGettingLocation(false);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setSearchLocLatitude(position.coords.latitude);
+          setSearchLocLongitude(position.coords.longitude);
+          setIsGettingLocation(false);
+          setLocationError('');
+        },
+        (error) => {
+          setIsGettingLocation(false);
+          setUseMyLocation(false);
+          setSearchLocLatitude(null);
+          setSearchLocLongitude(null);
+
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              setLocationError(t('geolocation_permission_denied'));
+              break;
+            case error.POSITION_UNAVAILABLE:
+              setLocationError(t('geolocation_position_unavailable'));
+              break;
+            case error.TIMEOUT:
+              setLocationError(t('geolocation_timeout'));
+              break;
+            default:
+              setLocationError(t('geolocation_error'));
+          }
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      // Unchecked: enable location input and clear coordinates
+      setSearchLocLatitude(null);
+      setSearchLocLongitude(null);
+      setLocationError('');
+    }
   };
 
   const handleSaveDiscoveryPreferences = async (
@@ -77,12 +198,27 @@ export function DiscoveryPreferencesDialog() {
   ) => {
     clearErrors();
 
+    // Collect all errors
+    const errors: string[] = [];
+
+    // Check for location errors
     if (searchLocLatitude === null || searchLocLongitude === null) {
-      setPreferencesErrors([t('invalid_location')]);
+      errors.push(t('invalid_location'));
+    }
+
+    // Include any existing locationError
+    if (locationError) {
+      errors.push(locationError);
+    }
+
+    // If there are errors, show them and stop
+    if (errors.length > 0) {
+      setPreferencesErrors(errors);
       return;
     }
 
     setPreferencesErrors([]);
+    // At this point, we've validated that searchLocLatitude and searchLocLongitude are not null
     const requestBody: UpdateDiscoveryPreferencesRequestBody = {
       minAge: formData.minAge,
       maxAge: formData.maxAge,
@@ -90,8 +226,8 @@ export function DiscoveryPreferencesDialog() {
       maxDistanceKm: formData.maxDistanceKm,
       neutered: formData.neutered,
       locationDisplayName: locationDisplayName.trim(),
-      searchLocLatitude: searchLocLatitude,
-      searchLocLongitude: searchLocLongitude
+      searchLocLatitude: searchLocLatitude!,
+      searchLocLongitude: searchLocLongitude!
     };
 
     try {
@@ -258,23 +394,77 @@ export function DiscoveryPreferencesDialog() {
                 <label className="mb-3 block text-sm font-semibold text-gray-700">
                   {t('location')}
                 </label>
-                <input
-                  id="location"
-                  type="text"
-                  className="input input-bordered focus:border-primary focus:ring-primary/20 mb-3 w-full bg-gray-50 transition-all focus:bg-white focus:ring-2"
-                  placeholder={t('location_field_placeholder')}
-                />
+                <div className="relative mb-3">
+                  <input
+                    id="location"
+                    type="text"
+                    ref={locationInputRef}
+                    value={locationInput}
+                    onChange={handleLocationInputChange}
+                    onFocus={() => setShowSuggestions(true)}
+                    disabled={useMyLocation}
+                    className="input input-bordered focus:border-primary focus:ring-primary/20 w-full bg-gray-50 transition-all focus:bg-white focus:ring-2 disabled:bg-gray-100 disabled:text-gray-500"
+                    placeholder={t('location_field_placeholder')}
+                  />
+
+                  {/* Loading indicator for suggestions */}
+                  {isLoadingSuggestions && locationInput.trim().length >= 3 && (
+                    <div className="absolute top-3 right-3">
+                      <div className="loading loading-spinner loading-xs text-primary"></div>
+                    </div>
+                  )}
+
+                  {/* Address Suggestions Dropdown */}
+                  {showSuggestions &&
+                    suggestionsData?.results &&
+                    suggestionsData.results.length > 0 && (
+                      <div
+                        ref={suggestionsRef}
+                        className="absolute top-full right-0 left-0 z-50 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg"
+                      >
+                        {suggestionsData.results.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                            onClick={() => handleSelectSuggestion(suggestion)}
+                          >
+                            <div className="font-medium text-gray-900">
+                              {suggestion.address_line1}
+                            </div>
+                            {suggestion.address_line2 && (
+                              <div className="text-sm text-gray-600">
+                                {suggestion.address_line2}
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                </div>
+
+                {/* Location error message */}
+                {locationError && (
+                  <div className="text-error mb-3 text-sm">{locationError}</div>
+                )}
+
                 <div className="flex items-center">
                   <input
                     id="useMyLocation"
                     type="checkbox"
+                    checked={useMyLocation}
+                    onChange={handleUseMyLocationChange}
                     className="checkbox checkbox-primary checkbox-sm"
+                    disabled={isGettingLocation}
                   />
                   <label
                     htmlFor="useMyLocation"
                     className="ml-2 cursor-pointer text-sm text-gray-700"
                   >
                     {t('use_current_location')}
+                    {isGettingLocation && (
+                      <span className="loading loading-spinner loading-xs ml-2"></span>
+                    )}
                   </label>
                 </div>
               </div>
@@ -314,7 +504,12 @@ export function DiscoveryPreferencesDialog() {
                       {t('neutered_modal_desc')}
                     </p>
                   </div>
-                  <input type="checkbox" className="toggle toggle-success" />
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-success"
+                    defaultChecked={discoveryPreferences?.neutered ?? false}
+                    {...register('neutered')}
+                  />
                 </div>
               </div>
             </div>

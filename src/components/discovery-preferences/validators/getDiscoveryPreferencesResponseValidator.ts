@@ -5,7 +5,7 @@ export const getDiscoveryPreferencesResponseValidator = z.object({
     .object({
       minAge: z.number().min(0),
       maxAge: z.number().max(480),
-      gender: z.literal(['', 'Male', 'Female']),
+      gender: z.enum(['', 'Male', 'Female']),
       maxDistanceKm: z.number().min(1).max(250),
       neutered: z.boolean(),
       locationDisplayName: z.string().nullable(),

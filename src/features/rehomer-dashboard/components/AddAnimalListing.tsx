@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -10,15 +10,16 @@ import {
   createAddAnimalListingFormValidator,
   type AddAnimalListingFormSchema
 } from '../validators/addAnimalListingFormValidator';
-
-// Mock address suggestions for autocomplete
-const mockAddressSuggestions = [
-  '123 Main St, New York, NY',
-  '456 Oak Ave, Los Angeles, CA',
-  '789 Pine Rd, Chicago, IL',
-  '101 Maple Dr, Houston, TX',
-  '202 Elm St, Phoenix, AZ'
-];
+import useCreateAnimalListing from '../hooks/useCreateAnimalListing';
+import useCreateAnimalListingPhotos from '../hooks/useCreateAnimalListingPhotos';
+import ErrorToast from '../../../components/toasts/ErrorToast';
+import usePhotoHandling from '../hooks/usePhotoHandling';
+import useAddressHandling from '../hooks/useAddressHandling';
+import {
+  createAnimalRequestFromFormData,
+  getAddAnimalFormErrorMessages
+} from '../utils/formSubmission';
+import ListingTips from './ListingTips';
 
 export default function AddAnimalListing() {
   const { i18n, t } = useTranslation();
@@ -31,6 +32,9 @@ export default function AddAnimalListing() {
 
   const goToLoginPage = () => navigate('/login', { replace: true });
 
+  const goToNewAnimalListing = (animalId: string) =>
+    navigate(`/rehomer/animal/edit/${animalId}`, { replace: true });
+
   useEffect(() => {
     if (!isLoadingSession) {
       // Only check authentication after session loading is complete
@@ -40,11 +44,16 @@ export default function AddAnimalListing() {
     }
   }, [userSession, isLoadingSession]);
 
-  const [photos, setPhotos] = useState<File[]>([]);
-  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
-  const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
-  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
-  const [locationTooltip, setLocationTooltip] = useState(false);
+  // Ref to track if component is mounted to prevent state updates after unmounting
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const [serverError, setServerError] = useState<string | null>(null);
 
   // Recreate the schema whenever the language changes so that error messages are in the correct language
   const formValidator = useMemo(
@@ -55,135 +64,172 @@ export default function AddAnimalListing() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
-    watch
+    watch,
+    reset,
+    clearErrors
   } = useForm<AddAnimalListingFormSchema>({
     resolver: zodResolver(formValidator) as any // as any type due to age preprocessor function
   });
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+  // Use custom hooks for photo and address handling
+  const {
+    photos,
+    photoPreviews,
+    photoValidationErrors,
+    isCompressing,
+    handlePhotoUpload,
+    handleRemovePhoto,
+    compressPhotos,
+    clearPhotos,
+    setPhotoValidationErrors
+  } = usePhotoHandling();
 
-    const newPhotos: File[] = [];
-    const newPreviews: string[] = [];
+  const {
+    addressSuggestions,
+    showAddressSuggestions,
+    locationTooltip,
+    handleAddressChange,
+    handleAddressSelect,
+    setLocationTooltip
+  } = useAddressHandling(setValue, watch, i18n.language.split('-')[0]);
 
-    // Calculate how many more photos we can add
-    const remainingSlots = 5 - photos.length;
-    const filesToAdd = Math.min(files.length, remainingSlots);
+  const {
+    isPending: isCreatingAnimalListing,
+    mutateAsync: createAnimalListing,
+    isError: createAnimalListingFailed
+  } = useCreateAnimalListing();
 
-    for (let i = 0; i < filesToAdd; i++) {
-      const file = files[i];
-      newPhotos.push(file);
+  const {
+    isPending: isCreatingAnimalListingPhotos,
+    mutateAsync: createAnimalListingPhotos,
+    isError: createAnimalListingPhotosFailed
+  } = useCreateAnimalListingPhotos();
 
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
-      newPreviews.push(previewUrl);
-    }
+  const onSubmit = async (data: AddAnimalListingFormSchema) => {
+    // Clear previous errors
+    setServerError(null);
+    clearErrors();
+    setPhotoValidationErrors([]);
 
-    setPhotos([...photos, ...newPhotos]);
-    setPhotoPreviews([...photoPreviews, ...newPreviews]);
-  };
+    // Photos are now optional - no validation required
 
-  const handleRemovePhoto = (index: number) => {
-    const newPhotos = [...photos];
-    const newPreviews = [...photoPreviews];
+    // Compress photos before submission
+    const compressionResult = await compressPhotos(photos).catch((error) => {
+      console.warn('Photo compression failed, using original photos:', error);
+      return { compressedPhotos: photos, compressionErrors: [] };
+    });
+    const photosToUpload = compressionResult.compressedPhotos;
+    const compressionErrors = compressionResult.compressionErrors;
 
-    // Revoke the object URL to prevent memory leaks
-    URL.revokeObjectURL(newPreviews[index]);
-
-    newPhotos.splice(index, 1);
-    newPreviews.splice(index, 1);
-
-    setPhotos(newPhotos);
-    setPhotoPreviews(newPreviews);
-  };
-
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setValue('location.address', value, { shouldValidate: true });
-
-    if (value.length > 2) {
-      // Filter mock suggestions based on input
-      const filtered = mockAddressSuggestions.filter((addr) =>
-        addr.toLowerCase().includes(value.toLowerCase())
-      );
-      setAddressSuggestions(filtered);
-      setShowAddressSuggestions(true);
-    } else {
-      setAddressSuggestions([]);
-      setShowAddressSuggestions(false);
-    }
-  };
-
-  const handleAddressSelect = (address: string) => {
-    setValue('location.address', address, { shouldValidate: true });
-
-    // Extract city and state from address (mock implementation)
-    const parts = address.split(', ');
-    if (parts.length >= 2) {
-      const city = parts[1] || '';
-      const state = parts[2] || '';
-      setValue('location.city', city);
-      setValue('location.state', state);
-
-      // Mock coordinates - in a real app, you would geocode the address
-      setValue('location.coordinates', {
-        lat: Math.random() * 180 - 90,
-        lng: Math.random() * 360 - 180
-      });
-    }
-
-    setShowAddressSuggestions(false);
-  };
-
-  const onSubmit = handleSubmit((data: AddAnimalListingFormSchema) => {
-    // Validate that at least one photo is uploaded
-    if (photos.length === 0) {
-      alert('Please upload at least one photo of the cat');
+    // If there are compression errors for large photos, show error and stop submission
+    if (compressionErrors.length > 0) {
+      setPhotoValidationErrors(compressionErrors);
       return;
     }
 
-    console.log('Form data:', data);
-    console.log('Photos:', photos);
+    const createAnimalRequest = createAnimalRequestFromFormData(data);
 
-    // In a real app, you would submit to an API here
-    alert('Cat listing created successfully!');
+    try {
+      const { animalId } = await createAnimalListing(createAnimalRequest);
 
-    // Reset form
-    setPhotos([]);
-    setPhotoPreviews([]);
-    setValue('location.address', '');
-    setValue('location.city', '');
-    setValue('location.state', '');
-    setValue('location.coordinates', { lat: 0, lng: 0 });
-  });
+      if (createAnimalListingFailed) {
+        setServerError(t('create_animal_listing_error'));
+        return;
+      }
+
+      const animalPhotos = new FormData();
+      photosToUpload.forEach((photo) => animalPhotos.append('photos', photo));
+      await createAnimalListingPhotos({ animalId, animalPhotos });
+
+      if (createAnimalListingPhotosFailed) {
+        setServerError(t('create_animal_listing_error'));
+        return;
+      }
+
+      // Clear form and all state before navigation
+      if (isMounted.current) {
+        reset();
+        setServerError(null);
+        clearPhotos();
+        setPhotoValidationErrors([]);
+      }
+
+      goToNewAnimalListing(animalId);
+    } catch (error) {
+      if (isMounted.current) {
+        setServerError(t('create_animal_listing_error'));
+      }
+    }
+  };
+
+  const handleClearForm = () => {
+    // Clear all photos and revoke object URLs
+    clearPhotos();
+    reset();
+    setServerError(null);
+    clearErrors();
+  };
+
+  // Get error messages from form state
+  const formErrorMessages = getAddAnimalFormErrorMessages(errors);
+
+  // Combine all error messages (excluding photo validation errors since they're shown in ErrorToast)
+  const allErrorMessages = [...formErrorMessages];
+  if (serverError) {
+    allErrorMessages.push(serverError);
+  }
+  // Photo validation errors are also included in the ErrorToast
+  if (photoValidationErrors.length > 0) {
+    allErrorMessages.push(...photoValidationErrors);
+  }
+
+  const onCloseErrorToast = () => {
+    setServerError(null);
+    setPhotoValidationErrors([]);
+    clearErrors();
+  };
+
+  const isSubmitDisabled =
+    photos.length === 0 ||
+    isSubmitting ||
+    isCompressing ||
+    isCreatingAnimalListing ||
+    isCreatingAnimalListingPhotos;
+  const isLoading =
+    isSubmitting ||
+    isCompressing ||
+    isCreatingAnimalListing ||
+    isCreatingAnimalListingPhotos;
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] px-4 py-8 md:px-8">
+      {allErrorMessages.length > 0 && (
+        <ErrorToast
+          messages={allErrorMessages}
+          onCloseToast={onCloseErrorToast}
+        />
+      )}
       <div className="mx-auto max-w-4xl">
         <div className="rounded-2xl bg-white p-6 shadow-lg md:p-8">
           <h1 className="mb-2 text-center font-serif text-3xl font-bold md:text-4xl">
-            Create Cat Listing
+            {t('add_animal_title')}
           </h1>
           <p className="mb-8 text-center text-gray-600">
-            Fill out the form below to list a cat for adoption
+            {t('add_animal_desc')}
           </p>
 
-          <form onSubmit={onSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Photo Upload Section */}
             <section className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Cat Photos</h2>
+                <h2 className="text-xl font-semibold">{t('cat_photos')}</h2>
                 <span className="text-sm text-gray-500">
-                  {photos.length} / 5 photos uploaded
+                  {photos.length} / 5 {t('photos_uploaded')}
                 </span>
               </div>
-              <p className="text-sm text-gray-600">
-                Upload up to 5 photos of the cat. At least 1 photo is required.
-                You can drag and drop or click to browse.
-              </p>
+              <p className="text-sm text-gray-600">{t('cat_photos_desc')}</p>
 
               {/* Photo Upload Area */}
               <div className="hover:border-primary rounded-2xl border-2 border-dashed border-gray-300 p-8 text-center transition-colors">
@@ -205,12 +251,14 @@ export default function AddAnimalListing() {
                   <IoCloudUploadOutline className="h-16 w-16 text-gray-400" />
                   <div>
                     <p className="font-medium">
-                      {photos.length >= 5
-                        ? 'Maximum 5 photos reached'
-                        : 'Click or drag to upload photos'}
+                      {t(
+                        photos.length >= 5
+                          ? 'reached_max_photos'
+                          : 'upload_photos'
+                      )}
                     </p>
                     <p className="mt-1 text-sm text-gray-500">
-                      PNG, JPG, GIF up to 5MB each
+                      {t('photo_upload_rules')}
                     </p>
                   </div>
                 </label>
@@ -223,41 +271,37 @@ export default function AddAnimalListing() {
                     <div key={index} className="group relative">
                       <img
                         src={preview}
-                        alt={`Preview ${index + 1}`}
+                        alt={`${t('preview')} ${index + 1}`}
                         className="h-32 w-full rounded-lg object-cover shadow-md"
                       />
                       <button
                         type="button"
                         onClick={() => handleRemovePhoto(index)}
                         className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
-                        aria-label="Remove photo"
+                        aria-label={t('remove_photo')}
                       >
                         <FaTimes className="h-3 w-3" />
                       </button>
                       <div className="bg-opacity-50 absolute right-0 bottom-0 left-0 rounded-b-lg bg-black py-1 text-center text-xs text-white">
-                        Photo {index + 1}
+                        {t('photo')} {index + 1}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-
-              {photos.length === 0 && (
-                <p className="mt-2 text-sm text-red-500">
-                  At least one photo is required
-                </p>
-              )}
             </section>
 
             {/* Cat Information Section */}
             <section className="space-y-6">
-              <h2 className="text-xl font-semibold">Cat Information</h2>
+              <h2 className="text-xl font-semibold">
+                {t('add_animals_form_title')}
+              </h2>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {/* Cat Name */}
                 <div className="space-y-2">
                   <label htmlFor="name" className="block font-medium">
-                    Cat Name *
+                    {t('cat_name')} *
                   </label>
                   <input
                     id="name"
@@ -276,7 +320,7 @@ export default function AddAnimalListing() {
                 {/* Age */}
                 <div className="space-y-2">
                   <label htmlFor="age" className="block font-medium">
-                    Age (in weeks) *
+                    {t('cat_age')} *
                   </label>
                   <input
                     id="age"
@@ -294,16 +338,16 @@ export default function AddAnimalListing() {
                 {/* Gender */}
                 <div className="space-y-2">
                   <label htmlFor="gender" className="block font-medium">
-                    Gender *
+                    {t('gender')} *
                   </label>
                   <select
                     id="gender"
                     {...register('gender')}
                     className="select select-bordered w-full"
                   >
-                    <option value="">Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
+                    <option value="">{t('select_gender')}</option>
+                    <option value="Male">{t('male')}</option>
+                    <option value="Female">{t('female')}</option>
                   </select>
                   {errors.gender && (
                     <p className="text-sm text-red-500">
@@ -314,7 +358,7 @@ export default function AddAnimalListing() {
 
                 {/* Neutered Status */}
                 <div className="space-y-2">
-                  <label className="block font-medium">Neutered / Spayed</label>
+                  <label className="block font-medium">{t('neutered')}</label>
                   <div className="flex items-center space-x-4">
                     <label className="flex cursor-pointer items-center space-x-2">
                       <input
@@ -323,7 +367,7 @@ export default function AddAnimalListing() {
                         value="yes"
                         className="radio radio-primary"
                       />
-                      <span>Yes</span>
+                      <span>{t('yes')}</span>
                     </label>
                     <label className="flex cursor-pointer items-center space-x-2">
                       <input
@@ -331,36 +375,25 @@ export default function AddAnimalListing() {
                         {...register('neutered')}
                         value="no"
                         className="radio radio-primary"
-                      />
-                      <span>No</span>
-                    </label>
-                    <label className="flex cursor-pointer items-center space-x-2">
-                      <input
-                        type="radio"
-                        {...register('neutered')}
-                        value="unknown"
-                        className="radio radio-primary"
                         defaultChecked
                       />
-                      <span>Unknown</span>
+                      <span>{t('no')}</span>
                     </label>
                   </div>
-                  <p className="text-sm text-gray-500">
-                    If not specified, it will be assumed the cat is not neutered
-                  </p>
+                  <p className="text-sm text-gray-500">{t('neutered_desc')}</p>
                 </div>
               </div>
 
               {/* Description */}
               <div className="space-y-2">
                 <label htmlFor="description" className="block font-medium">
-                  Description *
+                  {t('description')} *
                 </label>
                 <textarea
                   id="description"
                   {...register('description')}
                   className="textarea textarea-bordered h-32 w-full"
-                  placeholder="Tell potential adopters about the cat's personality, habits, health, etc."
+                  placeholder={t('description_placeholder')}
                 />
                 {errors.description && (
                   <p className="text-sm text-red-500">
@@ -373,38 +406,37 @@ export default function AddAnimalListing() {
             {/* Location Section */}
             <section className="space-y-4">
               <div className="flex items-center space-x-2">
-                <h2 className="text-xl font-semibold">Location</h2>
+                <h2 className="text-xl font-semibold">{t('location')}</h2>
                 <div className="relative">
                   <button
                     type="button"
                     onMouseEnter={() => setLocationTooltip(true)}
                     onMouseLeave={() => setLocationTooltip(false)}
                     className="text-gray-400 hover:text-gray-600"
-                    aria-label="Location information"
+                    aria-label={t('location_aria_label')}
                   >
                     <FaQuestionCircle />
                   </button>
                   {locationTooltip && (
                     <div className="absolute bottom-full left-0 z-10 mb-2 w-64 rounded-lg bg-gray-800 p-3 text-sm text-white shadow-lg">
-                      The full address will not be displayed to adopters. Only
-                      the city and state will be shown to protect your privacy.
+                      {t('location_tooltip')}
                     </div>
                   )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="location" className="block font-medium">
-                  Address *
+                <label htmlFor="address" className="block font-medium">
+                  {t('address')} *
                 </label>
                 <div className="relative">
                   <input
-                    id="location"
+                    id="address"
                     type="text"
-                    value={watch('location.address')}
+                    value={watch('address.formatted')}
                     onChange={handleAddressChange}
                     className="input input-bordered w-full"
-                    placeholder="Start typing an address..."
+                    placeholder={t('address_placeholder')}
                     autoComplete="off"
                   />
                   {showAddressSuggestions && addressSuggestions.length > 0 && (
@@ -416,35 +448,19 @@ export default function AddAnimalListing() {
                           onClick={() => handleAddressSelect(suggestion)}
                           className="w-full border-b border-gray-100 px-4 py-3 text-left last:border-b-0 hover:bg-gray-100"
                         >
-                          {suggestion}
+                          {suggestion.formatted}
                         </button>
                       ))}
                     </div>
                   )}
                 </div>
-                {errors.location?.address && (
+                {errors.address?.formatted && (
                   <p className="text-sm text-red-500">
-                    {errors.location.address.message}
+                    {errors.address.message}
                   </p>
                 )}
-                <p className="text-sm text-gray-500">
-                  Select an address from the suggestions to ensure proper
-                  formatting
-                </p>
+                <p className="text-sm text-gray-500">{t('address_desc')}</p>
               </div>
-
-              {/* Display selected city and state */}
-              {(watch('location.city') || watch('location.state')) && (
-                <div className="rounded-lg bg-blue-50 p-4">
-                  <p className="font-medium text-blue-800">
-                    Address Preview for Adopters:
-                  </p>
-                  <p className="text-blue-600">
-                    {watch('location.city') && `${watch('location.city')}, `}
-                    {watch('location.state')}
-                  </p>
-                </div>
-              )}
             </section>
 
             {/* Form Actions */}
@@ -452,65 +468,26 @@ export default function AddAnimalListing() {
               <button
                 type="submit"
                 className="btn btn-primary flex-1 py-3 text-lg"
-                disabled={photos.length === 0}
+                disabled={isSubmitDisabled}
               >
-                Create Listing
+                {isLoading ? t('submitting') : t('add_animal_form_submit')}
               </button>
               <button
                 type="button"
                 className="btn btn-outline flex-1 py-3 text-lg"
-                onClick={() => {
-                  setPhotos([]);
-                  setPhotoPreviews([]);
-                  setValue('name', '');
-                  setValue('age', 0);
-                  setValue('gender', '' as any);
-                  setValue('description', '');
-                  setValue('neutered', 'unknown');
-                  setValue('location.address', '');
-                  setValue('location.city', '');
-                  setValue('location.state', '');
-                  setValue('location.coordinates', { lat: 0, lng: 0 });
-                }}
+                onClick={handleClearForm}
               >
-                Clear Form
+                {t('add_animal_form_clear')}
               </button>
             </div>
 
             <p className="text-center text-sm text-gray-500">
-              * Required fields
+              * {t('required_fields')}
             </p>
           </form>
         </div>
 
-        {/* Help Text */}
-        <div className="mt-8 rounded-2xl bg-white p-6 shadow-lg">
-          <h3 className="mb-4 text-lg font-semibold">
-            Tips for a Great Listing
-          </h3>
-          <ul className="space-y-2 text-gray-600">
-            <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>
-              <span>
-                Use clear, well-lit photos that show the cat's face and body
-              </span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>
-              <span>Include photos from different angles</span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>
-              <span>
-                Be honest about the cat's personality and any special needs
-              </span>
-            </li>
-            <li className="flex items-start">
-              <span className="text-primary mr-2">•</span>
-              <span>Respond promptly to inquiries from potential adopters</span>
-            </li>
-          </ul>
-        </div>
+        <ListingTips />
       </div>
     </div>
   );

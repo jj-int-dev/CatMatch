@@ -7,7 +7,7 @@ import { LanguageNavigation } from './LanguageNavigation';
 import { useNavigationStore } from '../../stores/navigation-store';
 import { useAuthStore } from '../../stores/auth-store';
 import useGetUserProfilePictureAndType from '../../hooks/useGetUserProfilePictureAndType';
-import defaultProfilePic from '../../assets/default_profile_pic.jpg';
+import defaultProfilePic from '../../assets/default_profile_pic.webp';
 import DesktopNavigation from './DesktopNavigation';
 import getUniqueImageUrl from '../../utils/getUniqueImageUrl';
 
