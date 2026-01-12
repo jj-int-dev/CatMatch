@@ -167,7 +167,7 @@
   "password_change_failure": "No se pudo actualizar su contraseña",
   "age_range_months": "Rango de Edad (meses)",
   "max_distance": "Distancia Máxima",
-  "neutered": "Esterilizado",
+  "neutered_label": "Esterilizado",
   "male": "Macho",
   "female": "Hembra",
   "search": "Buscar",
@@ -294,5 +294,17 @@
   "new": "Nueva",
   "existing_photo": "Foto existente",
   "upload_new_photos": "Suba nuevas fotos",
-  "address_placeholder": "Escriba una dirección..."
+  "address_placeholder": "Escriba una dirección...",
+  "discovery_title": "Encuentre su Gato Ideal",
+  "discovery_subtitle": "Encuentre gatos en adopción cerca de usted",
+  "discovery_search_btn": "Buscar Gatos",
+  "no_animals_found": "No se encontraron gatos",
+  "discovery_search_help": "Ajuste sus criterios de búsqueda para encontrar más gatos.",
+  "modify_search": "Modificar Búsqueda",
+  "view_details": "Ver Detalles",
+  "animals_found": "gatos encontrados",
+  "neutered": "Esterilizado",
+  "not_neutered": "No Esterilizado",
+  "get_animals_error": "No se pudieron obtener los gatos",
+  "get_animal_error": "No se pudo obtener los datos del gato"
 }

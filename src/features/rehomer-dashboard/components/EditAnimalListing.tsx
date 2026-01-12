@@ -533,7 +533,9 @@ export default function EditAnimalListing() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block font-medium">{t('neutered')}</label>
+                  <label className="block font-medium">
+                    {t('neutered_label')}
+                  </label>
                   <div className="flex items-center space-x-4">
                     <label className="flex cursor-pointer items-center space-x-2">
                       <input

@@ -498,7 +498,7 @@ export function DiscoveryPreferencesDialog() {
                 <div className="flex items-center justify-between">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700">
-                      {t('neutered')}
+                      {t('neutered_label')}
                     </label>
                     <p className="mt-1 text-xs text-gray-500">
                       {t('neutered_modal_desc')}

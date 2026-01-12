@@ -168,7 +168,7 @@
   "password_change_failure": "Password could not be updated",
   "age_range_months": "Age Range (months)",
   "max_distance": "Max Distance",
-  "neutered": "Neutered/Spayed",
+  "neutered_label": "Neutered/Spayed",
   "male": "Male",
   "female": "Female",
   "search": "Search",
@@ -295,5 +295,17 @@
   "new": "New",
   "existing_photo": "Existing photo",
   "upload_new_photos": "Click or drag to upload new photos",
-  "address_placeholder": "Start typing an address..."
+  "address_placeholder": "Start typing an address...",
+  "discovery_title": "Find Your Purrfect Companion",
+  "discovery_subtitle": "Search for cats available for adoption in your area",
+  "discovery_search_btn": "Search Cats",
+  "no_animals_found": "No cats found",
+  "discovery_search_help": "Try adjusting your search criteria to find more cats.",
+  "modify_search": "Modify Search",
+  "view_details": "View Details",
+  "animals_found": "cats found",
+  "neutered": "Neutered",
+  "not_neutered": "Not Neutered",
+  "get_animals_error": "Unable to retrieve cats",
+  "get_animal_error": "Unable to retrieve cat details"
 }
