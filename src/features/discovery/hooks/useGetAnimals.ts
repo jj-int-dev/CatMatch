@@ -5,7 +5,7 @@ import getAnimals from '../api/getAnimals';
 import type { GetAnimalsRequest } from '../types/GetAnimalsRequest';
 
 export default function (
-  animalFilters: GetAnimalsRequest,
+  animalFilters: GetAnimalsRequest | null,
   page: number = 1,
   pageSize: number = 10
 ) {
@@ -19,12 +19,17 @@ export default function (
     queryKey: ['adoptable-animals', userId, animalFilters, page, pageSize],
     queryFn: async (): Promise<GetAnimalsResponseSchema> =>
       await getAnimals(
-        animalFilters,
+        animalFilters!,
         accessToken!,
         refreshToken!,
         page,
         pageSize
       ),
-    enabled: !isLoadingSession && !!userId && !!accessToken && !!refreshToken
+    enabled:
+      !isLoadingSession &&
+      !!userId &&
+      !!accessToken &&
+      !!refreshToken &&
+      !!animalFilters
   });
 }

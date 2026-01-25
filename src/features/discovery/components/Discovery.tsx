@@ -3,6 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useTranslation } from 'react-i18next';
 import ErrorToast from '../../../components/toasts/ErrorToast';
+import SearchPopover from './SearchPopover';
+import type { SearchFilters } from '../types/SearchFilters';
+import type { GetAnimalsRequest } from '../types/GetAnimalsRequest';
+import useGetAnimals from '../hooks/useGetAnimals';
+import { IoSearch } from 'react-icons/io5';
+import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
+import defaultCatPic from '../../../assets/default_cat.webp';
 // import {
 //   createGetAnimalsRequestFromFormData,
 //   getAddAnimalFormErrorMessages
@@ -51,6 +58,45 @@ export function Discovery() {
     }
   }, [userSession, isLoadingSession]);
 
+  const defaultSearchFilters: SearchFilters = {
+    gender: 'All',
+    minAgeWeeks: 0,
+    maxAgeWeeks: 1920,
+    neutered: 'All',
+    maxDistanceMeters: 250000,
+    location: {
+      formatted: null,
+      latitude: null,
+      longitude: null
+    }
+  };
+
+  const defaultSearchRequest: GetAnimalsRequest = {
+    gender: 'All',
+    minAgeWeeks: 0,
+    maxAgeWeeks: 1920,
+    neutered: false,
+    locationSource: 'client-ip',
+    maxDistanceMeters: 250000
+  };
+
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>({
+    ...defaultSearchFilters
+  });
+  const [locationSource, setLocationSource] = useState<string>('client-ip');
+  const [locationDetails, setLocationDetails] = useState<string | null>(null);
+  const [searchRequest, setSearchRequest] = useState<GetAnimalsRequest>({
+    ...defaultSearchRequest
+  });
+  const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
+
+  const {
+    data: animalsData,
+    isPending: isGettingAnimals,
+    isError: getAnimalsFailed,
+    error: getAnimalsError
+  } = useGetAnimals(searchRequest, page, pageSize);
+
   // Handle page navigation
   const goToPreviousPage = useCallback(() => {
     if (page > 1) {
@@ -60,19 +106,51 @@ export function Discovery() {
 
   const goToNextPage = useCallback(() => {
     if (
-      animalListings?.pagination.totalPages &&
-      page < animalListings.pagination.totalPages
+      animalsData?.pagination.totalPages &&
+      page < animalsData.pagination.totalPages
     ) {
       updatePage(page + 1);
     }
-  }, [page, updatePage, animalListings?.pagination.totalPages]);
+  }, [page, updatePage, animalsData?.pagination.totalPages]);
 
-  const handleReset = async () => {};
+  const handleReset = () => {
+    setSearchFilters({ ...defaultSearchFilters });
+    setSearchRequest({ ...defaultSearchRequest });
+    updatePage(1);
+  };
 
   const handleSearch = async () => {};
 
+  const getAgeDisplay = (ageInWeeks: number) => {
+    // Weeks
+    if (ageInWeeks < 4) {
+      return `${ageInWeeks} ${t('week')}${ageInWeeks === 1 ? '' : t('weeks_plural_suffix')}`;
+    }
+
+    // Convert weeks → months (rounded)
+    const months = Math.round(ageInWeeks / 4);
+
+    // Months only
+    if (months < 12) {
+      return `${months} ${t('month')}${months === 1 ? '' : t('months_plural_suffix')}`;
+    }
+
+    // Years + months
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+
+    if (remainingMonths === 0) {
+      return `${years} ${t('year')}${years === 1 ? '' : t('years_plural_suffix')}`;
+    }
+
+    return `${years} ${t('year')}${years === 1 ? '' : t('years_plural_suffix')} ${remainingMonths} ${t('month')}${
+      remainingMonths === 1 ? '' : t('months_plural_suffix')
+    }`;
+  };
+
   return (
     <div className="min-h-screen bg-[#f9f9f9] p-4 md:p-8">
+      // TODO: Add loading state while fetching animals
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -80,7 +158,11 @@ export function Discovery() {
             {t('discovery_title')}
           </h1>
           <p className="mt-4 text-lg text-gray-600">
-            {t('discovery_subtitle')}
+            {locationSource === 'client-ip'
+              ? `${t('discovery_ip')} ${animalsData?.locationDisplay} ${t('discovery_ip_1')}`
+              : locationSource === 'client-custom-location'
+                ? `${t('discovery_custom_location')} ${animalsData?.locationDisplay}`
+                : `${t('discovery_current_location')}`}
           </p>
         </div>
 
@@ -88,7 +170,7 @@ export function Discovery() {
         <div className="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="relative w-full md:w-auto">
             <button
-              onClick={() => setIsPopoverOpen(true)}
+              onClick={() => setIsSearchPopoverOpen(true)}
               className="btn btn-primary w-full gap-2 pr-6 pl-4 text-lg md:w-auto"
             >
               <IoSearch className="size-6" />
@@ -97,36 +179,36 @@ export function Discovery() {
 
             {/* Search Popover Component */}
             <SearchPopover
-              isOpen={isPopoverOpen}
-              isSearching={isSearching}
-              searchCriteria={searchCriteria}
-              onClose={() => setIsPopoverOpen(false)}
+              isOpen={isSearchPopoverOpen}
+              isSearching={isGettingAnimals}
+              searchFilters={searchFilters}
+              onClose={() => setIsSearchPopoverOpen(false)}
               onSearch={handleSearch}
               onReset={handleReset}
-              onCriteriaChange={setSearchCriteria}
+              onFiltersChange={setSearchFilters}
             />
           </div>
 
           {/* Results Summary */}
           <div className="text-center md:text-right">
             <p className="text-lg font-semibold text-gray-800">
-              {filteredCats.length} {t('animals_found')}
+              {animalsData?.animals.length} {t('animals_found')}
             </p>
             <p className="text-sm text-gray-600">
-              {t('page')} {currentPage} {t('of')} {totalPages}
+              {t('page')} {page} {t('of')} {animalsData?.pagination.totalPages}
             </p>
           </div>
         </div>
 
         {/* Cats Grid */}
-        {filteredCats.length === 0 ? (
+        {animalsData?.animals.length === 0 ? (
           <div className="rounded-box bg-base-100 border p-12 text-center shadow-sm">
             <h3 className="text-2xl font-bold text-gray-700">
               {t('no_animals_found')}
             </h3>
             <p className="mt-2 text-gray-600">{t('discovery_search_help')}</p>
             <button
-              onClick={() => setIsPopoverOpen(true)}
+              onClick={() => setIsSearchPopoverOpen(true)}
               className="btn btn-primary mt-6"
             >
               {t('modify_search')}
@@ -135,15 +217,19 @@ export function Discovery() {
         ) : (
           <>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {currentCats.map((cat) => (
+              {animalsData?.animals.map((animal) => (
                 <div
-                  key={cat.id}
+                  key={animal.animalId}
                   className="card card-compact rounded-box bg-base-100 overflow-hidden border shadow-lg transition-all duration-300 hover:shadow-xl"
                 >
                   <figure className="h-48 overflow-hidden">
                     <img
-                      src={cat.imageUrl}
-                      alt={cat.name}
+                      src={
+                        animal.animalPhotos.length > 0
+                          ? animal.animalPhotos[0].photoUrl
+                          : defaultCatPic
+                      }
+                      alt={animal.name}
                       className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
                     />
                   </figure>
@@ -151,38 +237,38 @@ export function Discovery() {
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="card-title text-xl font-bold">
-                          {cat.name}
+                          {animal.name}
                         </h3>
                         <div className="mt-1 flex flex-wrap items-center gap-2">
                           <span
-                            className={`badge ${cat.gender === 'Male' ? 'badge-info' : 'badge-secondary'}`}
+                            className={`badge ${animal.gender === 'Male' ? 'badge-info' : 'badge-secondary'}`}
                           >
-                            {cat.gender === 'Male' ? (
+                            {animal.gender === 'Male' ? (
                               <TbGenderMale className="mr-1 inline size-4" />
                             ) : (
                               <TbGenderFemale className="mr-1 inline size-4" />
                             )}
-                            {cat.gender}
+                            {animal.gender}
                           </span>
                           <span className="badge badge-outline">
-                            {cat.ageDisplay}
+                            {getAgeDisplay(animal.ageInWeeks)}
                           </span>
                           <span
-                            className={`badge ${cat.neutered ? 'badge-success' : 'badge-warning'}`}
+                            className={`badge ${animal.neutered ? 'badge-success' : 'badge-warning'}`}
                           >
-                            {t(cat.neutered ? 'neutered' : 'not_neutered')}
+                            {t(animal.neutered ? 'neutered' : 'not_neutered')}
                           </span>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-primary text-2xl font-bold">
-                          {cat.distance} km
+                          {(animal.distanceMeters / 1000).toFixed(1)} km
                         </div>
                       </div>
                     </div>
 
                     <p className="mt-3 line-clamp-2 text-gray-600">
-                      {cat.description}
+                      {animal.description}
                     </p>
 
                     <div className="card-actions mt-4">
@@ -199,35 +285,32 @@ export function Discovery() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {animalsData && animalsData.pagination.totalPages > 1 && (
               <div className="mt-12 flex justify-center">
                 <div className="join">
                   <button
                     className="join-item btn"
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
+                    onClick={goToPreviousPage}
+                    disabled={page === 1}
                   >
                     «
                   </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (page) => (
-                      <button
-                        key={page}
-                        className={`join-item btn ${currentPage === page ? 'btn-active' : ''}`}
-                        onClick={() => setCurrentPage(page)}
-                      >
-                        {page}
-                      </button>
-                    )
-                  )}
+                  {Array.from(
+                    { length: animalsData.pagination.totalPages },
+                    (_, i) => i + 1
+                  ).map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      className={`join-item btn ${pageNum === page ? 'btn-active' : ''}`}
+                      onClick={() => updatePage(pageNum)}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
                   <button
                     className="join-item btn"
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                    }
-                    disabled={currentPage === totalPages}
+                    onClick={goToNextPage}
+                    disabled={page === animalsData.pagination.totalPages}
                   >
                     »
                   </button>

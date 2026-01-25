@@ -18,6 +18,7 @@ export const getAnimalsResponseValidator = z.object({
       )
     })
   ),
+  locationDisplay: z.string().nullable(),
   pagination: z.object({
     totalResults: z.number().min(0),
     page: z.number().min(1),

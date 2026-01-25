@@ -33,7 +33,7 @@ export default function RehomerDashboard() {
     navigate(`/rehomer/animal/edit/${animalId}`);
 
   const getAgeDisplay = (ageInWeeks: number) =>
-    `${(ageInWeeks / 4).toFixed(1)} month(s) old`;
+    `${(ageInWeeks / 4).toFixed(2)} ${t('months_old')}`;
 
   // Get page from URL query parameter or default to 1
   const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);

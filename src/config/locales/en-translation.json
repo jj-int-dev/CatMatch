@@ -297,7 +297,10 @@
   "upload_new_photos": "Click or drag to upload new photos",
   "address_placeholder": "Start typing an address...",
   "discovery_title": "Find Your Purrfect Companion",
-  "discovery_subtitle": "Search for cats available for adoption in your area",
+  "discovery_ip": "Showing cats near",
+  "discovery_ip_1": "(approximate)",
+  "discovery_current_location": "Showing cats near you",
+  "discovery_custom_location": "Showing cats near",
   "discovery_search_btn": "Search Cats",
   "no_animals_found": "No cats found",
   "discovery_search_help": "Try adjusting your search criteria to find more cats.",
@@ -307,5 +310,15 @@
   "neutered": "Neutered",
   "not_neutered": "Not Neutered",
   "get_animals_error": "Unable to retrieve cats",
-  "get_animal_error": "Unable to retrieve cat details"
+  "get_animal_error": "Unable to retrieve cat details",
+  "months_old": "month(s) old",
+  "week": "week",
+  "month": "month",
+  "year": "year",
+  "weeks_plural_suffix": "s",
+  "months_plural_suffix": "s",
+  "years_plural_suffix": "s",
+  "search_filters": "Search Filters",
+  "using_current_location": "Using your current location...",
+  "search_location_desc": "This will be used as the central point for searching cats within your specified distance."
 }
