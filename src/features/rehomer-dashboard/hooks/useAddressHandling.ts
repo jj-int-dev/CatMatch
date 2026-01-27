@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { AddressSuggestionSchema } from '../../../validators/addressSuggestionValidators';
-import useAddressSuggestions from '../../../hooks/useGetAddressSuggestions';
+import useGetAddressSuggestions from '../../../hooks/useGetAddressSuggestions';
 import type { UseFormSetValue, UseFormWatch } from 'react-hook-form';
 
 // Define a type for forms that have an address field with the expected structure
@@ -42,7 +42,7 @@ export default function useAddressHandling<T extends FormWithAddress>(
   const {
     data: fetchedAddressSuggestions,
     isLoading: isLoadingAddressSuggestions
-  } = useAddressSuggestions(addressValue || '', languageCode);
+  } = useGetAddressSuggestions(addressValue || '', languageCode);
 
   const handleAddressChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import getAddressSuggestions from '../api/getAddressSuggestions';
 import { useDebouncedValue } from './useDebouncedValue';
 
-export default function useAddressSuggestions(
+export default function useGetAddressSuggestions(
   addressSearchText: string,
   languageCode: string
 ) {

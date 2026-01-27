@@ -376,8 +376,8 @@ export default function UserProfile() {
               <option value="" disabled hidden>
                 {t('select_your_gender')}
               </option>
-              <option value="Man">{t('Man')}</option>
-              <option value="Woman">{t('Woman')}</option>
+              <option value="Man">{t('man')}</option>
+              <option value="Woman">{t('woman')}</option>
             </select>
 
             <label className="label">{t('phone_number')}</label>

@@ -1,22 +1,19 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useTranslation } from 'react-i18next';
-import ErrorToast from '../../../components/toasts/ErrorToast';
 import SearchPopover from './SearchPopover';
+import DiscoveryLoading from './DiscoveryLoading';
+import DiscoveryError from './DiscoveryError';
 import type { SearchFilters } from '../types/SearchFilters';
 import type { GetAnimalsRequest } from '../types/GetAnimalsRequest';
 import useGetAnimals from '../hooks/useGetAnimals';
 import { IoSearch } from 'react-icons/io5';
 import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
 import defaultCatPic from '../../../assets/default_cat.webp';
-// import {
-//   createGetAnimalsRequestFromFormData,
-//   getAddAnimalFormErrorMessages
-// } from '../utils/formSubmission';
 
 export function Discovery() {
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const userSession = useAuthStore((state) => state.session);
@@ -64,27 +61,31 @@ export function Discovery() {
     maxAgeWeeks: 1920,
     neutered: 'All',
     maxDistanceMeters: 250000,
+    locationSource: 'client-ip',
     location: {
-      formatted: null,
+      formatted: '',
       latitude: null,
-      longitude: null
+      longitude: null,
+      city: null
     }
   };
 
   const defaultSearchRequest: GetAnimalsRequest = {
-    gender: 'All',
+    gender: null,
+    latitude: null,
+    longitude: null,
     minAgeWeeks: 0,
     maxAgeWeeks: 1920,
     neutered: false,
     locationSource: 'client-ip',
+    locationDetails: null,
     maxDistanceMeters: 250000
   };
 
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     ...defaultSearchFilters
   });
-  const [locationSource, setLocationSource] = useState<string>('client-ip');
-  const [locationDetails, setLocationDetails] = useState<string | null>(null);
+
   const [searchRequest, setSearchRequest] = useState<GetAnimalsRequest>({
     ...defaultSearchRequest
   });
@@ -115,11 +116,34 @@ export function Discovery() {
 
   const handleReset = () => {
     setSearchFilters({ ...defaultSearchFilters });
-    setSearchRequest({ ...defaultSearchRequest });
-    updatePage(1);
   };
 
-  const handleSearch = async () => {};
+  const handleSearch = async () => {
+    const newSearchRequest: GetAnimalsRequest = {
+      gender: searchFilters.gender === 'All' ? null : searchFilters.gender,
+      minAgeWeeks: searchFilters.minAgeWeeks,
+      maxAgeWeeks: searchFilters.maxAgeWeeks,
+      neutered: searchFilters.neutered === 'Neutered Only',
+      latitude:
+        searchFilters.locationSource === 'client-ip'
+          ? null
+          : searchFilters.location.latitude,
+      longitude:
+        searchFilters.locationSource === 'client-ip'
+          ? null
+          : searchFilters.location.longitude,
+      locationSource: searchFilters.locationSource,
+      locationDetails:
+        searchFilters.locationSource === 'client-custom-location'
+          ? searchFilters.location.city
+          : null,
+      maxDistanceMeters: searchFilters.maxDistanceMeters
+    };
+
+    setSearchRequest(newSearchRequest);
+    setIsSearchPopoverOpen(false);
+    updatePage(1);
+  };
 
   const getAgeDisplay = (ageInWeeks: number) => {
     // Weeks
@@ -148,9 +172,24 @@ export function Discovery() {
     }`;
   };
 
+  // Loading state
+  if (isGettingAnimals) {
+    return <DiscoveryLoading />;
+  }
+
+  // Error state
+  if (getAnimalsFailed) {
+    return (
+      <DiscoveryError
+        error={getAnimalsError}
+        onRetry={() => window.location.reload()}
+        onModifySearch={() => setIsSearchPopoverOpen(true)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f9f9f9] p-4 md:p-8">
-      // TODO: Add loading state while fetching animals
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -158,9 +197,9 @@ export function Discovery() {
             {t('discovery_title')}
           </h1>
           <p className="mt-4 text-lg text-gray-600">
-            {locationSource === 'client-ip'
+            {searchRequest.locationSource === 'client-ip'
               ? `${t('discovery_ip')} ${animalsData?.locationDisplay} ${t('discovery_ip_1')}`
-              : locationSource === 'client-custom-location'
+              : searchRequest.locationSource === 'client-custom-location'
                 ? `${t('discovery_custom_location')} ${animalsData?.locationDisplay}`
                 : `${t('discovery_current_location')}`}
           </p>
@@ -272,7 +311,10 @@ export function Discovery() {
                     </p>
 
                     <div className="card-actions mt-4">
-                      <button className="btn btn-primary btn-block group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                      <button
+                        className="btn btn-primary btn-block group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                        onClick={() => goToAnimalDetails(animal.animalId)}
+                      >
                         <span className="relative z-10">
                           {t('view_details')}
                         </span>

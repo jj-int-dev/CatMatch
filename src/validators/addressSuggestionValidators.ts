@@ -2,6 +2,7 @@ import * as z from 'zod';
 
 export const addressSuggestionValidator = z.object({
   formatted: z.string(),
+  city: z.string(),
   lat: z.number().min(-90).max(90),
   lon: z.number().min(-180).max(180)
 });

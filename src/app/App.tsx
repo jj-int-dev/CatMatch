@@ -16,7 +16,7 @@ import { supabase } from '../utils/supabase-client';
 import { useAuthStore } from '../stores/auth-store';
 import PrivacyPolicy from '../features/privacy-policy/components/PrivacyPolicy';
 import UserDataDeletion from '../features/user-data-deletion/components/UserDataDeletion';
-import ViewAnimalListing from '../features/discovery/components/ViewAnimalListing';
+import AnimalDetails from '../features/discovery/components/AnimalDetails';
 import EditAnimalListing from '../features/rehomer-dashboard/components/EditAnimalListing';
 import AddAnimalListing from '../features/rehomer-dashboard/components/AddAnimalListing';
 import { SendResetPasswordLinkDialog } from '../components/send-reset-password-link/SendResetPasswordLinkDialog';
@@ -61,10 +61,7 @@ function App() {
         <Route path="user-profile" element={<UserProfile />} />
         <Route path="user-type-selection" element={<UserTypeSelection />} />
         <Route path="discovery" element={<Discovery />} />
-        <Route
-          path="discovery/animal/:animalId"
-          element={<ViewAnimalListing />}
-        />
+        <Route path="discovery/animal/:animalId" element={<AnimalDetails />} />
         <Route path="rehomer/dashboard" element={<RehomerDashboard />} />
         <Route path="rehomer/animal/add" element={<AddAnimalListing />} />
         <Route
