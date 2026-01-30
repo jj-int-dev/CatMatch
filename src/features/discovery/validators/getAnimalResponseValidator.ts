@@ -1,8 +1,8 @@
 import * as z from 'zod';
 
 export const getAnimalResponseValidator = z.object({
-  animals: z.array(
-    z.object({
+  animal: z
+    .object({
       animalId: z.string().min(1),
       name: z.string().min(1),
       gender: z.enum(['Male', 'Female']),
@@ -16,7 +16,7 @@ export const getAnimalResponseValidator = z.object({
         })
       )
     })
-  )
+    .nullable()
 });
 
 export type GetAnimalResponseSchema = z.infer<

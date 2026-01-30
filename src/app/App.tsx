@@ -8,7 +8,7 @@ import UserProfile from '../features/user-profile/components/UserProfile';
 import UserTypeSelection from '../features/user-type-selection/components/UserTypeSelection';
 import NotFound from '../features/not-found/components/NotFound';
 import './App.css';
-import { Discovery } from '../features/discovery/components/Discovery';
+import Discovery from '../features/discovery/components/Discovery';
 import RehomerDashboard from '../features/rehomer-dashboard/components/RehomerDashboard';
 import ResetPassword from '../features/reset-password/components/ResetPassword';
 import { useEffect } from 'react';

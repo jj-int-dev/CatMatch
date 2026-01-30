@@ -1,3 +1,484 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '../../../stores/auth-store';
+import {
+  TbGenderMale,
+  TbGenderFemale,
+  TbMessageCircle,
+  TbX,
+  TbSend
+} from 'react-icons/tb';
+import { IoArrowBack } from 'react-icons/io5';
+import useGetAnimal from '../hooks/useGetAnimal';
+import getAgeDisplay from '../utils/getAgeDisplay';
+import defaultCatPic from '../../../assets/default_cat.webp';
+
 export default function AnimalDetails() {
-  return <h1>Animal Details</h1>;
+  const { animalId } = useParams();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const userSession = useAuthStore((state) => state.session);
+  const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
+  const isAuthenticatedUserSession = useAuthStore(
+    (state) => state.isAuthenticatedUserSession
+  );
+
+  const goToLoginPage = () => navigate('/login', { replace: true });
+
+  useEffect(() => {
+    if (!isLoadingSession) {
+      // Only check authentication after session loading is complete
+      if (!isAuthenticatedUserSession(userSession)) {
+        goToLoginPage();
+      }
+    }
+  }, [userSession, isLoadingSession]);
+
+  const {
+    data,
+    isLoading: isGettingAnimal,
+    isError: getAnimalFailed
+  } = useGetAnimal(animalId!);
+
+  const animal = data?.animal;
+
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const [showToast, setShowToast] = useState(false);
+  const [hoveredPhotoIndex, setHoveredPhotoIndex] = useState<number | null>(
+    null
+  );
+
+  const handleSendMessage = () => {
+    if (!message.trim()) return;
+
+    // TODO: Implement actual message sending logic here
+
+    // Close chat dialog immediately
+    setIsChatOpen(false);
+    setMessage('');
+
+    // Show success toast after a short delay (after dialog closes)
+    setTimeout(() => {
+      setShowToast(true);
+    }, 100);
+
+    // Hide toast after 3 seconds
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000);
+  };
+
+  const goToDiscovery = () => navigate('/discovery');
+
+  if (isGettingAnimal) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center">
+          <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
+          <p className="text-gray-600">{t('loading_cat_details')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // TODO: add error UI if getAnimalFailed
+
+  if (!animal) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
+          <h2 className="mb-4 text-2xl font-bold text-gray-800">
+            {t('cat_not_found')}
+          </h2>
+          <p className="mb-6 text-gray-600">{t('cat_not_found_desc')}</p>
+          <button onClick={goToDiscovery} className="btn btn-primary gap-2">
+            <IoArrowBack className="size-5" />
+            {t('back_to_discovery')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="toast toast-top toast-center z-50">
+          <div className="alert alert-success animate-fade-in-up shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold">{t('message_sent')}</h3>
+                <p className="text-sm">{t('message_sent_desc')}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Back Button */}
+      <div className="mx-auto mb-6 max-w-7xl">
+        <button
+          onClick={goToDiscovery}
+          className="btn btn-ghost gap-2 text-gray-600 transition-colors hover:text-gray-800"
+        >
+          <IoArrowBack className="size-5" />
+          {t('back_to_discovery')}
+        </button>
+      </div>
+
+      <div className="mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          {/* Left Column: Photos */}
+          <div className="space-y-6">
+            <div className="overflow-hidden rounded-3xl shadow-2xl">
+              <div
+                className="from-primary/10 to-secondary/10 relative h-64 overflow-hidden bg-gradient-to-br md:h-80 lg:h-96"
+                onMouseEnter={() => setHoveredPhotoIndex(0)}
+                onMouseLeave={() => setHoveredPhotoIndex(null)}
+              >
+                <img
+                  src={
+                    animal.animalPhotos.length > 0
+                      ? animal.animalPhotos[0].photoUrl
+                      : defaultCatPic
+                  }
+                  alt={animal.name}
+                  className={`h-full w-full object-cover transition-all duration-500 ${hoveredPhotoIndex === 0 ? 'scale-110' : 'scale-100'}`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                <div className="absolute bottom-4 left-4 text-white">
+                  <span className="badge badge-primary">
+                    {t('featured_photo')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {animal.animalPhotos.length > 1 && (
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                {animal.animalPhotos.slice(1).map(({ photoUrl }, index) => (
+                  <div
+                    key={index}
+                    className="group relative cursor-pointer overflow-hidden rounded-2xl shadow-lg"
+                    onMouseEnter={() => setHoveredPhotoIndex(index + 1)}
+                    onMouseLeave={() => setHoveredPhotoIndex(null)}
+                  >
+                    <div className="aspect-square overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
+                      <img
+                        src={photoUrl}
+                        alt={`${animal.name} photo ${index + 2}`}
+                        className={`h-full w-full object-cover transition-all duration-500 ${hoveredPhotoIndex === index + 1 ? 'scale-125' : 'scale-100'}`}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-black/0 transition-all duration-300 group-hover:bg-black/10"></div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Cat Details */}
+          <div className="space-y-6">
+            {/* Header with Name and Actions */}
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+              <div>
+                <h1 className="font-serif text-4xl font-bold text-gray-800 md:text-5xl">
+                  {animal.name}
+                </h1>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span
+                    className={`badge ${animal.gender === 'Male' ? 'badge-info' : 'badge-secondary'} gap-1`}
+                  >
+                    {animal.gender === 'Male' ? (
+                      <TbGenderMale className="size-4" />
+                    ) : (
+                      <TbGenderFemale className="size-4" />
+                    )}
+                    {animal.gender}
+                  </span>
+                  <span className="badge badge-outline">
+                    {getAgeDisplay(animal.ageInWeeks, t)}
+                  </span>
+                  <span
+                    className={`badge ${animal.neutered ? 'badge-success' : 'badge-warning'}`}
+                  >
+                    {animal.neutered ? t('neutered') : t('not_neutered')}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsChatOpen(true)}
+                className="btn btn-primary btn-lg gap-2 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95"
+              >
+                <TbMessageCircle className="size-6" />
+                {t('message_owner')}
+              </button>
+            </div>
+
+            {/* Description Card */}
+            <div className="card bg-base-100 overflow-hidden rounded-3xl shadow-xl">
+              <div className="card-body">
+                <h2 className="card-title text-2xl font-bold text-gray-800">
+                  {t('about_cat', { name: animal.name })}
+                </h2>
+                <p className="mt-2 text-lg leading-relaxed text-gray-600">
+                  {animal.description}
+                </p>
+                <div className="divider my-4"></div>
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-full">
+                        <TbGenderMale className="text-primary size-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">{t('gender')}</p>
+                        <p className="font-semibold">{animal.gender}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="bg-secondary/10 flex h-10 w-10 items-center justify-center rounded-full">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="text-secondary size-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">
+                          {t('age_label')}
+                        </p>
+                        <p className="font-semibold">
+                          {getAgeDisplay(animal.ageInWeeks, t)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-success/10 flex h-10 w-10 items-center justify-center rounded-full">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="text-success size-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">
+                          {t('neutered_status_label')}
+                        </p>
+                        <p className="font-semibold">
+                          {animal.neutered
+                            ? t('yes_neutered')
+                            : t('not_yet_neutered')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="bg-warning/10 flex h-10 w-10 items-center justify-center rounded-full">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="text-warning size-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Adoption Tips */}
+            <div className="card from-primary/5 to-secondary/5 overflow-hidden rounded-3xl bg-gradient-to-br shadow-lg">
+              <div className="card-body">
+                <h3 className="card-title text-xl font-bold text-gray-800">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="text-primary mr-2 size-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  {t('adoption_tips')}
+                </h3>
+                <ul className="mt-3 space-y-2">
+                  <li className="flex items-start gap-2">
+                    <div className="bg-primary mt-2 h-2 w-2 rounded-full"></div>
+                    <span className="text-gray-600">
+                      {t('adoption_tip_1', { name: animal.name })}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="bg-primary mt-2 h-2 w-2 rounded-full"></div>
+                    <span className="text-gray-600">{t('adoption_tip_2')}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="bg-primary mt-2 h-2 w-2 rounded-full"></div>
+                    <span className="text-gray-600">
+                      {t('adoption_tip_3', { name: animal.name })}
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Chat Dialog */}
+      {isChatOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="modal modal-open">
+            <div className="modal-box animate-scale-in max-w-md overflow-hidden p-0 shadow-2xl">
+              <div className="from-primary to-secondary bg-gradient-to-r p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <TbMessageCircle className="size-8" />
+                    <div>
+                      <h3 className="text-2xl font-bold">
+                        {t('message_owner')}
+                      </h3>
+                      <p className="text-primary-content/80">
+                        {t('send_message_about', { name: animal.name })}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsChatOpen(false)}
+                    className="btn btn-circle btn-ghost btn-sm text-white hover:bg-white/20"
+                  >
+                    <TbX className="size-6" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        {t('your_message')}
+                      </span>
+                    </label>
+                    <textarea
+                      className="textarea textarea-bordered h-32 resize-none"
+                      placeholder={t('message_placeholder', {
+                        name: animal.name
+                      })}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                    />
+                    <div className="label">
+                      <span className="label-text-alt text-gray-500">
+                        {t('characters_count', { count: message.length })}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="size-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span>{t('message_will_be_sent')}</span>
+                  </div>
+
+                  <div className="modal-action">
+                    <button
+                      onClick={() => setIsChatOpen(false)}
+                      className="btn btn-ghost"
+                    >
+                      {t('cancel')}
+                    </button>
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!message.trim()}
+                      className="btn btn-primary gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <TbSend className="size-5" />
+                      {t('send_message')}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

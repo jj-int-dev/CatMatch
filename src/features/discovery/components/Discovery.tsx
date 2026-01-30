@@ -10,9 +10,10 @@ import type { GetAnimalsRequest } from '../types/GetAnimalsRequest';
 import useGetAnimals from '../hooks/useGetAnimals';
 import { IoSearch } from 'react-icons/io5';
 import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
+import getAgeDisplay from '../utils/getAgeDisplay';
 import defaultCatPic from '../../../assets/default_cat.webp';
 
-export function Discovery() {
+export default function Discovery() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -145,33 +146,6 @@ export function Discovery() {
     updatePage(1);
   };
 
-  const getAgeDisplay = (ageInWeeks: number) => {
-    // Weeks
-    if (ageInWeeks < 4) {
-      return `${ageInWeeks} ${t('week')}${ageInWeeks === 1 ? '' : t('weeks_plural_suffix')}`;
-    }
-
-    // Convert weeks → months (rounded)
-    const months = Math.round(ageInWeeks / 4);
-
-    // Months only
-    if (months < 12) {
-      return `${months} ${t('month')}${months === 1 ? '' : t('months_plural_suffix')}`;
-    }
-
-    // Years + months
-    const years = Math.floor(months / 12);
-    const remainingMonths = months % 12;
-
-    if (remainingMonths === 0) {
-      return `${years} ${t('year')}${years === 1 ? '' : t('years_plural_suffix')}`;
-    }
-
-    return `${years} ${t('year')}${years === 1 ? '' : t('years_plural_suffix')} ${remainingMonths} ${t('month')}${
-      remainingMonths === 1 ? '' : t('months_plural_suffix')
-    }`;
-  };
-
   // Loading state
   if (isGettingAnimals) {
     return <DiscoveryLoading />;
@@ -290,7 +264,7 @@ export function Discovery() {
                             {animal.gender}
                           </span>
                           <span className="badge badge-outline">
-                            {getAgeDisplay(animal.ageInWeeks)}
+                            {getAgeDisplay(animal.ageInWeeks, t)}
                           </span>
                           <span
                             className={`badge ${animal.neutered ? 'badge-success' : 'badge-warning'}`}
