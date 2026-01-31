@@ -1,9 +1,6 @@
-import { useSetNavigationColor } from '../../../hooks/useSetNavigationColor';
 import defaultProfilePic from '../../../assets/default_profile_pic.webp';
 
 export default function UserTypeSelection() {
-  useSetNavigationColor('transparent');
-
   return (
     <div className="-mt-16 flex h-screen w-screen flex-col items-center justify-center bg-[#3e98fd] bg-cover bg-center">
       <div className="mb-25 grid grid-cols-12">

@@ -1,9 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { useSetNavigationColor } from '../../../hooks/useSetNavigationColor';
 
 export default function PrivacyPolicy() {
   const { t } = useTranslation();
-  useSetNavigationColor('[#3e98fd]');
 
   return (
     <div className="h-screen bg-[#3e98fd] bg-cover pt-7">

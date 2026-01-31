@@ -365,5 +365,15 @@
   "characters_count": "{{count}}/500 caracteres",
   "message_will_be_sent": "Su mensaje será enviado al dueño del gato",
   "cancel": "Cancelar",
-  "send_message": "Enviar Mensaje"
+  "send_message": "Enviar Mensaje",
+  "my_cats": "Mis Gatos",
+  "adopt": "Adoptar",
+  "messages": "Mensajes",
+  "theme": "Modo",
+  "light": "Claro",
+  "dark": "Oscuro",
+  "language": "Idioma",
+  "profile_picture": "Foto de Perfil",
+  "user_profile": "Perfil",
+  "view_edit_profile": "Ver y editar su perfil"
 }

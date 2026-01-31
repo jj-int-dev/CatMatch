@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { useSetNavigationColor } from '../../../hooks/useSetNavigationColor';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
@@ -18,10 +17,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { GetUserProfilePictureAndTypeResponse } from '../../../types/GetUserProfilePictureAndTypeResponse';
 import InternalServerError from '../../../components/internal-server-error/InternalServerError';
 import UserTypeSelectionSkeleton from './UserTypeSelectionSkeleton';
-import { useDiscoveryPreferencesStore } from '../../../components/discovery-preferences/stores/discovery-preferences-store';
 
 export default function UserTypeSelection() {
-  useSetNavigationColor('transparent');
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -30,26 +27,23 @@ export default function UserTypeSelection() {
   const isAuthenticatedUserSession = useAuthStore(
     (state) => state.isAuthenticatedUserSession
   );
-  const logUserOut = useAuthStore((state) => state.logUserOut);
-
-  const setShowDiscoveryPreferencesDialog = useDiscoveryPreferencesStore(
-    (state) => state.setShowDiscoveryPreferencesDialog
-  );
 
   const goToLoginPage = () => navigate('/login', { replace: true });
 
   const goToNextPageBasedOnUserType = () => {
     if (newUserType === 'Adopter') {
-      setShowDiscoveryPreferencesDialog(true);
+      navigate('/discovery');
     } else if (newUserType === 'Rehomer') {
       navigate('/rehomer-dashboard');
     }
   };
 
   useEffect(() => {
-    if (!isLoadingSession && !isAuthenticatedUserSession(userSession)) {
+    if (!isLoadingSession) {
       // Only check authentication after session loading is complete
-      goToLoginPage();
+      if (!isAuthenticatedUserSession(userSession)) {
+        goToLoginPage();
+      }
     }
   }, [userSession, isLoadingSession]);
 

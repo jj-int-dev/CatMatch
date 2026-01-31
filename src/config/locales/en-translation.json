@@ -365,5 +365,15 @@
   "characters_count": "{{count}}/500 characters",
   "message_will_be_sent": "Your message will be sent to the cat's owner",
   "cancel": "Cancel",
-  "send_message": "Send Message"
+  "send_message": "Send Message",
+  "my_cats": "My Cats",
+  "adopt": "Adopt",
+  "messages": "Messages",
+  "theme": "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "language": "Language",
+  "profile_picture": "Profile Picture",
+  "user_profile": "User Profile",
+  "view_edit_profile": "View and edit your profile"
 }
