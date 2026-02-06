@@ -22,7 +22,7 @@ import {
 import defaultProfilePic from '../../../assets/default_profile_pic.webp';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { PiUploadSimple } from 'react-icons/pi';
-import { HiUser, HiMail, HiCamera } from 'react-icons/hi';
+import { HiUser, HiMail } from 'react-icons/hi';
 import type { GetUserProfileResponse } from '../types/GetUserProfileResponse';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 import getUniqueImageUrl from '../../../utils/getUniqueImageUrl';

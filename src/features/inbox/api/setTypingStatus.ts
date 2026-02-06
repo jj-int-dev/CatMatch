@@ -1,6 +1,10 @@
 import { axiosMessagesClient } from '../../../utils/axios-client';
 import getTokenHeaders from '../../../utils/getTokenHeaders';
 import i18next from '../../../utils/i18n';
+import {
+  setTypingStatusResponseValidator,
+  type SetTypingStatusResponseSchema
+} from '../validators/setTypingStatusResponseValidator';
 
 /**
  * Set typing status in a conversation
@@ -17,7 +21,7 @@ export async function setTypingStatus(
   accessToken: string,
   refreshToken: string,
   isTyping: boolean
-): Promise<{ success: boolean }> {
+): Promise<SetTypingStatusResponseSchema> {
   try {
     const response = await axiosMessagesClient.put(
       `${userId}/conversations/${conversationId}/typing`,
@@ -26,8 +30,13 @@ export async function setTypingStatus(
         headers: getTokenHeaders(accessToken, refreshToken)
       }
     );
+    const { success, data } = setTypingStatusResponseValidator.safeParse(
+      response.data
+    );
 
-    return response.data;
+    if (success) return data;
+
+    return Promise.reject(new Error(i18next.t('set_typing_status_error')));
   } catch (error) {
     console.error('Failed to set typing status:', error);
     return Promise.reject(new Error(i18next.t('set_typing_status_error')));

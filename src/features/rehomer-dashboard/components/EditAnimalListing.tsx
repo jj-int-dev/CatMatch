@@ -97,7 +97,6 @@ export default function EditAnimalListing() {
   const {
     addressSuggestions,
     showAddressSuggestions,
-    locationTooltip,
     handleAddressChange,
     handleAddressSelect,
     setLocationTooltip

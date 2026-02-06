@@ -3,7 +3,6 @@ import { supabase } from '../../../utils/supabase-client';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useTranslation } from 'react-i18next';
 import { getConversations } from '../api/getConversations';
-import { markConversationAsRead } from '../api/markConversationAsRead';
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import type { ConversationSchema } from '../validators/conversationValidator';
 

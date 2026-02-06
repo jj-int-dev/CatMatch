@@ -76,7 +76,7 @@ export function useSwipeGesture(options: UseSwipeGestureOptions = {}) {
   );
 
   const handleTouchEnd = useCallback(
-    (e: TouchEvent) => {
+    (_e: TouchEvent) => {
       if (!swipeState.isSwiping) return;
 
       const endTime = Date.now();

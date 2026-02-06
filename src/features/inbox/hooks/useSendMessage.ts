@@ -32,7 +32,7 @@ export default function useSendMessage() {
         refreshToken
       );
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate the messages query for this conversation to refetch
       queryClient.invalidateQueries({
         queryKey: ['messages', variables.conversationId, userId]

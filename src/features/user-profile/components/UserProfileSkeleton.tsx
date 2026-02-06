@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 
@@ -9,7 +8,6 @@ type UserProfileSkeletonProps = {
 export default function UserProfileSkeleton({
   errorMessages
 }: UserProfileSkeletonProps) {
-  const { t } = useTranslation();
   const [showErrorToast, setShowErrorToast] = useState(
     !!errorMessages && errorMessages.length > 0
   );
