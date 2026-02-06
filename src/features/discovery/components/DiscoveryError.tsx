@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
+import { HiExclamationCircle, HiRefresh } from 'react-icons/hi';
 
-interface DiscoveryErrorProps {
+type DiscoveryErrorProps = {
   error?: { message?: string };
   onRetry?: () => void;
   onModifySearch?: () => void;
-}
+};
 
 export default function DiscoveryError({
   error,
@@ -14,131 +15,90 @@ export default function DiscoveryError({
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] p-4 md:p-8">
+    <div className="from-base-100 to-base-200 min-h-screen bg-gradient-to-br p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="font-serif text-4xl font-bold text-gray-800 md:text-5xl">
+          <h1 className="text-base-content text-4xl font-bold md:text-5xl">
             {t('discovery_title')}
           </h1>
-          <p className="mt-4 text-lg text-gray-600">
+          <p className="text-base-content/70 mt-4 text-lg">
             {t('discovery_current_location')}
           </p>
         </div>
 
         {/* Error Card */}
-        <div className="rounded-box overflow-hidden bg-white shadow-2xl">
-          <div className="md:flex">
-            <div className="flex flex-col items-center justify-center bg-gradient-to-br from-red-500 to-red-600 p-8 md:w-2/5">
-              <div className="text-center text-white">
-                <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-white/20">
-                  <svg
-                    className="h-12 w-12 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                </div>
-                <h1 className="text-6xl font-bold">Error</h1>
-                <p className="mt-4 text-xl font-semibold">
-                  {t('error_loading_cats')}
-                </p>
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body items-center text-center">
+            {/* Error Icon */}
+            <div className="bg-error/10 mb-6 flex h-24 w-24 items-center justify-center rounded-full">
+              <HiExclamationCircle className="text-error h-12 w-12" />
+            </div>
+
+            {/* Error Title */}
+            <h2 className="text-base-content mb-3 text-3xl font-bold">
+              {t('error_loading_cats')}
+            </h2>
+
+            {/* Error Message */}
+            <p className="text-base-content/70 mb-8 max-w-md">
+              {error?.message || t('error_loading_cats_desc')}
+            </p>
+
+            {/* Troubleshooting Section */}
+            <div className="alert mb-8 w-full max-w-2xl">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="size-6 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div className="w-full">
+                <h3 className="text-base-content mb-3 text-left font-semibold">
+                  {t('error_troubleshooting_title')}
+                </h3>
+                <ul className="text-base-content/80 space-y-2 text-left text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="bg-error/50 mt-1.5 inline-block h-1.5 w-1.5 flex-shrink-0 rounded-full"></span>
+                    <span>{t('error_tip_internet')}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-error/50 mt-1.5 inline-block h-1.5 w-1.5 flex-shrink-0 rounded-full"></span>
+                    <span>{t('error_tip_filters')}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="bg-error/50 mt-1.5 inline-block h-1.5 w-1.5 flex-shrink-0 rounded-full"></span>
+                    <span>{t('error_tip_retry')}</span>
+                  </li>
+                </ul>
               </div>
             </div>
-            <div className="p-8 md:w-3/5 md:p-12">
-              <h2 className="mb-4 text-3xl font-bold text-gray-800">
-                {t('error_loading_cats')}
-              </h2>
-              <p className="mb-8 text-lg text-gray-600">
-                {error?.message || t('error_loading_cats_desc')}
-              </p>
 
-              <div className="space-y-6">
-                <div className="border-l-4 border-red-500 bg-red-50 p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-5 w-5 text-red-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        ></path>
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-red-700">
-                        {t('error_loading_cats_desc')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-700">
-                    {t('error_troubleshooting_title')}
-                  </h3>
-                  <ul className="space-y-2 text-gray-600">
-                    <li className="flex items-start">
-                      <span className="mt-2 mr-3 inline-block h-2 w-2 rounded-full bg-red-500"></span>
-                      <span>{t('error_tip_internet')}</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mt-2 mr-3 inline-block h-2 w-2 rounded-full bg-red-500"></span>
-                      <span>{t('error_tip_filters')}</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="mt-2 mr-3 inline-block h-2 w-2 rounded-full bg-red-500"></span>
-                      <span>{t('error_tip_retry')}</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="flex flex-col gap-4 pt-4 sm:flex-row">
-                  <button
-                    onClick={onRetry}
-                    className="btn btn-error btn-lg flex flex-1 items-center justify-center gap-2"
-                  >
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                      ></path>
-                    </svg>
-                    {t('try_again')}
-                  </button>
-                  {onModifySearch && (
-                    <button
-                      onClick={onModifySearch}
-                      className="btn btn-outline btn-lg flex-1"
-                    >
-                      {t('modify_search_filters')}
-                    </button>
-                  )}
-                </div>
-              </div>
+            {/* Action Buttons */}
+            <div className="flex w-full max-w-md flex-col gap-3 sm:flex-row">
+              <button
+                onClick={onRetry}
+                className="btn btn-primary flex-1 gap-2 shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <HiRefresh className="size-5" />
+                {t('try_again')}
+              </button>
+              {onModifySearch && (
+                <button
+                  onClick={onModifySearch}
+                  className="btn btn-outline flex-1 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  {t('modify_search_filters')}
+                </button>
+              )}
             </div>
           </div>
         </div>

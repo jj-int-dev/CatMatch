@@ -12,7 +12,7 @@ export type FormWithAddress = {
   };
 };
 
-export interface UseAddressHandlingReturn {
+export type UseAddressHandlingReturn = {
   addressSuggestions: AddressSuggestionSchema[];
   showAddressSuggestions: boolean;
   locationTooltip: boolean;
@@ -24,7 +24,7 @@ export interface UseAddressHandlingReturn {
   setAddressSuggestions: React.Dispatch<
     React.SetStateAction<AddressSuggestionSchema[]>
   >;
-}
+};
 
 export default function useAddressHandling<T extends FormWithAddress>(
   setValue: UseFormSetValue<T>,

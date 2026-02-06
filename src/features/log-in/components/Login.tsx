@@ -35,7 +35,6 @@ export default function Login() {
   const [showVerifyEmailToast, setShowVerifyEmailToast] = useState(false);
   const [isThirdPartyLoading, setIsThirdPartyLoading] = useState(false);
 
-  // Recreate the schema whenever the language changes so that error messages are in the correct language
   const formSchema = useMemo(() => createLoginFormValidator(), [i18n.language]);
 
   const {
@@ -50,7 +49,6 @@ export default function Login() {
 
   const goToUserProfile = () => navigate(`/user-profile`);
 
-  // Handle cleanup to prevent race conditions
   useEffect(() => {
     return () => {
       // Cleanup function to prevent state updates on unmounted component
@@ -58,7 +56,6 @@ export default function Login() {
   }, []);
 
   const onEmailPasswordLogin = async (formData: LoginFormSchema) => {
-    // Clear previous errors
     setServerError(null);
     clearErrors();
 
@@ -76,7 +73,6 @@ export default function Login() {
     } else if (!isAuthenticatedUserSession(userSession)) {
       setServerError(t('no_authenticated_user_found'));
     } else {
-      // Clear form and all state before navigation
       reset();
       setShowVerifyEmailToast(false);
       setServerError(null);
@@ -119,151 +115,154 @@ export default function Login() {
     setShowSendResetPasswordLinkDialog(true);
   };
 
-  // Get error messages from form state
   const formErrorMessages = Object.values(errors)
     .filter((error) => error?.message)
     .map((error) => error.message as string);
 
-  // Combine form errors and server errors
   const allErrorMessages = [...formErrorMessages];
   if (serverError) {
     allErrorMessages.push(serverError);
   }
 
   return (
-    <>
-      <div className="bg-main-background h-screen bg-cover pt-7">
-        {allErrorMessages.length > 0 && (
-          <ErrorToast
-            messages={allErrorMessages}
-            onCloseToast={onCloseErrorToast}
-          />
-        )}
-        {showVerifyEmailToast && (
-          <WarningToast
-            messages={[t('verify_email')]}
-            onCloseToast={onCloseWarningToast}
-          />
-        )}
-        <div className="flex flex-col justify-center px-6">
-          <div className="mt-2 sm:mx-auto sm:w-full sm:max-w-sm">
-            <img
-              alt="CatMatch"
-              src={catLogo}
-              className="m-auto h-[120px] w-auto"
-            />
-            <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-black">
-              {t('log_in_to_your_account')}
-            </h2>
-          </div>
+    <div className="from-base-200 to-base-300 min-h-screen bg-gradient-to-br px-6 py-12">
+      {allErrorMessages.length > 0 && (
+        <ErrorToast
+          messages={allErrorMessages}
+          onCloseToast={onCloseErrorToast}
+        />
+      )}
+      {showVerifyEmailToast && (
+        <WarningToast
+          messages={[t('verify_email')]}
+          onCloseToast={onCloseWarningToast}
+        />
+      )}
 
-          <div className="mt-10 rounded-xl bg-[#7289DA] p-8 shadow-2xl sm:mx-auto sm:w-full sm:max-w-sm">
+      <div className="mx-auto flex max-w-md flex-col items-center">
+        {/* Logo */}
+        <img
+          alt="CatMatch"
+          src={catLogo}
+          className="h-28 w-auto drop-shadow-lg sm:h-32"
+        />
+
+        {/* Heading */}
+        <h1 className="text-base-content mt-8 text-center text-3xl font-bold sm:text-4xl">
+          {t('log_in_to_your_account')}
+        </h1>
+        <p className="text-base-content/70 mt-2 text-center">
+          {t('welcome_back_login_subtitle')}
+        </p>
+
+        {/* Login Card */}
+        <div className="card bg-base-100 mt-8 w-full shadow-2xl">
+          <div className="card-body">
             <form onSubmit={handleSubmit(onEmailPasswordLogin)}>
-              <div className="space-y-6">
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm/6 font-medium text-black"
-                  >
-                    {t('email_address')}
+              <div className="space-y-4">
+                {/* Email Field */}
+                <div className="form-control">
+                  <label htmlFor="email" className="label">
+                    <span className="label-text font-medium">
+                      {t('email_address')}
+                    </span>
                   </label>
-                  <div className="mt-2">
-                    <input
-                      id="email"
-                      type="email"
-                      autoComplete="email"
-                      {...register('email')}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                    />
-                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    {...register('email')}
+                    className="input input-bordered focus:input-primary w-full"
+                    placeholder={t('enter_your_email')}
+                  />
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="password"
-                      className="block text-sm/6 font-medium text-black"
-                    >
+                {/* Password Field */}
+                <div className="form-control">
+                  <label htmlFor="password" className="label">
+                    <span className="label-text font-medium">
                       {t('password')}
-                    </label>
-                    <div className="text-sm">
-                      <button
-                        onClick={handleForgotPassword}
-                        className="text-sm/6 text-white hover:font-bold hover:text-indigo-700"
-                      >
-                        {t('forgot_password')}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <input
-                      id="password"
-                      type="password"
-                      {...register('password')}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                    />
-                  </div>
+                    </span>
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    autoComplete="current-password"
+                    {...register('password')}
+                    className="input input-bordered focus:input-primary w-full"
+                    placeholder={t('enter_your_password')}
+                  />
+                  <label className="label">
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      className="link-hover link label-text-alt text-primary"
+                    >
+                      {t('forgot_password')}
+                    </button>
+                  </label>
                 </div>
-              </div>
 
-              <p className="mt-2 text-end text-sm/6 text-white">
-                {t('not_a_member')}{' '}
-                <Link
-                  to="/register"
-                  className="font-semibold text-indigo-900 hover:font-bold hover:text-indigo-700"
+                {/* Sign In Button */}
+                <button
+                  disabled={isSubmitting}
+                  type="submit"
+                  className="btn btn-primary w-full"
                 >
-                  {t('register')}
-                </Link>
-              </p>
+                  {isSubmitting ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm"></span>
+                      {t('signing_in')}
+                    </>
+                  ) : (
+                    t('sign_in')
+                  )}
+                </button>
 
-              <div className="mt-4 space-y-2">
-                <div>
-                  <button
-                    disabled={isSubmitting}
-                    type="submit"
-                    className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-                  >
-                    {t(isSubmitting ? 'signing_in' : 'sign_in')}
-                  </button>
+                {/* Divider */}
+                <div className="divider text-base-content/60 text-sm">
+                  {t('or')}
                 </div>
-                <p className="text-center">{t('or')}</p>
-              </div>
 
-              <div className="mt-3 space-y-2">
-                <div>
+                {/* Social Login Buttons */}
+                <div className="space-y-3">
                   <button
                     disabled={isThirdPartyLoading}
                     onClick={onFacebookLogin}
                     type="button"
-                    className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                    className="btn btn-outline btn-secondary w-full"
                   >
-                    <FaFacebook className="size-4 self-center" />
-                    {t(
-                      isThirdPartyLoading
-                        ? 'signing_in'
-                        : 'log_in_with_facebook'
-                    )}
+                    <FaFacebook className="h-5 w-5" />
+                    {t('log_in_with_facebook')}
                   </button>
-                </div>
 
-                <div>
                   <button
                     disabled={isThirdPartyLoading}
                     onClick={onGoogleLogin}
                     type="button"
-                    className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                    className="btn btn-outline btn-accent w-full"
                   >
-                    <FaGoogle className="ml-[-15px] size-4 self-center" />
-                    {t(
-                      isThirdPartyLoading ? 'signing_in' : 'log_in_with_google'
-                    )}
+                    <FaGoogle className="h-5 w-5" />
+                    {t('log_in_with_google')}
                   </button>
                 </div>
               </div>
             </form>
+
+            {/* Register Link */}
+            <div className="divider"></div>
+            <p className="text-base-content/70 text-center text-sm">
+              {t('not_a_member')}{' '}
+              <Link
+                to="/register"
+                className="link-hover link text-primary font-semibold"
+              >
+                {t('register')}
+              </Link>
+            </p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

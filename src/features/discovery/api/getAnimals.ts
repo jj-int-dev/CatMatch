@@ -24,7 +24,7 @@ export default async function (
     );
     if (success) return data;
     return Promise.reject(new Error(i18next.t('get_animals_error')));
-  } catch (error) {
+  } catch (_error) {
     return Promise.reject(new Error(i18next.t('get_animals_error')));
   }
 }

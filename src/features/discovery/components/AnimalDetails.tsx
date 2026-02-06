@@ -13,6 +13,9 @@ import { IoArrowBack } from 'react-icons/io5';
 import useGetAnimal from '../hooks/useGetAnimal';
 import getAgeDisplay from '../utils/getAgeDisplay';
 import defaultCatPic from '../../../assets/default_cat.webp';
+import useCreateConversation from '../../inbox/hooks/useCreateConversation';
+import useSendMessage from '../../inbox/hooks/useSendMessage';
+import useGetUserType from '../../../hooks/useGetUserType';
 
 export default function AnimalDetails() {
   const { animalId } = useParams();
@@ -24,60 +27,112 @@ export default function AnimalDetails() {
     (state) => state.isAuthenticatedUserSession
   );
 
+  // Get user type
+  const { data: userType, isLoading: isLoadingUserType } = useGetUserType();
+
   const goToLoginPage = () => navigate('/login', { replace: true });
 
+  const goToRehomerDashboard = () =>
+    navigate('/rehomer/dashboard', { replace: true });
+
   useEffect(() => {
-    if (!isLoadingSession) {
+    if (!isLoadingSession && !isLoadingUserType) {
       // Only check authentication after session loading is complete
       if (!isAuthenticatedUserSession(userSession)) {
         goToLoginPage();
+        return;
+      }
+
+      // Check if user is a rehomer and redirect if they are
+      if (userType === 'Rehomer') {
+        goToRehomerDashboard();
       }
     }
-  }, [userSession, isLoadingSession]);
+  }, [userSession, isLoadingSession, isLoadingUserType, userType]);
 
-  const {
-    data,
-    isLoading: isGettingAnimal,
-    isError: getAnimalFailed
-  } = useGetAnimal(animalId!);
+  const { data, isLoading: isGettingAnimal } = useGetAnimal(animalId!);
 
   const animal = data?.animal;
 
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const [hoveredPhotoIndex, setHoveredPhotoIndex] = useState<number | null>(
     null
   );
 
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
+  // Hooks for messaging
+  const { mutateAsync: createConversation, isPending: isCreatingConversation } =
+    useCreateConversation();
+  const { mutateAsync: sendMessage, isPending: isSendingMessage } =
+    useSendMessage();
 
-    // TODO: Implement actual message sending logic here
+  const handleSendMessage = async () => {
+    if (!message.trim() || !animal || !animal.rehomerId) return;
 
-    // Close chat dialog immediately
-    setIsChatOpen(false);
-    setMessage('');
+    try {
+      // First, create or get the conversation
+      const conversationResponse = await createConversation({
+        rehomerId: animal.rehomerId,
+        animalId: animal.animalId
+      });
 
-    // Show success toast after a short delay (after dialog closes)
-    setTimeout(() => {
-      setShowToast(true);
-    }, 100);
+      if (!conversationResponse?.conversation?.conversation_id) {
+        throw new Error('Failed to create conversation');
+      }
 
-    // Hide toast after 3 seconds
-    setTimeout(() => {
-      setShowToast(false);
-    }, 3000);
+      const conversationId = conversationResponse.conversation.conversation_id;
+
+      // Then send the message
+      await sendMessage({
+        conversationId,
+        content: message
+      });
+
+      // Close chat dialog immediately
+      setIsChatOpen(false);
+      setMessage('');
+
+      // Show success toast after a short delay (after dialog closes)
+      setTimeout(() => {
+        setToastMessage(t('message_sent'));
+        setShowToast(true);
+      }, 100);
+
+      // Hide toast after 3 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+
+      // Navigate to inbox after successful message send
+      setTimeout(() => {
+        navigate('/inbox');
+      }, 1500);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+
+      // Show error toast
+      setToastMessage(t('send_message_error'));
+      setShowErrorToast(true);
+
+      // Hide error toast after 3 seconds
+      setTimeout(() => {
+        setShowErrorToast(false);
+      }, 3000);
+    }
   };
 
   const goToDiscovery = () => navigate('/discovery');
 
-  if (isGettingAnimal) {
+  // Show loading while checking user type or fetching animal
+  if (isLoadingUserType || isGettingAnimal) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="from-base-100 to-base-200 flex min-h-screen items-center justify-center bg-gradient-to-br">
         <div className="text-center">
           <div className="loading loading-spinner loading-lg text-primary mb-4"></div>
-          <p className="text-gray-600">{t('loading_cat_details')}</p>
+          <p className="text-base-content/80">{t('loading_cat_details')}</p>
         </div>
       </div>
     );
@@ -87,12 +142,12 @@ export default function AnimalDetails() {
 
   if (!animal) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
-          <h2 className="mb-4 text-2xl font-bold text-gray-800">
+      <div className="from-base-100 to-base-200 flex min-h-screen items-center justify-center bg-gradient-to-br">
+        <div className="bg-base-100 max-w-md rounded-2xl p-8 text-center shadow-xl">
+          <h2 className="text-base-content mb-4 text-2xl font-bold">
             {t('cat_not_found')}
           </h2>
-          <p className="mb-6 text-gray-600">{t('cat_not_found_desc')}</p>
+          <p className="text-base-content/80 mb-6">{t('cat_not_found_desc')}</p>
           <button onClick={goToDiscovery} className="btn btn-primary gap-2">
             <IoArrowBack className="size-5" />
             {t('back_to_discovery')}
@@ -103,8 +158,8 @@ export default function AnimalDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
-      {/* Toast Notification */}
+    <div className="from-base-100 to-base-200 min-h-screen bg-gradient-to-br p-4 md:p-8">
+      {/* Success Toast Notification */}
       {showToast && (
         <div className="toast toast-top toast-center z-50">
           <div className="alert alert-success animate-fade-in-up shadow-lg">
@@ -126,8 +181,42 @@ export default function AnimalDetails() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold">{t('message_sent')}</h3>
+                <h3 className="font-bold">
+                  {toastMessage || t('message_sent')}
+                </h3>
                 <p className="text-sm">{t('message_sent_desc')}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Toast Notification */}
+      {showErrorToast && (
+        <div className="toast toast-top toast-center z-50">
+          <div className="alert alert-error animate-fade-in-up shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold">
+                  {toastMessage || t('send_message_error')}
+                </h3>
+                <p className="text-sm">{t('send_message_error_desc')}</p>
               </div>
             </div>
           </div>
@@ -138,7 +227,7 @@ export default function AnimalDetails() {
       <div className="mx-auto mb-6 max-w-7xl">
         <button
           onClick={goToDiscovery}
-          className="btn btn-ghost gap-2 text-gray-600 transition-colors hover:text-gray-800"
+          className="btn btn-ghost text-base-content/80 hover:text-base-content gap-2 transition-colors"
         >
           <IoArrowBack className="size-5" />
           {t('back_to_discovery')}
@@ -182,7 +271,7 @@ export default function AnimalDetails() {
                     onMouseEnter={() => setHoveredPhotoIndex(index + 1)}
                     onMouseLeave={() => setHoveredPhotoIndex(null)}
                   >
-                    <div className="aspect-square overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
+                    <div className="from-base-300 to-base-400 aspect-square overflow-hidden bg-gradient-to-br">
                       <img
                         src={photoUrl}
                         alt={`${animal.name} photo ${index + 2}`}
@@ -201,7 +290,7 @@ export default function AnimalDetails() {
             {/* Header with Name and Actions */}
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
-                <h1 className="font-serif text-4xl font-bold text-gray-800 md:text-5xl">
+                <h1 className="text-base-content font-serif text-4xl font-bold md:text-5xl">
                   {animal.name}
                 </h1>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -238,10 +327,10 @@ export default function AnimalDetails() {
             {/* Description Card */}
             <div className="card bg-base-100 overflow-hidden rounded-3xl shadow-xl">
               <div className="card-body">
-                <h2 className="card-title text-2xl font-bold text-gray-800">
+                <h2 className="text-base-content card-title text-2xl font-bold">
                   {t('about_cat', { name: animal.name })}
                 </h2>
-                <p className="mt-2 text-lg leading-relaxed text-gray-600">
+                <p className="text-base-content/80 mt-2 text-lg leading-relaxed">
                   {animal.description}
                 </p>
                 <div className="divider my-4"></div>
@@ -254,8 +343,12 @@ export default function AnimalDetails() {
                         <TbGenderMale className="text-primary size-5" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">{t('gender')}</p>
-                        <p className="font-semibold">{animal.gender}</p>
+                        <p className="text-base-content/70 text-sm">
+                          {t('gender')}
+                        </p>
+                        <p className="text-base-content font-semibold">
+                          {animal.gender}
+                        </p>
                       </div>
                     </div>
 
@@ -277,10 +370,10 @@ export default function AnimalDetails() {
                         </svg>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-base-content/70 text-sm">
                           {t('age_label')}
                         </p>
-                        <p className="font-semibold">
+                        <p className="text-base-content font-semibold">
                           {getAgeDisplay(animal.ageInWeeks, t)}
                         </p>
                       </div>
@@ -306,10 +399,10 @@ export default function AnimalDetails() {
                         </svg>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-base-content/70 text-sm">
                           {t('neutered_status_label')}
                         </p>
-                        <p className="font-semibold">
+                        <p className="text-base-content font-semibold">
                           {animal.neutered
                             ? t('yes_neutered')
                             : t('not_yet_neutered')}
@@ -349,7 +442,7 @@ export default function AnimalDetails() {
             {/* Adoption Tips */}
             <div className="card from-primary/5 to-secondary/5 overflow-hidden rounded-3xl bg-gradient-to-br shadow-lg">
               <div className="card-body">
-                <h3 className="card-title text-xl font-bold text-gray-800">
+                <h3 className="text-base-content card-title text-xl font-bold">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="text-primary mr-2 size-6"
@@ -369,17 +462,19 @@ export default function AnimalDetails() {
                 <ul className="mt-3 space-y-2">
                   <li className="flex items-start gap-2">
                     <div className="bg-primary mt-2 h-2 w-2 rounded-full"></div>
-                    <span className="text-gray-600">
+                    <span className="text-base-content/80">
                       {t('adoption_tip_1', { name: animal.name })}
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <div className="bg-primary mt-2 h-2 w-2 rounded-full"></div>
-                    <span className="text-gray-600">{t('adoption_tip_2')}</span>
+                    <span className="text-base-content/80">
+                      {t('adoption_tip_2')}
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <div className="bg-primary mt-2 h-2 w-2 rounded-full"></div>
-                    <span className="text-gray-600">
+                    <span className="text-base-content/80">
                       {t('adoption_tip_3', { name: animal.name })}
                     </span>
                   </li>
@@ -433,13 +528,13 @@ export default function AnimalDetails() {
                       onChange={(e) => setMessage(e.target.value)}
                     />
                     <div className="label">
-                      <span className="label-text-alt text-gray-500">
+                      <span className="label-text-alt text-base-content/70">
                         {t('characters_count', { count: message.length })}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="text-base-content/70 flex items-center gap-2 text-sm">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="size-4"
@@ -466,11 +561,24 @@ export default function AnimalDetails() {
                     </button>
                     <button
                       onClick={handleSendMessage}
-                      disabled={!message.trim()}
+                      disabled={
+                        !message.trim() ||
+                        isCreatingConversation ||
+                        isSendingMessage
+                      }
                       className="btn btn-primary gap-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <TbSend className="size-5" />
-                      {t('send_message')}
+                      {isCreatingConversation || isSendingMessage ? (
+                        <>
+                          <span className="loading loading-spinner loading-sm"></span>
+                          {t('sending')}
+                        </>
+                      ) : (
+                        <>
+                          <TbSend className="size-5" />
+                          {t('send_message')}
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

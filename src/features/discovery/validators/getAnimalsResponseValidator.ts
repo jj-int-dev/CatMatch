@@ -9,6 +9,7 @@ export const getAnimalsResponseValidator = z.object({
       ageInWeeks: z.number().min(0),
       neutered: z.boolean(),
       description: z.string().min(1),
+      rehomerId: z.string().min(1),
       distanceMeters: z.number().min(0),
       animalPhotos: z.array(
         z.object({

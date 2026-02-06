@@ -4,20 +4,20 @@ export default function DiscoveryLoading() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] p-4 md:p-8">
+    <div className="from-base-100 to-base-200 min-h-screen bg-gradient-to-br p-4 md:p-8">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
+        {/* Header Skeleton */}
         <div className="mb-8 text-center">
-          <div className="skeleton mx-auto mb-4 h-12 w-64 rounded-lg md:h-14 md:w-80"></div>
-          <div className="skeleton mx-auto h-6 w-96 rounded"></div>
+          <div className="skeleton mx-auto mb-4 h-12 w-64 rounded-lg md:h-14 md:w-80" />
+          <div className="skeleton mx-auto h-6 w-96 rounded" />
         </div>
 
         {/* Search Bar and Controls Skeleton */}
         <div className="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="skeleton h-12 w-48 rounded-lg"></div>
-          <div className="text-center md:text-right">
-            <div className="skeleton mb-2 h-6 w-32 rounded"></div>
-            <div className="skeleton h-4 w-24 rounded"></div>
+          <div className="skeleton h-14 w-full rounded-lg md:w-64" />
+          <div className="space-y-2 text-center md:text-right">
+            <div className="skeleton mx-auto h-6 w-40 rounded md:ml-auto" />
+            <div className="skeleton mx-auto h-4 w-32 rounded md:ml-auto" />
           </div>
         </div>
 
@@ -26,24 +26,35 @@ export default function DiscoveryLoading() {
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className="card card-compact rounded-box bg-base-100 overflow-hidden border shadow-lg"
+              className="card bg-base-100 overflow-hidden shadow-lg"
             >
-              <div className="skeleton h-48 w-full"></div>
+              {/* Image Skeleton */}
+              <div className="skeleton h-48 w-full rounded-none" />
+
               <div className="card-body">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="skeleton mb-2 h-6 w-32 rounded"></div>
+                {/* Header */}
+                <div className="mb-3 flex items-start justify-between">
+                  <div className="flex-1 space-y-3">
+                    <div className="skeleton h-6 w-32 rounded" />
                     <div className="flex flex-wrap gap-2">
-                      <div className="skeleton h-5 w-16 rounded-full"></div>
-                      <div className="skeleton h-5 w-20 rounded-full"></div>
-                      <div className="skeleton h-5 w-24 rounded-full"></div>
+                      <div className="skeleton h-6 w-16 rounded-full" />
+                      <div className="skeleton h-6 w-20 rounded-full" />
+                      <div className="skeleton h-6 w-24 rounded-full" />
                     </div>
                   </div>
-                  <div className="skeleton h-8 w-16 rounded"></div>
+                  <div className="skeleton h-8 w-16 rounded" />
                 </div>
-                <div className="skeleton mt-3 h-4 w-full rounded"></div>
-                <div className="skeleton mt-2 h-4 w-3/4 rounded"></div>
-                <div className="skeleton mt-4 h-10 w-full rounded-lg"></div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <div className="skeleton h-4 w-full rounded" />
+                  <div className="skeleton h-4 w-3/4 rounded" />
+                </div>
+
+                {/* Button */}
+                <div className="mt-4">
+                  <div className="skeleton h-12 w-full rounded-lg" />
+                </div>
               </div>
             </div>
           ))}
@@ -51,15 +62,22 @@ export default function DiscoveryLoading() {
 
         {/* Pagination Skeleton */}
         <div className="mt-12 flex justify-center">
-          <div className="join">
-            <div className="skeleton join-item h-10 w-10 rounded"></div>
+          <div className="join gap-2">
+            <div className="skeleton h-12 w-12 rounded-lg" />
             {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className="skeleton join-item h-10 w-10 rounded"
-              ></div>
+              <div key={i} className="skeleton h-12 w-12 rounded-lg" />
             ))}
-            <div className="skeleton join-item h-10 w-10 rounded"></div>
+            <div className="skeleton h-12 w-12 rounded-lg" />
+          </div>
+        </div>
+
+        {/* Loading Message */}
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-3">
+            <span className="loading loading-spinner loading-md text-primary" />
+            <p className="text-base-content/70">
+              {t('loading_cats', 'Loading cats...')}
+            </p>
           </div>
         </div>
       </div>

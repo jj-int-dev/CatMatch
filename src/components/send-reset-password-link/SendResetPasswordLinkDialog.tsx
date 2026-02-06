@@ -66,11 +66,6 @@ export function SendResetPasswordLinkDialog() {
     setIsSuccess(false);
     const { error } = await sendResetPasswordLink(formData.email);
     if (error) {
-      // Error is displayed via form error
-      // We can set a generic error on the email field
-      // but the validator already catches invalid email; Supabase error is generic.
-      // We'll set a form-level error using setError
-      // For simplicity, we can set a message in emailSentMessage (but it's error)
       setEmailSentMessage(t('unable_to_send_email'));
     } else {
       setEmailSentMessage(t('email_sent'));
@@ -81,65 +76,136 @@ export function SendResetPasswordLinkDialog() {
 
   const handleSendEmailFailure = () => {
     // Errors are already available in `errors` object
-    // No need to set separate state
   };
 
   if (!showSendResetPasswordLinkDialog) return null;
 
   return (
     <dialog open={showSendResetPasswordLinkDialog} className="modal">
-      <div className="modal-box w-md bg-white">
+      <div className="modal-box bg-base-100 shadow-xl">
+        {/* Close button */}
         <form method="dialog">
           <button
-            className="btn btn-sm btn-circle btn-ghost absolute top-2 right-2 bg-transparent text-black transition-colors duration-200 hover:border-[rgba(0,0,0,0.12)] hover:bg-[rgba(0,0,0,0.12)] hover:text-black"
+            className="btn btn-circle btn-ghost btn-sm absolute top-3 right-3"
             onClick={closeDialog}
+            aria-label={t('close')}
           >
             ✕
           </button>
         </form>
+
         {emailSentMessage ? (
-          <div className="mt-6">
-            <p className={isSuccess ? 'text-green-500' : 'text-red-600'}>
+          // Success/Error message display
+          <div className="flex flex-col items-center space-y-4 py-8">
+            <div
+              className={`flex h-16 w-16 items-center justify-center rounded-full ${
+                isSuccess ? 'bg-success/20' : 'bg-error/20'
+              }`}
+            >
+              {isSuccess ? (
+                <svg
+                  className="text-success h-8 w-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="text-error h-8 w-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              )}
+            </div>
+            <p
+              className={`text-center text-lg font-medium ${
+                isSuccess ? 'text-success' : 'text-error'
+              }`}
+            >
               {emailSentMessage}
             </p>
+            {isSuccess && (
+              <p className="text-base-content/70 text-center text-sm">
+                {t('check_email_for_reset_link')}
+              </p>
+            )}
           </div>
         ) : (
+          // Form display
           <>
-            <div className="mt-6">
-              <h3 className="text-md font-bold">
+            <div className="mb-6">
+              <h3 className="text-base-content mb-2 text-2xl font-bold">
                 {t('reset_password_link_dialog_title')}
               </h3>
-              <div className="pt-6">
-                <span className="px-1 text-sm text-gray-600">{t('email')}</span>
-                <input
-                  type="email"
-                  {...register('email')}
-                  className="text-md block w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 shadow-md focus:border-[#4181fa] focus:bg-white focus:outline-none"
-                />
+              <p className="text-base-content/70 text-sm">
+                {t('reset_password_dialog_description')}
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="form-control">
+                <label htmlFor="email" className="label">
+                  <span className="label-text font-medium">{t('email')}</span>
+                </label>
+                <label className="input input-bordered flex items-center gap-2">
+                  <MdOutlineEmail className="text-base-content/50 h-5 w-5" />
+                  <input
+                    type="email"
+                    id="email"
+                    {...register('email')}
+                    className="grow"
+                    placeholder={t('enter_your_email')}
+                  />
+                </label>
                 {errors.email && (
-                  <div className="mt-2">
-                    <ul className="list-inside list-disc">
-                      <li className="text-sm text-red-600">
-                        {errors.email.message}
-                      </li>
-                    </ul>
-                  </div>
+                  <label className="label">
+                    <span className="label-text-alt text-error">
+                      {errors.email.message}
+                    </span>
+                  </label>
                 )}
               </div>
             </div>
+
             <div className="modal-action">
               <button
-                className="btn btn-sm border-[#4181fa] bg-[#4181fa] text-white transition-all duration-300 ease-in-out hover:scale-95 hover:shadow-sm"
+                className="btn btn-primary w-full"
                 disabled={isSubmitting}
                 onClick={handleSubmit(handleSendEmail, handleSendEmailFailure)}
               >
-                <MdOutlineEmail /> {t('send')}
+                {isSubmitting ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm"></span>
+                    {t('sending')}
+                  </>
+                ) : (
+                  <>
+                    <MdOutlineEmail className="h-5 w-5" />
+                    {t('send')}
+                  </>
+                )}
               </button>
             </div>
           </>
         )}
       </div>
-      {/* Backdrop click closes dialog */}
+
+      {/* Backdrop */}
       <form method="dialog" className="modal-backdrop">
         <button onClick={closeDialog}>close</button>
       </form>

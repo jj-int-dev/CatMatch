@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import i18n from '../../../utils/i18n';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 import SuccessToast from '../../../components/toasts/SuccessToast';
+import { HiEye, HiEyeOff } from 'react-icons/hi';
 
 export default function ResetPassword() {
   const { t } = useTranslation();
@@ -23,10 +24,8 @@ export default function ResetPassword() {
   );
   const updateUserPassword = useAuthStore((state) => state.updateUserPassword);
 
-  const goToLoginPage = () => navigate('/login', { replace: true });
-
-  const goToUserProfile = () => navigate(`/user-profile`);
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [formValidationErrors, setFormValidationErrors] = useState<string[]>(
     []
@@ -35,8 +34,10 @@ export default function ResetPassword() {
     string | null
   >(null);
 
+  const goToLoginPage = () => navigate('/login', { replace: true });
+  const goToUserProfile = () => navigate(`/user-profile`);
+
   useEffect(() => {
-    // Only check authentication after session loading is complete
     if (!isLoadingSession && !isAuthenticatedUserSession(userSession)) {
       goToLoginPage();
     }
@@ -100,7 +101,7 @@ export default function ResetPassword() {
 
   return (
     <>
-      <div className="bg-main-background h-screen bg-cover pt-25">
+      <div className="from-base-100 to-base-200 flex min-h-screen items-center justify-center bg-gradient-to-br px-4 py-12">
         {showErrorToast && (
           <ErrorToast
             messages={formValidationErrors}
@@ -110,75 +111,124 @@ export default function ResetPassword() {
         {passwordChangedMessage && (
           <SuccessToast messages={[passwordChangedMessage]} />
         )}
-        <div className="flex flex-col justify-center px-6">
-          <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+
+        <div className="w-full max-w-md">
+          {/* Logo and Header */}
+          <div className="mb-8 text-center">
             <img
               alt="CatMatch"
               src={catLogo}
-              className="m-auto h-[120px] w-auto"
+              className="mx-auto mb-6 h-24 w-auto"
             />
-            <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-black">
+            <h2 className="text-base-content text-3xl font-bold">
               {t('reset_your_password')}
             </h2>
+            <p className="text-base-content/70 mt-2">
+              {t(
+                'reset_password_desc',
+                'Enter your new password below to secure your account'
+              )}
+            </p>
           </div>
 
-          <div className="mt-10 rounded-xl bg-[#7289DA] p-8 shadow-2xl sm:mx-auto sm:w-full sm:max-w-sm">
-            <form>
-              <div className="space-y-6">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="newPassword"
-                      className="block text-sm/6 font-medium text-black"
-                    >
-                      {t('enter_new_password')}
+          {/* Form Card */}
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <form
+                onSubmit={handleSubmit(
+                  handlePasswordChange,
+                  handlePasswordChangeFailure
+                )}
+              >
+                <div className="space-y-4">
+                  {/* New Password Field */}
+                  <div className="form-control">
+                    <label htmlFor="newPassword" className="label">
+                      <span className="label-text font-medium">
+                        {t('enter_new_password')}
+                      </span>
                     </label>
+                    <div className="relative">
+                      <input
+                        id="newPassword"
+                        {...register('newPassword')}
+                        type={showPassword ? 'text' : 'password'}
+                        className="input input-bordered w-full pr-10"
+                        placeholder={t('enter_password', 'Enter password')}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="btn btn-ghost btn-sm absolute top-0 right-0 h-full px-3"
+                      >
+                        {showPassword ? (
+                          <HiEyeOff className="size-5" />
+                        ) : (
+                          <HiEye className="size-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      id="newPassword"
-                      {...register('newPassword')}
-                      type="password"
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                    />
-                  </div>
-                </div>
 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="confirmPassword"
-                      className="block text-sm/6 font-medium text-black"
-                    >
-                      {t('confirm_new_password')}
+                  {/* Confirm Password Field */}
+                  <div className="form-control">
+                    <label htmlFor="confirmPassword" className="label">
+                      <span className="label-text font-medium">
+                        {t('confirm_new_password')}
+                      </span>
                     </label>
+                    <div className="relative">
+                      <input
+                        id="confirmPassword"
+                        {...register('confirmPassword')}
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        className="input input-bordered w-full pr-10"
+                        placeholder={t('confirm_password', 'Confirm password')}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        className="btn btn-ghost btn-sm absolute top-0 right-0 h-full px-3"
+                      >
+                        {showConfirmPassword ? (
+                          <HiEyeOff className="size-5" />
+                        ) : (
+                          <HiEye className="size-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      id="confirmPassword"
-                      {...register('confirmPassword')}
-                      type="password"
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="mt-4 space-y-2">
-                <div>
+
+                  {/* Submit Button */}
                   <button
-                    onClick={handleSubmit(
-                      handlePasswordChange,
-                      handlePasswordChangeFailure
-                    )}
-                    disabled={isSubmitting}
                     type="submit"
-                    className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                    disabled={isSubmitting}
+                    className="btn btn-primary w-full shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    {t('save')}
+                    {isSubmitting ? (
+                      <>
+                        <span className="loading loading-spinner loading-sm"></span>
+                        {t('saving', 'Saving...')}
+                      </>
+                    ) : (
+                      t('save')
+                    )}
                   </button>
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
+          </div>
+
+          {/* Back to Profile Link */}
+          <div className="mt-6 text-center">
+            <button
+              onClick={goToUserProfile}
+              className="link link-primary text-sm"
+            >
+              {t('back_to_profile', '← Back to Profile')}
+            </button>
           </div>
         </div>
       </div>

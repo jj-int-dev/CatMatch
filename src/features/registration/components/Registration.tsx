@@ -35,7 +35,6 @@ export default function Registration() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [isThirdPartyLoading, setIsThirdPartyLoading] = useState(false);
 
-  // Recreate the schema whenever the language changes so that error messages are in the correct language
   const formSchema = useMemo(
     () => createRegistrationFormValidator(),
     [i18n.language]
@@ -52,10 +51,8 @@ export default function Registration() {
   });
 
   const goToUserProfile = () => navigate(`/user-profile`);
-
   const goToLoginPage = () => navigate('/login');
 
-  // Handle cleanup to prevent race conditions
   useEffect(() => {
     return () => {
       // Cleanup function to prevent state updates on unmounted component
@@ -65,7 +62,6 @@ export default function Registration() {
   const onEmailPasswordRegistration = async (
     formData: RegistrationFormSchema
   ) => {
-    // Clear previous errors
     setServerError(null);
     clearErrors();
 
@@ -86,14 +82,12 @@ export default function Registration() {
     ) {
       setServerError(t('no_authenticated_user_found'));
     } else {
-      // Clear form and all state before navigation
       reset();
       setServerError(null);
 
       if (isAuthenticatedUserSession(userSession)) {
         goToUserProfile();
       } else if (isAuthenticatedUser(user)) {
-        // user hasn't confirmed email yet
         goToLoginPage();
       }
     }
@@ -124,154 +118,156 @@ export default function Registration() {
     clearErrors();
   };
 
-  // Get error messages from form state
   const formErrorMessages = Object.values(errors)
     .filter((error) => error?.message)
     .map((error) => error.message as string);
 
-  // Combine form errors and server errors
   const allErrorMessages = [...formErrorMessages];
   if (serverError) {
     allErrorMessages.push(serverError);
   }
 
   return (
-    <>
-      <div className="bg-main-background h-screen bg-cover pt-7">
-        {allErrorMessages.length > 0 && (
-          <ErrorToast
-            messages={allErrorMessages}
-            onCloseToast={onCloseErrorToast}
-          />
-        )}
-        <div className="flex flex-col justify-center px-6">
-          <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-            <img
-              alt="CatMatch"
-              src={catLogo}
-              className="m-auto h-[120px] w-auto"
-            />
-            <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-black">
-              {t('create_your_account')}
-            </h2>
-          </div>
+    <div className="from-base-200 to-base-300 min-h-screen bg-gradient-to-br px-6 py-12">
+      {allErrorMessages.length > 0 && (
+        <ErrorToast
+          messages={allErrorMessages}
+          onCloseToast={onCloseErrorToast}
+        />
+      )}
 
-          <div className="mt-10 rounded-xl bg-[#7289DA] p-8 shadow-2xl sm:mx-auto sm:w-full sm:max-w-sm">
+      <div className="mx-auto flex max-w-md flex-col items-center">
+        {/* Logo */}
+        <img
+          alt="CatMatch"
+          src={catLogo}
+          className="h-28 w-auto drop-shadow-lg sm:h-32"
+        />
+
+        {/* Heading */}
+        <h1 className="text-base-content mt-8 text-center text-3xl font-bold sm:text-4xl">
+          {t('create_your_account')}
+        </h1>
+        <p className="text-base-content/70 mt-2 text-center">
+          {t('join_catmatch_subtitle')}
+        </p>
+
+        {/* Registration Card */}
+        <div className="card bg-base-100 mt-8 w-full shadow-2xl">
+          <div className="card-body">
             <form onSubmit={handleSubmit(onEmailPasswordRegistration)}>
-              <div className="space-y-6">
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm/6 font-medium text-black"
-                  >
-                    {t('email_address')}
+              <div className="space-y-4">
+                {/* Email Field */}
+                <div className="form-control">
+                  <label htmlFor="email" className="label">
+                    <span className="label-text font-medium">
+                      {t('email_address')}
+                    </span>
                   </label>
-                  <div className="mt-2">
-                    <input
-                      id="email"
-                      type="email"
-                      autoComplete="email"
-                      {...register('email')}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                    />
-                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    {...register('email')}
+                    className="input input-bordered focus:input-primary w-full"
+                    placeholder={t('enter_your_email')}
+                  />
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="password"
-                      className="block text-sm/6 font-medium text-black"
-                    >
+                {/* Password Field */}
+                <div className="form-control">
+                  <label htmlFor="password" className="label">
+                    <span className="label-text font-medium">
                       {t('password')}
-                    </label>
-                  </div>
-                  <div className="mt-2">
-                    <input
-                      id="password"
-                      type="password"
-                      {...register('password')}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-700 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                    />
-                  </div>
+                    </span>
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    autoComplete="new-password"
+                    {...register('password')}
+                    className="input input-bordered focus:input-primary w-full"
+                    placeholder={t('create_password')}
+                  />
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="confirmPassword"
-                      className="block text-sm/6 font-medium text-black"
-                    >
+                {/* Confirm Password Field */}
+                <div className="form-control">
+                  <label htmlFor="confirmPassword" className="label">
+                    <span className="label-text font-medium">
                       {t('confirm_password')}
-                    </label>
-                  </div>
-                  <div className="mt-2">
-                    <input
-                      id="confirmPassword"
-                      type="password"
-                      {...register('confirmPassword')}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-700 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                    />
-                  </div>
+                    </span>
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    {...register('confirmPassword')}
+                    className="input input-bordered focus:input-primary w-full"
+                    placeholder={t('confirm_your_password')}
+                  />
                 </div>
-              </div>
 
-              <p className="mt-2 text-end text-sm/6 text-white">
-                {t('already_a_member')}{' '}
-                <Link
-                  to="/login"
-                  className="font-semibold text-indigo-900 hover:font-bold hover:text-indigo-700"
+                {/* Sign Up Button */}
+                <button
+                  disabled={isSubmitting}
+                  type="submit"
+                  className="btn btn-primary w-full"
                 >
-                  {t('login')}
-                </Link>
-              </p>
+                  {isSubmitting ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm"></span>
+                      {t('creating_account')}
+                    </>
+                  ) : (
+                    t('sign_up')
+                  )}
+                </button>
 
-              <div className="mt-4 space-y-2">
-                <div>
-                  <button
-                    disabled={isSubmitting}
-                    type="submit"
-                    className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-                  >
-                    {isSubmitting ? `${t('sign_in')}...` : t('sign_in')}
-                  </button>
+                {/* Divider */}
+                <div className="divider text-base-content/60 text-sm">
+                  {t('or')}
                 </div>
-                <p className="text-center">{t('or')}</p>
-              </div>
 
-              <div className="mt-3 space-y-2">
-                <div>
+                {/* Social Login Buttons */}
+                <div className="space-y-3">
                   <button
                     disabled={isThirdPartyLoading}
                     onClick={onFacebookLogin}
                     type="button"
-                    className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                    className="btn btn-outline btn-secondary w-full"
                   >
-                    <FaFacebook className="size-4 self-center" />
-                    {isThirdPartyLoading
-                      ? `${t('log_in_with_facebook')}...`
-                      : t('log_in_with_facebook')}
+                    <FaFacebook className="h-5 w-5" />
+                    {t('sign_up_with_facebook')}
                   </button>
-                </div>
 
-                <div>
                   <button
                     disabled={isThirdPartyLoading}
                     onClick={onGoogleLogin}
                     type="button"
-                    className="flex w-full justify-center gap-x-3 rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                    className="btn btn-outline btn-accent w-full"
                   >
-                    <FaGoogle className="ml-[-15px] size-4 self-center" />
-                    {isThirdPartyLoading
-                      ? `${t('log_in_with_google')}...`
-                      : t('log_in_with_google')}
+                    <FaGoogle className="h-5 w-5" />
+                    {t('sign_up_with_google')}
                   </button>
                 </div>
               </div>
             </form>
+
+            {/* Login Link */}
+            <div className="divider"></div>
+            <p className="text-base-content/70 text-center text-sm">
+              {t('already_a_member')}{' '}
+              <Link
+                to="/login"
+                className="link-hover link text-primary font-semibold"
+              >
+                {t('login')}
+              </Link>
+            </p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -67,4 +67,127 @@
       transform: translateX(100%);
     }
   }
+
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+
+  /* Mobile touch target optimizations */
+  @media (max-width: 768px) {
+    /* Ensure minimum touch target size of 44px */
+    button,
+    [role='button'],
+    a[href],
+    input[type='submit'],
+    input[type='button'],
+    .btn,
+    .btn-ghost,
+    .btn-square {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Increase padding for better touch targets */
+    .btn {
+      padding: 0.75rem 1rem;
+    }
+
+    /* Larger form inputs for mobile */
+    input:not([type='checkbox']):not([type='radio']),
+    select,
+    textarea {
+      min-height: 44px;
+      font-size: 16px; /* Prevent iOS zoom on focus */
+    }
+
+    /* Better spacing for mobile lists */
+    .list-row {
+      padding: 1rem;
+    }
+
+    /* Mobile-optimized pagination */
+    .join .btn {
+      padding: 0.5rem 0.75rem;
+    }
+
+    /* Mobile-friendly dialog spacing */
+    .modal-box {
+      padding: 1.5rem;
+      margin: 1rem;
+    }
+
+    /* Better touch targets for icons */
+    .btn-square {
+      padding: 0.5rem;
+    }
+  }
+
+  /* Prevent text selection on interactive elements */
+  button,
+  [role='button'],
+  a[href] {
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Improve touch feedback */
+  button:active,
+  [role='button']:active,
+  .btn:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  /* Mobile gesture hints */
+  .swipe-hint {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .swipe-hint::after {
+    content: '← Swipe →';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.8),
+      transparent
+    );
+    color: #666;
+    font-size: 0.875rem;
+    font-weight: 500;
+    animation: swipe-hint 2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes swipe-hint {
+    0%,
+    100% {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+    10%,
+    90% {
+      opacity: 1;
+    }
+    50% {
+      transform: translateX(100%);
+    }
+  }
 }

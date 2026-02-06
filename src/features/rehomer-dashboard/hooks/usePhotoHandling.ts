@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { createAnimalListingPhotosValidator } from '../validators/animalListingPhotosValidator';
 import { processImage } from '../../../utils/processImage';
 
-export interface UsePhotoHandlingReturn {
+export type UsePhotoHandlingReturn = {
   photos: File[];
   photoPreviews: string[];
   photoValidationErrors: string[];
@@ -20,7 +20,7 @@ export interface UsePhotoHandlingReturn {
   setPhotoValidationErrors: React.Dispatch<React.SetStateAction<string[]>>;
   setIsCompressing: React.Dispatch<React.SetStateAction<boolean>>;
   clearPhotos: () => void;
-}
+};
 
 export default function usePhotoHandling(
   maxPhotos: number = 5

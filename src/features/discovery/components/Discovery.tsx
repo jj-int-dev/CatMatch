@@ -3,15 +3,23 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useTranslation } from 'react-i18next';
 import SearchPopover from './SearchPopover';
+import MobileFilterModal from './MobileFilterModal';
 import DiscoveryLoading from './DiscoveryLoading';
 import DiscoveryError from './DiscoveryError';
 import type { SearchFilters } from '../types/SearchFilters';
 import type { GetAnimalsRequest } from '../types/GetAnimalsRequest';
 import useGetAnimals from '../hooks/useGetAnimals';
-import { IoSearch } from 'react-icons/io5';
+import { useSwipeGesture } from '../../../hooks/useSwipeGesture';
+import {
+  IoSearch,
+  IoFilter,
+  IoChevronBack,
+  IoChevronForward
+} from 'react-icons/io5';
 import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
 import getAgeDisplay from '../utils/getAgeDisplay';
 import defaultCatPic from '../../../assets/default_cat.webp';
+import useGetUserType from '../../../hooks/useGetUserType';
 
 export default function Discovery() {
   const { t } = useTranslation();
@@ -23,10 +31,31 @@ export default function Discovery() {
     (state) => state.isAuthenticatedUserSession
   );
 
+  // Get user type
+  const { data: userType, isLoading: isLoadingUserType } = useGetUserType();
+
   const goToLoginPage = () => navigate('/login', { replace: true });
+
+  const goToRehomerDashboard = () =>
+    navigate('/rehomer/dashboard', { replace: true });
 
   const goToAnimalDetails = (animalId: string) =>
     navigate(`/discovery/animal/${animalId}`);
+
+  useEffect(() => {
+    if (!isLoadingSession && !isLoadingUserType) {
+      // Only check authentication after session loading is complete
+      if (!isAuthenticatedUserSession(userSession)) {
+        goToLoginPage();
+        return;
+      }
+
+      // Check if user is a rehomer and redirect if they are
+      if (userType === 'Rehomer') {
+        goToRehomerDashboard();
+      }
+    }
+  }, [userSession, isLoadingSession, isLoadingUserType, userType]);
 
   // Get page from URL query parameter or default to 1
   const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
@@ -46,15 +75,6 @@ export default function Discovery() {
     },
     [searchParams, setSearchParams]
   );
-
-  useEffect(() => {
-    if (!isLoadingSession) {
-      // Only check authentication after session loading is complete
-      if (!isAuthenticatedUserSession(userSession)) {
-        goToLoginPage();
-      }
-    }
-  }, [userSession, isLoadingSession]);
 
   const defaultSearchFilters: SearchFilters = {
     gender: 'All',
@@ -91,6 +111,41 @@ export default function Discovery() {
     ...defaultSearchRequest
   });
   const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [currentAnimalIndex, setCurrentAnimalIndex] = useState(0);
+
+  // Check if device is mobile
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Swipe gesture for animal cards
+  const { ref: swipeRef } = useSwipeGesture({
+    onSwipeLeft: () => {
+      if (
+        animalsData?.animals &&
+        currentAnimalIndex < animalsData.animals.length - 1
+      ) {
+        setCurrentAnimalIndex(currentAnimalIndex + 1);
+      }
+    },
+    onSwipeRight: () => {
+      if (currentAnimalIndex > 0) {
+        setCurrentAnimalIndex(currentAnimalIndex - 1);
+      }
+    },
+    threshold: 50,
+    maxDuration: 300
+  });
 
   const {
     data: animalsData,
@@ -143,6 +198,7 @@ export default function Discovery() {
 
     setSearchRequest(newSearchRequest);
     setIsSearchPopoverOpen(false);
+    setIsMobileFilterOpen(false);
     updatePage(1);
   };
 
@@ -163,14 +219,14 @@ export default function Discovery() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] p-4 md:p-8">
+    <div className="bg-base-100 min-h-screen p-4 md:p-8" ref={swipeRef}>
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="font-serif text-4xl font-bold text-gray-800 md:text-5xl">
+          <h1 className="text-base-content font-serif text-4xl font-bold md:text-5xl">
             {t('discovery_title')}
           </h1>
-          <p className="mt-4 text-lg text-gray-600">
+          <p className="text-base-content/80 mt-4 text-lg">
             {searchRequest.locationSource === 'client-ip'
               ? `${t('discovery_ip')} ${animalsData?.locationDisplay} ${t('discovery_ip_1')}`
               : searchRequest.locationSource === 'client-custom-location'
@@ -182,13 +238,23 @@ export default function Discovery() {
         {/* Search Bar and Controls */}
         <div className="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="relative w-full md:w-auto">
-            <button
-              onClick={() => setIsSearchPopoverOpen(true)}
-              className="btn btn-primary w-full gap-2 pr-6 pl-4 text-lg md:w-auto"
-            >
-              <IoSearch className="size-6" />
-              <span>{t('discovery_search_btn')}</span>
-            </button>
+            {isMobile ? (
+              <button
+                onClick={() => setIsMobileFilterOpen(true)}
+                className="btn btn-primary h-14 min-h-14 w-full gap-2 pr-6 pl-4 text-lg"
+              >
+                <IoFilter className="size-6" />
+                <span>{t('discovery_search_btn')}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsSearchPopoverOpen(true)}
+                className="btn btn-primary h-14 min-h-14 w-full gap-2 pr-6 pl-4 text-lg md:w-auto"
+              >
+                <IoSearch className="size-6" />
+                <span>{t('discovery_search_btn')}</span>
+              </button>
+            )}
 
             {/* Search Popover Component */}
             <SearchPopover
@@ -196,6 +262,17 @@ export default function Discovery() {
               isSearching={isGettingAnimals}
               searchFilters={searchFilters}
               onClose={() => setIsSearchPopoverOpen(false)}
+              onSearch={handleSearch}
+              onReset={handleReset}
+              onFiltersChange={setSearchFilters}
+            />
+
+            {/* Mobile Filter Modal */}
+            <MobileFilterModal
+              isOpen={isMobileFilterOpen}
+              isSearching={isGettingAnimals}
+              searchFilters={searchFilters}
+              onClose={() => setIsMobileFilterOpen(false)}
               onSearch={handleSearch}
               onReset={handleReset}
               onFiltersChange={setSearchFilters}
@@ -213,7 +290,7 @@ export default function Discovery() {
           </div>
         </div>
 
-        {/* Cats Grid */}
+        {/* Cats Grid or Mobile Swipe View */}
         {animalsData?.animals.length === 0 ? (
           <div className="rounded-box bg-base-100 border p-12 text-center shadow-sm">
             <h3 className="text-2xl font-bold text-gray-700">
@@ -221,13 +298,124 @@ export default function Discovery() {
             </h3>
             <p className="mt-2 text-gray-600">{t('discovery_search_help')}</p>
             <button
-              onClick={() => setIsSearchPopoverOpen(true)}
-              className="btn btn-primary mt-6"
+              onClick={() =>
+                isMobile
+                  ? setIsMobileFilterOpen(true)
+                  : setIsSearchPopoverOpen(true)
+              }
+              className="btn btn-primary mt-6 h-14 min-h-14 px-8"
             >
               {t('modify_search')}
             </button>
           </div>
+        ) : isMobile ? (
+          // Mobile swipe view
+          <div className="relative">
+            <div className="mb-6 flex items-center justify-between">
+              <button
+                onClick={() =>
+                  setCurrentAnimalIndex(Math.max(0, currentAnimalIndex - 1))
+                }
+                disabled={currentAnimalIndex === 0}
+                className="btn btn-circle btn-ghost h-14 min-h-14 w-14 disabled:opacity-30"
+              >
+                <IoChevronBack className="size-6" />
+              </button>
+              <div className="text-center">
+                <p className="font-semibold">
+                  {currentAnimalIndex + 1} / {animalsData.animals.length}
+                </p>
+                <p className="text-sm text-gray-600">{t('swipe_to_browse')}</p>
+              </div>
+              <button
+                onClick={() =>
+                  setCurrentAnimalIndex(
+                    Math.min(
+                      animalsData.animals.length - 1,
+                      currentAnimalIndex + 1
+                    )
+                  )
+                }
+                disabled={currentAnimalIndex === animalsData.animals.length - 1}
+                className="btn btn-circle btn-ghost h-14 min-h-14 w-14 disabled:opacity-30"
+              >
+                <IoChevronForward className="size-6" />
+              </button>
+            </div>
+
+            {animalsData.animals.map((animal, index) => (
+              <div
+                key={animal.animalId}
+                className={`transition-all duration-300 ${index === currentAnimalIndex ? 'translate-x-0 opacity-100' : 'absolute translate-x-full opacity-0'}`}
+                style={{
+                  display: index === currentAnimalIndex ? 'block' : 'none'
+                }}
+              >
+                <div className="card card-compact rounded-box bg-base-100 overflow-hidden border shadow-lg">
+                  <figure className="h-64 overflow-hidden">
+                    <img
+                      src={
+                        animal.animalPhotos.length > 0
+                          ? animal.animalPhotos[0].photoUrl
+                          : defaultCatPic
+                      }
+                      alt={animal.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </figure>
+                  <div className="card-body p-6">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="card-title text-2xl font-bold">
+                          {animal.name}
+                        </h3>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <span
+                            className={`badge h-8 min-h-8 ${animal.gender === 'Male' ? 'badge-info' : 'badge-secondary'}`}
+                          >
+                            {animal.gender === 'Male' ? (
+                              <TbGenderMale className="mr-1 inline size-4" />
+                            ) : (
+                              <TbGenderFemale className="mr-1 inline size-4" />
+                            )}
+                            {animal.gender}
+                          </span>
+                          <span className="badge badge-outline h-8 min-h-8">
+                            {getAgeDisplay(animal.ageInWeeks, t)}
+                          </span>
+                          <span
+                            className={`badge h-8 min-h-8 ${animal.neutered ? 'badge-success' : 'badge-warning'}`}
+                          >
+                            {t(animal.neutered ? 'neutered' : 'not_neutered')}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-primary text-2xl font-bold">
+                          {(animal.distanceMeters / 1000).toFixed(1)} km
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="mt-4 line-clamp-3 text-gray-600">
+                      {animal.description}
+                    </p>
+
+                    <div className="card-actions mt-6">
+                      <button
+                        className="btn btn-primary btn-block h-14 min-h-14 text-lg"
+                        onClick={() => goToAnimalDetails(animal.animalId)}
+                      >
+                        {t('view_details')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
+          // Desktop grid view
           <>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {animalsData?.animals.map((animal) => (
@@ -254,7 +442,7 @@ export default function Discovery() {
                         </h3>
                         <div className="mt-1 flex flex-wrap items-center gap-2">
                           <span
-                            className={`badge ${animal.gender === 'Male' ? 'badge-info' : 'badge-secondary'}`}
+                            className={`badge h-8 min-h-8 ${animal.gender === 'Male' ? 'badge-info' : 'badge-secondary'}`}
                           >
                             {animal.gender === 'Male' ? (
                               <TbGenderMale className="mr-1 inline size-4" />
@@ -263,11 +451,11 @@ export default function Discovery() {
                             )}
                             {animal.gender}
                           </span>
-                          <span className="badge badge-outline">
+                          <span className="badge badge-outline h-8 min-h-8">
                             {getAgeDisplay(animal.ageInWeeks, t)}
                           </span>
                           <span
-                            className={`badge ${animal.neutered ? 'badge-success' : 'badge-warning'}`}
+                            className={`badge h-8 min-h-8 ${animal.neutered ? 'badge-success' : 'badge-warning'}`}
                           >
                             {t(animal.neutered ? 'neutered' : 'not_neutered')}
                           </span>
@@ -286,7 +474,7 @@ export default function Discovery() {
 
                     <div className="card-actions mt-4">
                       <button
-                        className="btn btn-primary btn-block group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                        className="btn btn-primary btn-block group relative h-12 min-h-12 overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                         onClick={() => goToAnimalDetails(animal.animalId)}
                       >
                         <span className="relative z-10">
@@ -305,7 +493,7 @@ export default function Discovery() {
               <div className="mt-12 flex justify-center">
                 <div className="join">
                   <button
-                    className="join-item btn"
+                    className="join-item btn h-12 min-h-12"
                     onClick={goToPreviousPage}
                     disabled={page === 1}
                   >
@@ -317,14 +505,14 @@ export default function Discovery() {
                   ).map((pageNum) => (
                     <button
                       key={pageNum}
-                      className={`join-item btn ${pageNum === page ? 'btn-active' : ''}`}
+                      className={`join-item btn h-12 min-h-12 ${pageNum === page ? 'btn-active' : ''}`}
                       onClick={() => updatePage(pageNum)}
                     >
                       {pageNum}
                     </button>
                   ))}
                   <button
-                    className="join-item btn"
+                    className="join-item btn h-12 min-h-12"
                     onClick={goToNextPage}
                     disabled={page === animalsData.pagination.totalPages}
                   >

@@ -18,6 +18,12 @@ const axiosAnimalsClient = axios.create({
   withCredentials: true
 });
 
+const axiosMessagesClient = axios.create({
+  baseURL: import.meta.env.VITE_MESSAGES_MICROSERVICE_BASE_URL,
+  timeout: 30000,
+  withCredentials: true
+});
+
 const axiosGeoapifyClient = axios.create({
   baseURL: import.meta.env.VITE_GEOAPIFY_BASE_API_URL,
   timeout: 30000,
@@ -30,5 +36,6 @@ export {
   axiosUsersClient,
   axiosRehomersClient,
   axiosAnimalsClient,
+  axiosMessagesClient,
   axiosGeoapifyClient
 };

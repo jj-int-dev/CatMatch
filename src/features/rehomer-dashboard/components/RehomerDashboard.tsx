@@ -7,12 +7,14 @@ import useGetAnimalListings from '../hooks/useGetAnimalListings';
 import RehomerDashboardSkeleton from './RehomerDashboardSkeleton';
 import RehomerDashboardEmpty from './RehomerDashboardEmpty';
 import RehomerDashboardError from './RehomerDashboardError';
+import MobileAnimalCard from './MobileAnimalCard';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 import { IoAddCircleOutline } from 'react-icons/io5';
 import { FaRegEdit, FaRegTrashAlt } from 'react-icons/fa';
 import { DeleteAnimalDialog, type AnimalToDelete } from './DeleteAnimalDialog';
 import useDeleteAnimalListing from '../hooks/useDeleteAnimalListing';
 import defaultCatPic from '../../../assets/default_cat.webp';
+import useGetUserType from '../../../hooks/useGetUserType';
 
 export default function RehomerDashboard() {
   const { t } = useTranslation();
@@ -25,25 +27,35 @@ export default function RehomerDashboard() {
     (state) => state.isAuthenticatedUserSession
   );
 
+  const { data: userType, isLoading: isLoadingUserType } = useGetUserType();
+
+  const goToDiscovery = () => navigate('/discovery', { replace: true });
   const goToLoginPage = () => navigate('/login', { replace: true });
-
   const goToAddAnimalListingPage = () => navigate('/rehomer/animal/add');
-
   const goToEditAnimalListingPage = (animalId: string) =>
     navigate(`/rehomer/animal/edit/${animalId}`);
+
+  useEffect(() => {
+    if (!isLoadingSession && !isLoadingUserType) {
+      if (!isAuthenticatedUserSession(userSession)) {
+        goToLoginPage();
+        return;
+      }
+      if (userType === 'Adopter') {
+        goToDiscovery();
+      }
+    }
+  }, [userSession, isLoadingSession, isLoadingUserType, userType]);
 
   const getAgeDisplay = (ageInWeeks: number) =>
     `${(ageInWeeks / 4).toFixed(2)} ${t('months_old')}`;
 
-  // Get page from URL query parameter or default to 1
   const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
   const initialPage = !isNaN(pageFromUrl) && pageFromUrl >= 1 ? pageFromUrl : 1;
   const pageSize = 10;
 
-  // Pagination state
   const [page, setPage] = useState(initialPage);
 
-  // Update URL when page changes
   const updatePage = useCallback(
     (newPage: number) => {
       setPage(newPage);
@@ -54,14 +66,18 @@ export default function RehomerDashboard() {
     [searchParams, setSearchParams]
   );
 
+  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
-    if (!isLoadingSession) {
-      // Only check authentication after session loading is complete
-      if (!isAuthenticatedUserSession(userSession)) {
-        goToLoginPage();
-      }
-    }
-  }, [userSession, isLoadingSession]);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const {
     data: animalListings,
@@ -69,7 +85,6 @@ export default function RehomerDashboard() {
     isError: getAnimalListingsFailed
   } = useGetAnimalListings(page, pageSize);
 
-  // Handle page navigation
   const goToPreviousPage = useCallback(() => {
     if (page > 1) {
       updatePage(page - 1);
@@ -90,14 +105,12 @@ export default function RehomerDashboard() {
     isError: deleteAnimalListingFailed
   } = useDeleteAnimalListing();
 
-  // State for deletion confirmation dialog
   const [animalToDelete, setAnimalToDelete] = useState<AnimalToDelete | null>(
     null
   );
   const [isDeletingAnimal, setIsDeletingAnimal] = useState(false);
   const [isDeletionDialogOpen, setIsDeletionDialogOpen] = useState(false);
 
-  // Functions for delete dialog
   const openDeletionDialog = (animal: AnimalToDelete) => {
     setAnimalToDelete(animal);
     setIsDeletingAnimal(false);
@@ -121,31 +134,6 @@ export default function RehomerDashboard() {
     });
   };
 
-  // Handle error states
-  if (getAnimalListingsFailed) {
-    return (
-      <div className="-mt-16 flex w-screen flex-col justify-start bg-[#f9f9f9] bg-cover bg-center px-8 pt-28 pb-10">
-        <h1 className="self-center font-serif text-5xl font-bold">
-          {t('rehomer_dashboard_title')}
-        </h1>
-        <RehomerDashboardError
-          errorType="load"
-          onRetry={() => {
-            queryClient.invalidateQueries({
-              queryKey: [
-                'animal-listings',
-                userSession?.user.id,
-                page,
-                pageSize
-              ]
-            });
-          }}
-        />
-      </div>
-    );
-  }
-
-  // Show error toast for delete failures
   const [showDeleteError, setShowDeleteError] = useState(false);
 
   useEffect(() => {
@@ -158,136 +146,252 @@ export default function RehomerDashboard() {
     setShowDeleteError(false);
   };
 
-  return (
-    <div className="-mt-16 flex w-screen flex-col justify-start bg-[#f9f9f9] bg-cover bg-center px-8 pt-28 pb-10">
-      <h1 className="self-center font-serif text-5xl font-bold">
-        {t('rehomer_dashboard_title')}
-      </h1>
-      <button
-        className="btn btn-soft btn-success mt-16 self-end pl-2"
-        onClick={goToAddAnimalListingPage}
-      >
-        <IoAddCircleOutline className="size-5" />{' '}
-        <span className="text-base">{t('add')}</span>
-      </button>
-      {!isLoadingAnimalListings && animalListings?.animals.length === 0 ? (
-        <RehomerDashboardEmpty />
-      ) : (
-        <div className="mt-7">
-          {isLoadingAnimalListings ? (
-            <RehomerDashboardSkeleton />
-          ) : (
-            <>
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  {t('showing')}{' '}
-                  {animalListings?.pagination.totalResults === 0
-                    ? 0
-                    : (animalListings?.pagination.page! - 1) *
-                        animalListings?.pagination.pageSize! +
-                      1}{' '}
-                  -{' '}
-                  {Math.min(
-                    animalListings?.pagination.page! *
-                      animalListings?.pagination.pageSize!,
-                    animalListings?.pagination.totalResults!
-                  )}{' '}
-                  {t('of')} {animalListings?.pagination.totalResults}{' '}
-                  {t('cats')}
-                </div>
-                <div className="join">
-                  <button
-                    className="btn join-item"
-                    onClick={goToPreviousPage}
-                    disabled={page === 1 || isLoadingAnimalListings}
-                  >
-                    {t('previous')}
-                  </button>
-                  <button className="btn join-item no-animation cursor-default">
-                    {t('page')} {animalListings?.pagination.page} /{' '}
-                    {animalListings?.pagination.totalPages}
-                  </button>
-                  <button
-                    className="btn join-item"
-                    onClick={goToNextPage}
-                    disabled={
-                      page === animalListings?.pagination.totalPages ||
-                      isLoadingAnimalListings
-                    }
-                  >
-                    {t('next')}
-                  </button>
-                </div>
-              </div>
-              <ul className="list bg-base-100 rounded-box shadow-md">
-                {animalListings?.animals.map((animal) => (
-                  <li className="list-row" key={animal.animalId}>
-                    <div>
-                      <img
-                        className="rounded-box size-24"
-                        src={animal.animalPhotos[0]?.photoUrl || defaultCatPic}
-                        alt={animal.name}
-                      />
-                    </div>
-                    <div>
-                      <div>{animal.name}</div>
-                      <div className="text-xs font-semibold uppercase opacity-60">
-                        {`${animal.gender} - ${getAgeDisplay(animal.ageInWeeks)} - ${animal.addressDisplayName}`}
-                      </div>
-                      <p className="list-col-wrap text-xs">
-                        {animal.description}
-                      </p>
-                    </div>
-                    <button
-                      className="btn btn-square btn-ghost"
-                      onClick={() => goToEditAnimalListingPage(animal.animalId)}
-                    >
-                      <FaRegEdit className="size-5" />
-                    </button>
-                    <button
-                      className="btn btn-square btn-ghost"
-                      onClick={() =>
-                        openDeletionDialog({
-                          animalId: animal.animalId,
-                          name: animal.name,
-                          gender: animal.gender,
-                          ageDisplay: getAgeDisplay(animal.ageInWeeks),
-                          addressDisplay: animal.addressDisplayName,
-                          description: animal.description,
-                          photoUrl:
-                            animal.animalPhotos.find((a) => a.order === 0)
-                              ?.photoUrl ?? ''
-                        })
-                      }
-                    >
-                      <FaRegTrashAlt className="size-5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Deletion Confirmation Dialog */}
-              {animalToDelete && (
-                <DeleteAnimalDialog
-                  animal={animalToDelete}
-                  isOpen={isDeletionDialogOpen}
-                  isDeleting={isDeletingAnimal}
-                  onClose={closeDeletionDialog}
-                  onConfirm={handleDeleteAnimal}
-                />
-              )}
-            </>
-          )}
+  if (getAnimalListingsFailed) {
+    return (
+      <div className="from-base-200 to-base-300 min-h-screen bg-gradient-to-br px-4 pt-28 pb-10 md:px-8">
+        <div className="mx-auto max-w-7xl">
+          <h1 className="text-base-content mb-8 text-center text-4xl font-bold md:text-5xl">
+            {t('rehomer_dashboard_title')}
+          </h1>
+          <RehomerDashboardError
+            errorType="load"
+            onRetry={() => {
+              queryClient.invalidateQueries({
+                queryKey: [
+                  'animal-listings',
+                  userSession?.user.id,
+                  page,
+                  pageSize
+                ]
+              });
+            }}
+          />
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Error toast for delete failures */}
+  return (
+    <div className="from-base-200 to-base-300 min-h-screen bg-gradient-to-br px-4 pt-28 pb-10 md:px-8">
       {showDeleteError && (
         <ErrorToast
           messages={[t('delete_animal_listing_error')]}
           onCloseToast={handleCloseDeleteErrorToast}
         />
       )}
+
+      <div className="mx-auto max-w-7xl">
+        {/* Header Section */}
+        <div className="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row">
+          <h1 className="text-base-content text-center text-4xl font-bold md:text-left md:text-5xl">
+            {t('rehomer_dashboard_title')}
+          </h1>
+          <button
+            className="btn btn-success gap-2 shadow-lg"
+            onClick={goToAddAnimalListingPage}
+          >
+            <IoAddCircleOutline className="h-5 w-5" />
+            {t('add')}
+          </button>
+        </div>
+
+        {/* Content Section */}
+        {!isLoadingAnimalListings && animalListings?.animals.length === 0 ? (
+          <RehomerDashboardEmpty />
+        ) : (
+          <div className="space-y-6">
+            {isLoadingAnimalListings ? (
+              <RehomerDashboardSkeleton />
+            ) : (
+              <>
+                {/* Stats and Pagination */}
+                <div className="card bg-base-100 shadow-lg">
+                  <div className="card-body">
+                    <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+                      {/* Results Info */}
+                      <div className="text-base-content/70 text-center text-sm md:text-left md:text-base">
+                        {t('showing')}{' '}
+                        <span className="text-base-content font-semibold">
+                          {animalListings?.pagination.totalResults === 0
+                            ? 0
+                            : (animalListings?.pagination.page! - 1) *
+                                animalListings?.pagination.pageSize! +
+                              1}
+                        </span>
+                        {' - '}
+                        <span className="text-base-content font-semibold">
+                          {Math.min(
+                            animalListings?.pagination.page! *
+                              animalListings?.pagination.pageSize!,
+                            animalListings?.pagination.totalResults!
+                          )}
+                        </span>{' '}
+                        {t('of')}{' '}
+                        <span className="text-base-content font-semibold">
+                          {animalListings?.pagination.totalResults}
+                        </span>{' '}
+                        {t('cats')}
+                      </div>
+
+                      {/* Pagination Controls */}
+                      <div className="join shadow-md">
+                        <button
+                          className="btn btn-sm join-item md:btn-md"
+                          onClick={goToPreviousPage}
+                          disabled={page === 1 || isLoadingAnimalListings}
+                        >
+                          ‹
+                        </button>
+                        <button className="btn btn-sm join-item no-animation md:btn-md cursor-default">
+                          {t('page')} {animalListings?.pagination.page} /{' '}
+                          {animalListings?.pagination.totalPages}
+                        </button>
+                        <button
+                          className="btn btn-sm join-item md:btn-md"
+                          onClick={goToNextPage}
+                          disabled={
+                            page === animalListings?.pagination.totalPages ||
+                            isLoadingAnimalListings
+                          }
+                        >
+                          ›
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Animals List */}
+                {isMobile ? (
+                  <div className="space-y-4">
+                    {animalListings?.animals.map((animal) => (
+                      <MobileAnimalCard
+                        key={animal.animalId}
+                        animal={animal}
+                        onEdit={goToEditAnimalListingPage}
+                        onDelete={openDeletionDialog}
+                        getAgeDisplay={getAgeDisplay}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="card bg-base-100 shadow-lg">
+                    <div className="card-body p-0">
+                      <div className="overflow-x-auto">
+                        <table className="table">
+                          <thead>
+                            <tr className="border-base-300">
+                              <th className="bg-base-200">{t('photo')}</th>
+                              <th className="bg-base-200">{t('name')}</th>
+                              <th className="bg-base-200">{t('details')}</th>
+                              <th className="bg-base-200">
+                                {t('description')}
+                              </th>
+                              <th className="bg-base-200 text-right">
+                                {t('actions')}
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {animalListings?.animals.map((animal) => (
+                              <tr
+                                key={animal.animalId}
+                                className="hover border-base-300"
+                              >
+                                <td>
+                                  <div className="avatar">
+                                    <div className="mask mask-squircle h-16 w-16">
+                                      <img
+                                        src={
+                                          animal.animalPhotos[0]?.photoUrl ||
+                                          defaultCatPic
+                                        }
+                                        alt={animal.name}
+                                      />
+                                    </div>
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="text-base-content font-bold">
+                                    {animal.name}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="text-base-content/70 text-sm">
+                                    {animal.gender} •{' '}
+                                    {getAgeDisplay(animal.ageInWeeks)}
+                                  </div>
+                                  <div className="badge badge-ghost badge-sm mt-1">
+                                    {animal.addressDisplayName}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="text-base-content/70 line-clamp-2 max-w-md text-sm">
+                                    {animal.description}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="flex justify-end gap-2">
+                                    <button
+                                      className="btn btn-ghost btn-sm"
+                                      onClick={() =>
+                                        goToEditAnimalListingPage(
+                                          animal.animalId
+                                        )
+                                      }
+                                      aria-label={t('edit')}
+                                    >
+                                      <FaRegEdit className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                      className="btn btn-ghost btn-sm text-error hover:bg-error/10"
+                                      onClick={() =>
+                                        openDeletionDialog({
+                                          animalId: animal.animalId,
+                                          name: animal.name,
+                                          gender: animal.gender,
+                                          ageDisplay: getAgeDisplay(
+                                            animal.ageInWeeks
+                                          ),
+                                          addressDisplay:
+                                            animal.addressDisplayName,
+                                          description: animal.description,
+                                          photoUrl:
+                                            animal.animalPhotos.find(
+                                              (a) => a.order === 0
+                                            )?.photoUrl ?? ''
+                                        })
+                                      }
+                                      aria-label={t('delete')}
+                                    >
+                                      <FaRegTrashAlt className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Deletion Confirmation Dialog */}
+                {animalToDelete && (
+                  <DeleteAnimalDialog
+                    animal={animalToDelete}
+                    isOpen={isDeletionDialogOpen}
+                    isDeleting={isDeletingAnimal}
+                    onClose={closeDeletionDialog}
+                    onConfirm={handleDeleteAnimal}
+                  />
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

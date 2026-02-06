@@ -1,13 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth-store';
-import useGetUserProfilePictureAndType from '../../hooks/useGetUserProfilePictureAndType';
+import useGetUserProfilePicture from '../../hooks/useGetUserProfilePicture';
+import useGetUserType from '../../hooks/useGetUserType';
+import useGetUnreadMessagesCount from './hooks/useGetUnreadMessagesCount';
+import { useTheme } from '../../hooks/useTheme';
 import defaultProfilePic from '../../assets/default_profile_pic.webp';
 import getUniqueImageUrl from '../../utils/getUniqueImageUrl';
 import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, type NavLinkRenderProps } from 'react-router';
-import type { Theme } from '../../types/Theme';
 import type { Language } from '../../types/Language';
+import type { Theme } from '../../types/Theme';
 import {
   FiUser,
   FiLogOut,
@@ -29,8 +32,8 @@ export default function Navigation() {
     (state) => state.isAuthenticatedUserSession
   );
   const logUserOut = useAuthStore((state) => state.logUserOut);
+  const { theme, setTheme } = useTheme();
 
-  const [theme, setTheme] = useState<Theme>('light');
   const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -62,28 +65,27 @@ export default function Navigation() {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Apply theme to document
-  useEffect(() => {
-    const html = document.documentElement;
-    if (theme === 'dark') {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
-  }, [theme]);
-
-  const toggleTheme = (newTheme: Theme) => {
+  const handleThemeToggle = (newTheme: Theme, closeMobileMenu = false) => {
     setTheme(newTheme);
     setIsThemeDropdownOpen(false);
+    if (closeMobileMenu) {
+      setIsMobileMenuOpen(false);
+    }
   };
 
-  const toggleLanguage = (newLanguage: Language) => {
+  const handleLanguageToggle = (
+    newLanguage: Language,
+    closeMobileMenu = false
+  ) => {
     i18n.changeLanguage(newLanguage);
     setIsLanguageDropdownOpen(false);
+    if (closeMobileMenu) {
+      setIsMobileMenuOpen(false);
+    }
   };
 
   const onLogout = async () => {
@@ -96,44 +98,48 @@ export default function Navigation() {
     await onLogout();
   };
 
-  const { isPending, isError, data } = useGetUserProfilePictureAndType();
+  const {
+    isPending: isGettingProfilePicture,
+    isError: getProfilePictureFailed,
+    data: profilePicture
+  } = useGetUserProfilePicture();
+  const { isPending: isGettingUserType, data: userType } = useGetUserType();
+  const { data: unreadCount } = useGetUnreadMessagesCount();
 
   const profilePicUrl =
-    isPending || isError || !data.avatarUrl
+    isGettingProfilePicture || getProfilePictureFailed || !profilePicture
       ? defaultProfilePic
-      : data.avatarUrl!.includes('?timestamp=')
-        ? data.avatarUrl!
-        : getUniqueImageUrl(data.avatarUrl!);
-
-  const userType = isPending || isError ? null : data.userType;
+      : profilePicture.includes('?timestamp=')
+        ? profilePicture
+        : getUniqueImageUrl(profilePicture);
 
   const menuItemStyles = ({ isActive }: NavLinkRenderProps): string =>
     `flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors md:px-4 md:text-sm ${
       isActive
-        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'
+        ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-content'
+        : 'text-base-content hover:bg-base-200'
     }`;
 
   const mobileMenuItemStyles = ({ isActive }: NavLinkRenderProps): string =>
     `flex items-center space-x-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
       isActive
-        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+        ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-content'
+        : 'text-base-content hover:bg-base-200'
     }`;
 
   const goToUserProfile = () => navigate(`/user-profile`);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <nav className="border-base-300 bg-base-100 sticky top-0 z-50 w-full border-b shadow-sm">
       <div className="mx-auto w-full px-4 sm:px-6 lg:max-w-7xl lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo and Home Button */}
           <div className="flex items-center">
             <Link
               to="/"
-              className="flex items-center space-x-2 text-gray-900 transition-colors hover:text-indigo-600 dark:text-white dark:hover:text-indigo-400"
+              className="text-base-content hover:text-primary flex items-center space-x-2 transition-colors"
             >
-              <FaCat className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+              <FaCat className="text-primary h-8 w-8" />
               <span className="hidden text-xl font-bold sm:inline">
                 CatMatch
               </span>
@@ -145,9 +151,10 @@ export default function Navigation() {
             {/* Main Menu Items */}
             {isAuthenticatedUserSession(userSession) && (
               <>
-                {!!userType &&
+                {!isGettingUserType &&
+                  !!userType &&
                   (userType === 'Rehomer' ? (
-                    <NavLink to="/rehomer-dashboard" className={menuItemStyles}>
+                    <NavLink to="/rehomer/dashboard" className={menuItemStyles}>
                       <FaCat className="h-4 w-4" />
                       <span>{t('my_cats')}</span>
                     </NavLink>
@@ -161,6 +168,11 @@ export default function Navigation() {
                 <NavLink to="/messages" className={menuItemStyles}>
                   <FiMessageSquare className="h-4 w-4" />
                   <span>{t('messages')}</span>
+                  {!!unreadCount && unreadCount > 0 && (
+                    <span className="bg-error text-error-content ml-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-medium">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </NavLink>
               </>
             )}
@@ -172,7 +184,7 @@ export default function Navigation() {
                   setIsThemeDropdownOpen(!isThemeDropdownOpen);
                   setIsLanguageDropdownOpen(false);
                 }}
-                className="flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 md:px-4 md:text-sm dark:text-gray-300 dark:hover:bg-gray-800"
+                className="text-base-content hover:bg-base-200 flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors md:px-4 md:text-sm"
               >
                 {theme === 'light' ? (
                   <FiSun className="h-4 w-4" />
@@ -186,33 +198,33 @@ export default function Navigation() {
               </button>
 
               {isThemeDropdownOpen && (
-                <div className="absolute right-0 z-10 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                <div className="border-base-300 bg-base-100 absolute right-0 z-10 mt-2 w-48 rounded-lg border py-1 shadow-lg">
                   <button
-                    onClick={() => toggleTheme('light')}
+                    onClick={() => handleThemeToggle('light')}
                     className={`flex w-full items-center space-x-3 px-4 py-2 text-left text-sm transition-colors ${
                       theme === 'light'
-                        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-base-content hover:bg-base-200'
                     }`}
                   >
                     <FiSun className="h-4 w-4" />
                     <span className="flex-1">{t('light')}</span>
                     {theme === 'light' && (
-                      <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                      <div className="bg-primary h-2 w-2 rounded-full" />
                     )}
                   </button>
                   <button
-                    onClick={() => toggleTheme('dark')}
+                    onClick={() => handleThemeToggle('dark')}
                     className={`flex w-full items-center space-x-3 px-4 py-2 text-left text-sm transition-colors ${
                       theme === 'dark'
-                        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-base-content hover:bg-base-200'
                     }`}
                   >
                     <FiMoon className="h-4 w-4" />
                     <span className="flex-1">{t('dark')}</span>
                     {theme === 'dark' && (
-                      <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                      <div className="bg-primary h-2 w-2 rounded-full" />
                     )}
                   </button>
                 </div>
@@ -226,7 +238,7 @@ export default function Navigation() {
                   setIsLanguageDropdownOpen(!isLanguageDropdownOpen);
                   setIsThemeDropdownOpen(false);
                 }}
-                className="flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 md:px-4 md:text-sm dark:text-gray-300 dark:hover:bg-gray-800"
+                className="text-base-content hover:bg-base-200 flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors md:px-4 md:text-sm"
               >
                 <FiGlobe className="h-4 w-4" />
                 <span>{t('language')}</span>
@@ -236,32 +248,32 @@ export default function Navigation() {
               </button>
 
               {isLanguageDropdownOpen && (
-                <div className="absolute right-0 z-10 mt-2 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                <div className="border-base-300 bg-base-100 absolute right-0 z-10 mt-2 w-48 rounded-lg border py-1 shadow-lg">
                   <button
-                    onClick={() => toggleLanguage('en')}
+                    onClick={() => handleLanguageToggle('en')}
                     className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm transition-colors ${
                       i18n.language === 'en'
-                        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-base-content hover:bg-base-200'
                     }`}
                   >
                     <span>English</span>
                     {i18n.language === 'en' && (
-                      <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                      <div className="bg-primary h-2 w-2 rounded-full" />
                     )}
                   </button>
 
                   <button
-                    onClick={() => toggleLanguage('es')}
+                    onClick={() => handleLanguageToggle('es')}
                     className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm transition-colors ${
                       i18n.language === 'es'
-                        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-base-content hover:bg-base-200'
                     }`}
                   >
                     <span>Español</span>
                     {i18n.language === 'es' && (
-                      <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                      <div className="bg-primary h-2 w-2 rounded-full" />
                     )}
                   </button>
                 </div>
@@ -271,10 +283,10 @@ export default function Navigation() {
             {/* Profile Picture */}
             <div className="relative">
               <button
-                className="flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 md:px-3 md:text-sm dark:text-gray-300 dark:hover:bg-gray-800"
+                className="text-base-content hover:bg-base-200 flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors md:px-3 md:text-sm"
                 onClick={goToUserProfile}
               >
-                <div className="relative h-8 w-8 overflow-hidden rounded-full border-2 border-indigo-200 dark:border-indigo-800">
+                <div className="border-primary/30 relative h-8 w-8 overflow-hidden rounded-full border-2">
                   <img
                     src={profilePicUrl}
                     alt={t('profile_picture')}
@@ -286,7 +298,10 @@ export default function Navigation() {
             </div>
 
             {/* Sign Out Button */}
-            <button className="flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 md:px-4 md:text-sm dark:text-red-400 dark:hover:bg-red-900/30">
+            <button
+              onClick={onLogout}
+              className="text-error hover:bg-error/10 flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors md:px-4 md:text-sm"
+            >
               <FiLogOut className="h-4 w-4" />
               <span>{t('sign_out')}</span>
             </button>
@@ -296,7 +311,7 @@ export default function Navigation() {
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="rounded-lg p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+              className="text-base-content hover:bg-base-200 rounded-lg p-2 transition-colors"
             >
               {isMobileMenuOpen ? (
                 <FiX className="h-6 w-6" />
@@ -312,12 +327,12 @@ export default function Navigation() {
       {isMobileMenuOpen && (
         <div
           ref={mobileMenuRef}
-          className="border-t border-gray-200 bg-white md:hidden dark:border-gray-800 dark:bg-gray-900"
+          className="border-base-300 bg-base-100 border-t md:hidden"
         >
           <div className="space-y-1 px-4 py-3">
             {/* Mobile Profile Section */}
-            <div className="mb-4 flex items-center space-x-3 rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
-              <div className="relative h-12 w-12 overflow-hidden rounded-full border-2 border-indigo-300 dark:border-indigo-700">
+            <div className="bg-base-200 mb-4 flex items-center space-x-3 rounded-lg p-4">
+              <div className="border-primary/40 relative h-12 w-12 overflow-hidden rounded-full border-2">
                 <img
                   src={profilePicUrl}
                   alt={t('profile_picture')}
@@ -325,14 +340,20 @@ export default function Navigation() {
                 />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-gray-900 dark:text-white">
+                <h3 className="text-base-content font-medium">
                   {t('user_profile')}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-base-content/70 text-sm">
                   {t('view_edit_profile')}
                 </p>
               </div>
-              <button className="rounded-lg p-2 text-gray-700 transition-colors hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700">
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  goToUserProfile();
+                }}
+                className="text-base-content hover:bg-base-300 rounded-lg p-2 transition-colors"
+              >
                 <FiUser className="h-5 w-5" />
               </button>
             </div>
@@ -340,10 +361,11 @@ export default function Navigation() {
             {/* Mobile Menu Items */}
             {isAuthenticatedUserSession(userSession) && (
               <>
-                {!!userType &&
+                {!isGettingUserType &&
+                  !!userType &&
                   (userType === 'Rehomer' ? (
                     <NavLink
-                      to="/rehomer-dashboard"
+                      to="/rehomer/dashboard"
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={mobileMenuItemStyles}
                     >
@@ -368,48 +390,47 @@ export default function Navigation() {
                 >
                   <FiMessageSquare className="h-4 w-4" />
                   <span>{t('messages')}</span>
+                  {!!unreadCount && unreadCount > 0 && (
+                    <span className="bg-error text-error-content ml-auto flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-xs font-medium">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </NavLink>
               </>
             )}
 
             {/* Mobile Theme Section */}
             <div className="px-4 py-3">
-              <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+              <div className="text-base-content/70 mb-2 text-sm font-medium">
                 {t('theme')}
               </div>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => {
-                    toggleTheme('light');
-                    setIsMobileMenuOpen(false);
-                  }}
+                  onClick={() => handleThemeToggle('light', true)}
                   className={`flex flex-1 items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                     theme === 'light'
-                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-base-content hover:bg-base-200'
                   }`}
                 >
                   <FiSun className="h-4 w-4" />
                   <span>{t('light')}</span>
                   {theme === 'light' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                    <div className="bg-primary ml-auto h-2 w-2 rounded-full" />
                   )}
                 </button>
                 <button
-                  onClick={() => {
-                    toggleTheme('dark');
-                    setIsMobileMenuOpen(false);
-                  }}
+                  onClick={() => handleThemeToggle('dark', true)}
                   className={`flex flex-1 items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                     theme === 'dark'
-                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-base-content hover:bg-base-200'
                   }`}
                 >
                   <FiMoon className="h-4 w-4" />
                   <span>{t('dark')}</span>
                   {theme === 'dark' && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                    <div className="bg-primary ml-auto h-2 w-2 rounded-full" />
                   )}
                 </button>
               </div>
@@ -417,41 +438,35 @@ export default function Navigation() {
 
             {/* Mobile Language Section */}
             <div className="px-4 py-3">
-              <div className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+              <div className="text-base-content/70 mb-2 text-sm font-medium">
                 {t('language')}
               </div>
               <div className="space-y-1">
                 <button
-                  onClick={() => {
-                    toggleLanguage('en');
-                    setIsMobileMenuOpen(false);
-                  }}
+                  onClick={() => handleLanguageToggle('en', true)}
                   className={`flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                     i18n.language === 'en'
-                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-base-content hover:bg-base-200'
                   }`}
                 >
                   <span>English</span>
                   {i18n.language === 'en' && (
-                    <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                    <div className="bg-primary h-2 w-2 rounded-full" />
                   )}
                 </button>
 
                 <button
-                  onClick={() => {
-                    toggleLanguage('es');
-                    setIsMobileMenuOpen(false);
-                  }}
+                  onClick={() => handleLanguageToggle('es', true)}
                   className={`flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                     i18n.language === 'es'
-                      ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-base-content hover:bg-base-200'
                   }`}
                 >
                   <span>Español</span>
                   {i18n.language === 'es' && (
-                    <div className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                    <div className="bg-primary h-2 w-2 rounded-full" />
                   )}
                 </button>
               </div>
@@ -460,7 +475,7 @@ export default function Navigation() {
             {/* Mobile Sign Out Button */}
             <button
               onClick={onMobileLogout}
-              className="flex w-full items-center space-x-3 rounded-lg px-4 py-3 text-base font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30"
+              className="text-error hover:bg-error/10 flex w-full items-center space-x-3 rounded-lg px-4 py-3 text-base font-medium transition-colors"
             >
               <FiLogOut className="h-5 w-5" />
               <span>{t('sign_out')}</span>

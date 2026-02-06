@@ -5,7 +5,6 @@ import Login from '../features/log-in/components/Login';
 import Registration from '../features/registration/components/Registration';
 import OAuthCallback from '../features/oauth-callback/components/OAuthCallback';
 import UserProfile from '../features/user-profile/components/UserProfile';
-import UserTypeSelection from '../features/user-type-selection/components/UserTypeSelection';
 import NotFound from '../features/not-found/components/NotFound';
 import './App.css';
 import Discovery from '../features/discovery/components/Discovery';
@@ -19,6 +18,7 @@ import UserDataDeletion from '../features/user-data-deletion/components/UserData
 import AnimalDetails from '../features/discovery/components/AnimalDetails';
 import EditAnimalListing from '../features/rehomer-dashboard/components/EditAnimalListing';
 import AddAnimalListing from '../features/rehomer-dashboard/components/AddAnimalListing';
+import MessagesPage from '../features/inbox/components/MessagesPage';
 import { SendResetPasswordLinkDialog } from '../components/send-reset-password-link/SendResetPasswordLinkDialog';
 
 function App() {
@@ -59,7 +59,6 @@ function App() {
         <Route path="privacy-policy" element={<PrivacyPolicy />} />
         <Route path="user-data-deletion" element={<UserDataDeletion />} />
         <Route path="user-profile" element={<UserProfile />} />
-        <Route path="user-type-selection" element={<UserTypeSelection />} />
         <Route path="discovery" element={<Discovery />} />
         <Route path="discovery/animal/:animalId" element={<AnimalDetails />} />
         <Route path="rehomer/dashboard" element={<RehomerDashboard />} />
@@ -68,6 +67,7 @@ function App() {
           path="rehomer/animal/edit/:animalId"
           element={<EditAnimalListing />}
         />
+        <Route path="messages" element={<MessagesPage />} />
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="*" element={<NotFound />} />

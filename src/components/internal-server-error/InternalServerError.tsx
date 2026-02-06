@@ -15,77 +15,76 @@ export default function InternalServerError() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="md:flex">
-          <div className="flex flex-col items-center justify-center bg-gradient-to-br from-red-500 to-red-600 p-8 md:w-2/5">
-            <div className="text-center text-white">
-              <FaExclamationTriangle className="mx-auto mb-6 h-24 w-24" />
-              <h1 className="text-8xl font-bold">500</h1>
-              <p className="mt-4 text-xl font-semibold">
-                {t('internal_server_error')}
-              </p>
+    <div className="from-base-200 to-base-300 flex min-h-screen items-center justify-center bg-gradient-to-br px-4 py-12">
+      <div className="card bg-base-100 w-full max-w-2xl shadow-2xl">
+        <div className="card-body">
+          {/* Error Icon and Code */}
+          <div className="mb-6 flex flex-col items-center text-center">
+            <div className="bg-error/10 mb-4 flex h-24 w-24 items-center justify-center rounded-full">
+              <FaExclamationTriangle className="text-error h-12 w-12" />
             </div>
-          </div>
-          <div className="p-8 md:w-3/5 md:p-12">
-            <h2 className="mb-4 text-3xl font-bold text-gray-800">
+            <div className="badge badge-error badge-lg mb-4 px-6 py-4 text-2xl font-bold">
+              500
+            </div>
+            <h1 className="text-base-content mb-2 text-3xl font-bold">
               {t('internal_server_error')}
-            </h2>
-            <p className="mb-8 text-lg text-gray-600">
+            </h1>
+            <p className="text-base-content/70 max-w-md text-lg">
               {t('internal_server_error_desc')}
             </p>
+          </div>
 
-            <div className="space-y-6">
-              <div className="border-l-4 border-red-500 bg-red-50 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <FaExclamationTriangle className="h-5 w-5 text-red-500" />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-red-700">
-                      Our team has been notified and is working to fix the
-                      issue.
-                    </p>
-                  </div>
-                </div>
-              </div>
+          {/* Info Alert */}
+          <div className="alert alert-info mb-6 shadow-md">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="h-6 w-6 shrink-0 stroke-current"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span className="text-sm">{t('error_notification_message')}</span>
+          </div>
 
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-700">
-                  What you can try:
-                </h3>
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-start">
-                    <span className="mt-2 mr-3 inline-block h-2 w-2 rounded-full bg-red-500"></span>
-                    <span>Refresh the page to see if the issue resolves</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="mt-2 mr-3 inline-block h-2 w-2 rounded-full bg-red-500"></span>
-                    <span>Check your internet connection</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="mt-2 mr-3 inline-block h-2 w-2 rounded-full bg-red-500"></span>
-                    <span>Try again in a few minutes</span>
-                  </li>
-                </ul>
-              </div>
+          {/* Suggestions */}
+          <div className="mb-6">
+            <h3 className="text-base-content mb-3 text-lg font-semibold">
+              {t('what_you_can_try')}
+            </h3>
+            <ul className="text-base-content/80 space-y-3">
+              <li className="flex items-start gap-3">
+                <div className="bg-primary mt-1 h-2 w-2 shrink-0 rounded-full"></div>
+                <span>{t('refresh_page_suggestion')}</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="bg-primary mt-1 h-2 w-2 shrink-0 rounded-full"></div>
+                <span>{t('check_connection_suggestion')}</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="bg-primary mt-1 h-2 w-2 shrink-0 rounded-full"></div>
+                <span>{t('try_again_later_suggestion')}</span>
+              </li>
+            </ul>
+          </div>
 
-              <div className="flex flex-col gap-4 pt-4 sm:flex-row">
-                <button
-                  onClick={handleRetry}
-                  className="btn btn-error btn-lg flex flex-1 items-center justify-center gap-2"
-                >
-                  <FaRedo />
-                  Try Again
-                </button>
-                <button
-                  onClick={handleGoHome}
-                  className="btn btn-outline btn-lg flex-1"
-                >
-                  Go to Homepage
-                </button>
-              </div>
-            </div>
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              onClick={handleRetry}
+              className="btn btn-primary flex-1 gap-2"
+            >
+              <FaRedo />
+              {t('try_again')}
+            </button>
+            <button onClick={handleGoHome} className="btn btn-outline flex-1">
+              {t('go_to_homepage')}
+            </button>
           </div>
         </div>
       </div>

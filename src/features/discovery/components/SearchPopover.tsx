@@ -29,19 +29,14 @@ export default function SearchPopover({
   onFiltersChange
 }: SearchPopoverProps) {
   const { i18n, t } = useTranslation();
-
   const popoverRef = useRef<HTMLDialogElement>(null);
-
   const [addressSuggestions, setAddressSuggestions] = useState<
     AddressSuggestionSchema[]
   >([]);
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
-  const {
-    data: fetchedAddressSuggestions,
-    isLoading: isLoadingAddressSuggestions
-  } = useGetAddressSuggestions(
+  const { data: fetchedAddressSuggestions } = useGetAddressSuggestions(
     searchFilters.location.formatted,
     i18n.language.split('-')[0]
   );
@@ -93,7 +88,6 @@ export default function SearchPopover({
     [searchFilters]
   );
 
-  // Handle dialog open/close
   useEffect(() => {
     if (isOpen) {
       popoverRef.current?.showModal();
@@ -102,7 +96,6 @@ export default function SearchPopover({
     }
   }, [isOpen]);
 
-  // Handle click outside popover
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -118,7 +111,6 @@ export default function SearchPopover({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
-  // Handle field changes
   const handleFieldChange = (field: keyof SearchFilters, value: any) => {
     const newFilters = { ...searchFilters, [field]: value };
     onFiltersChange(newFilters);
@@ -165,7 +157,7 @@ export default function SearchPopover({
           }
         });
       },
-      (err) => {
+      () => {
         onFiltersChange({
           ...searchFilters,
           locationSource: 'client-ip',
@@ -203,9 +195,15 @@ export default function SearchPopover({
       aria-labelledby="search-popover-title"
       onClose={onClose}
     >
-      <div className="modal-box w-full max-w-2xl p-0">
-        <div className="flex items-center justify-between border-b p-6">
-          <h3 className="text-2xl font-bold">{t('search_filters')}</h3>
+      <div className="modal-box bg-base-100 w-full max-w-3xl">
+        {/* Header */}
+        <div className="border-base-200 mb-6 flex items-center justify-between border-b pb-4">
+          <h3
+            id="search-popover-title"
+            className="text-base-content text-2xl font-bold"
+          >
+            {t('search_filters')}
+          </h3>
           <button
             onClick={onClose}
             className="btn btn-circle btn-ghost btn-sm"
@@ -215,11 +213,16 @@ export default function SearchPopover({
           </button>
         </div>
 
-        <div className="max-h-[60vh] overflow-y-auto p-6">
-          {/* Location Field */}
-          <div className="mb-6">
-            <div className="mb-4 flex items-center">
-              <label className="label cursor-pointer gap-2">
+        <div className="max-h-[60vh] space-y-6 overflow-y-auto">
+          {/* Location Section */}
+          <div className="card bg-base-200/50">
+            <div className="card-body">
+              <h4 className="card-title text-base-content mb-4 flex items-center gap-2 text-lg">
+                <IoLocationOutline className="size-6" />
+                {t('location')}
+              </h4>
+
+              <label className="label cursor-pointer justify-start gap-3">
                 <input
                   type="checkbox"
                   className="checkbox checkbox-primary"
@@ -228,63 +231,62 @@ export default function SearchPopover({
                   }
                   onChange={(e) => requestUserLocation(e.target.checked)}
                 />
-                <span className="label-text font-semibold">
-                  {t('use_current_location')}
-                </span>
+                <span className="label-text">{t('use_current_location')}</span>
               </label>
-            </div>
 
-            <label className="label">
-              <span className="label-text text-lg font-semibold">
-                <IoLocationOutline className="mr-2 inline size-5" />
-                {t('location')}
-              </span>
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder={t(
-                  searchFilters.locationSource === 'client-current-location'
-                    ? 'using_current_location'
-                    : 'address_placeholder'
-                )}
-                className="input input-bordered w-full"
-                autoComplete="off"
-                value={searchFilters.location.formatted}
-                onChange={handleAddressChange}
-                disabled={
-                  searchFilters.locationSource === 'client-current-location'
-                }
-              />
+              <div className="form-control">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder={t(
+                      searchFilters.locationSource === 'client-current-location'
+                        ? 'using_current_location'
+                        : 'address_placeholder'
+                    )}
+                    className="input input-bordered w-full"
+                    autoComplete="off"
+                    value={searchFilters.location.formatted}
+                    onChange={handleAddressChange}
+                    disabled={
+                      searchFilters.locationSource === 'client-current-location'
+                    }
+                  />
 
-              {/* Address Suggestions Dropdown */}
-              {showAddressSuggestions && addressSuggestions.length > 0 && (
-                <div className="rounded-box bg-base-100 absolute z-10 mt-1 w-full border shadow-lg">
-                  {addressSuggestions.map((address, index) => (
-                    <button
-                      key={index}
-                      className="hover:bg-base-200 block w-full px-4 py-3 text-left"
-                      onClick={() => handleAddressSelect(address)}
-                    >
-                      {address.formatted}
-                    </button>
-                  ))}
+                  {showAddressSuggestions && addressSuggestions.length > 0 && (
+                    <div className="bg-base-100 border-base-300 absolute z-10 mt-1 w-full rounded-lg border shadow-lg">
+                      {addressSuggestions.map((address, index) => (
+                        <button
+                          key={index}
+                          className="hover:bg-base-200 text-base-content block w-full px-4 py-3 text-left transition-colors"
+                          onClick={() => handleAddressSelect(address)}
+                        >
+                          {address.formatted}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+                <label className="label">
+                  <span className="label-text-alt text-base-content/70">
+                    {t('search_location_desc')}
+                  </span>
+                </label>
+                {locationError && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">
+                      {locationError}
+                    </span>
+                  </label>
+                )}
+              </div>
             </div>
-            <p className="mt-2 text-sm text-gray-500">
-              {t('search_location_desc')}
-            </p>
-            {locationError && (
-              <p className="mt-2 text-sm text-red-500">{locationError}</p>
-            )}
           </div>
 
-          {/* Max Distance Field */}
-          <div className="mb-6">
+          {/* Distance Filter */}
+          <div className="form-control">
             <label className="label">
-              <span className="label-text text-lg font-semibold">
-                <GiPathDistance className="mr-2 inline size-5" />
+              <span className="label-text text-base-content flex items-center gap-2 text-lg font-semibold">
+                <GiPathDistance className="size-5" />
                 {`${t('max_distance')}: ${Math.trunc(searchFilters.maxDistanceMeters / 1000)} km`}
               </span>
             </label>
@@ -296,23 +298,22 @@ export default function SearchPopover({
               onChange={(e) =>
                 handleFieldChange('maxDistanceMeters', parseInt(e.target.value))
               }
-              className="range range-primary w-full"
+              className="range range-primary"
             />
-            <div className="flex w-full justify-between px-2 text-xs">
+            <div className="text-base-content/70 mt-2 flex w-full justify-between px-2 text-xs">
               <span>1 km</span>
-              <span>50 km</span>
-              <span>100 km</span>
-              <span>150 km</span>
-              <span>200 km</span>
+              <span>62 km</span>
+              <span>125 km</span>
+              <span>188 km</span>
               <span>250 km</span>
             </div>
           </div>
 
-          {/* Age Range Fields */}
-          <div className="mb-6">
+          {/* Age Range */}
+          <div className="form-control">
             <label className="label">
-              <span className="label-text text-lg font-semibold">
-                <FaCat className="mr-2 inline size-5" />
+              <span className="label-text text-base-content flex items-center gap-2 text-lg font-semibold">
+                <FaCat className="size-5" />
                 {t('age_range_weeks')}
               </span>
             </label>
@@ -354,15 +355,17 @@ export default function SearchPopover({
                 />
               </div>
             </div>
-            <p className="mt-2 text-sm text-gray-500">
-              {`${t('age_range')}: ${searchFilters.minAgeWeeks} - ${searchFilters.maxAgeWeeks} ${t('weeks')} (${Math.round(searchFilters.minAgeWeeks / 4)} - ${Math.round(searchFilters.maxAgeWeeks / 4)} ${t('months')})`}
-            </p>
+            <label className="label">
+              <span className="label-text-alt text-base-content/70">
+                {`${t('age_range')}: ${searchFilters.minAgeWeeks} - ${searchFilters.maxAgeWeeks} ${t('weeks')} (${Math.round(searchFilters.minAgeWeeks / 4)} - ${Math.round(searchFilters.maxAgeWeeks / 4)} ${t('months')})`}
+              </span>
+            </label>
           </div>
 
-          {/* Gender Field */}
-          <div className="mb-6">
+          {/* Gender Filter */}
+          <div className="form-control">
             <label className="label">
-              <span className="label-text text-lg font-semibold">
+              <span className="label-text text-base-content text-lg font-semibold">
                 {t('gender')}
               </span>
             </label>
@@ -374,27 +377,27 @@ export default function SearchPopover({
                 {t('all_genders')}
               </button>
               <button
-                className={`btn ${searchFilters.gender === 'Male' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn gap-2 ${searchFilters.gender === 'Male' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => handleFieldChange('gender', 'Male')}
               >
-                <TbGenderMale className="mr-2 size-5" />
+                <TbGenderMale className="size-5" />
                 {t('male')}
               </button>
               <button
-                className={`btn ${searchFilters.gender === 'Female' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn gap-2 ${searchFilters.gender === 'Female' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => handleFieldChange('gender', 'Female')}
               >
-                <TbGenderFemale className="mr-2 size-5" />
+                <TbGenderFemale className="size-5" />
                 {t('female')}
               </button>
             </div>
           </div>
 
-          {/* Neutered Field */}
-          <div className="mb-8">
+          {/* Neutered Filter */}
+          <div className="form-control">
             <label className="label">
-              <span className="label-text text-lg font-semibold">
-                <FaNeuter className="mr-2 inline size-5" />
+              <span className="label-text text-base-content flex items-center gap-2 text-lg font-semibold">
+                <FaNeuter className="size-5" />
                 {t('neutered_status')}
               </span>
             </label>
@@ -415,8 +418,8 @@ export default function SearchPopover({
           </div>
         </div>
 
-        {/* Popover Footer with Actions */}
-        <div className="flex flex-col gap-3 border-t p-6 sm:flex-row sm:justify-between">
+        {/* Footer Actions */}
+        <div className="border-base-200 mt-6 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:justify-between">
           <div className="flex gap-2">
             <button
               onClick={onReset}
@@ -440,7 +443,7 @@ export default function SearchPopover({
           >
             {isSearching ? (
               <>
-                <span className="loading loading-spinner"></span>
+                <span className="loading loading-spinner" />
                 {t('searching')}
               </>
             ) : (
@@ -449,6 +452,7 @@ export default function SearchPopover({
           </button>
         </div>
       </div>
+
       <form method="dialog" className="modal-backdrop">
         <button>{t('close')}</button>
       </form>
