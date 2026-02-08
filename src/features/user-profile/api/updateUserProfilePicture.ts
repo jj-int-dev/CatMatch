@@ -1,6 +1,5 @@
 import { axiosUsersClient } from '../../../utils/axios-client';
 import { updateUserProfilePictureResponseValidator } from '../validators/updateUserProfilePictureResponseValidator';
-import type { UpdateUserProfilePictureResponse } from '../types/UpdateUserProfilePictureResponse';
 import i18next from '../../../utils/i18n';
 import getTokenHeaders from '../../../utils/getTokenHeaders';
 
@@ -9,7 +8,7 @@ export default async function (
   imageFormData: FormData,
   accessToken: string,
   refreshToken: string
-): Promise<UpdateUserProfilePictureResponse> {
+): Promise<string> {
   try {
     const userProfilePictureResponse = await axiosUsersClient.put(
       `/${userId}/profile-picture`,
@@ -20,7 +19,7 @@ export default async function (
       updateUserProfilePictureResponseValidator.safeParse(
         userProfilePictureResponse.data
       );
-    if (success && data) return { avatarUrl: data.avatarUrl };
+    if (success && data) return data.avatarUrl;
     return Promise.reject(
       new Error(i18next.t('update_user_profile_picture_error'))
     );

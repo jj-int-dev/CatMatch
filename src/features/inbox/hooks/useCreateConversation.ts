@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/auth-store';
 import i18next from '../../../utils/i18n';
-import { createConversation } from '../api/createConversation';
+import { createConversation } from '../../../api/createConversation';
 import type { CreateConversationRequest } from '../types/CreateConversationRequest';
-import type { CreateConversationResponseSchema } from '../validators/createConversationResponseValidator';
+import type { CreateConversationResponseSchema } from '../../../validators/createConversationResponseValidator';
 
 export default function () {
   const userSession = useAuthStore((state) => state.session);

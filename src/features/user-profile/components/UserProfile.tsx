@@ -5,7 +5,7 @@ import { useAuthStore } from '../../../stores/auth-store';
 import { useQueryClient } from '@tanstack/react-query';
 import useGetUserProfile from '../hooks/useGetUserProfile';
 import useUpdateUserProfile from '../hooks/useUpdateUserProfile';
-import useGetUserProfilePicture from '../hooks/useGetUserProfilePicture';
+import useGetUserProfilePicture from '../../../hooks/useGetUserProfilePicture';
 import useUpdateUserProfilePicture from '../hooks/useUpdateUserProfilePicture';
 import useDeleteUserProfilePicture from '../hooks/useDeleteUserProfilePicture';
 import UserProfileSkeleton from './UserProfileSkeleton';
@@ -23,7 +23,6 @@ import defaultProfilePic from '../../../assets/default_profile_pic.webp';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { PiUploadSimple } from 'react-icons/pi';
 import { HiUser, HiMail } from 'react-icons/hi';
-import type { GetUserProfileResponse } from '../types/GetUserProfileResponse';
 import ErrorToast from '../../../components/toasts/ErrorToast';
 import getUniqueImageUrl from '../../../utils/getUniqueImageUrl';
 import { processImage } from '../../../utils/processImage';
@@ -55,9 +54,9 @@ export default function UserProfile() {
   const goToLoginPage = () => navigate('/login', { replace: true });
 
   const goToNextPageBasedOnUserType = () => {
-    if (userProfileData?.userProfile.userType === 'Rehomer') {
+    if (userProfileData?.userType === 'Rehomer') {
       navigate(`/rehomer/dashboard`);
-    } else if (userProfileData?.userProfile.userType === 'Adopter') {
+    } else if (userProfileData?.userType === 'Adopter') {
       navigate('/discovery');
     }
   };
@@ -99,6 +98,9 @@ export default function UserProfile() {
   const { isPending: isUpdatingUserProfile, mutateAsync: updateUserProfile } =
     useUpdateUserProfile();
 
+  const { setShowSendResetPasswordLinkDialog } =
+    useSendResetPasswordLinkStore();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const saveNewProfilePicture = async (newPicture: File) => {
@@ -107,14 +109,11 @@ export default function UserProfile() {
     try {
       const formData = new FormData();
       formData.append('profile_picture', newPicture);
-      const { avatarUrl } = await updateUserProfilePicture(formData);
-      queryClient.setQueryData(['user-profile-picture', userSession!.user.id], {
-        avatarUrl
-      });
+      const avatarUrl = await updateUserProfilePicture(formData);
       queryClient.setQueryData(
         ['profile-picture', userSession!.user.id],
         () => {
-          return { avatarUrl: getUniqueImageUrl(avatarUrl) };
+          return getUniqueImageUrl(avatarUrl);
         }
       );
       if (imageUpdateErrors.length === 0) {
@@ -145,17 +144,12 @@ export default function UserProfile() {
   };
 
   const handleDeleteProfilePicture = async () => {
-    if (!isAuthenticatedUserSession(userSession)) return;
-
     try {
       await deleteUserProfilePicture();
-      queryClient.setQueryData(['user-profile-picture', userSession!.user.id], {
-        avatarUrl: defaultProfilePic
-      });
       queryClient.setQueryData(
         ['profile-picture', userSession!.user.id],
         () => {
-          return { avatarUrl: getUniqueImageUrl(defaultProfilePic) };
+          return getUniqueImageUrl(defaultProfilePic);
         }
       );
       setImageUpdateErrors([]);
@@ -212,24 +206,11 @@ export default function UserProfile() {
   };
 
   const handleSave = async (formData: UserProfileFormSchema) => {
-    if (!isAuthenticatedUserSession(userSession)) return;
-
     try {
-      const { userProfile: updatedProfile } = await updateUserProfile(formData);
-      const updatedProfileData: GetUserProfileResponse = {
-        userProfile: {
-          email: updatedProfile.email,
-          displayName: updatedProfile.displayName,
-          dateOfBirth: updatedProfile.dateOfBirth,
-          phoneNumber: updatedProfile.phoneNumber,
-          gender: updatedProfile.gender,
-          bio: updatedProfile.bio,
-          userType: updatedProfile.userType
-        }
-      };
+      const updatedProfile = await updateUserProfile(formData);
       queryClient.setQueryData(
         ['user-profile', userSession!.user.id],
-        updatedProfileData
+        updatedProfile
       );
       clearErrors();
       setShowErrorToast(false);
@@ -275,9 +256,6 @@ export default function UserProfile() {
     closeChooseProfilePicDialog();
   };
 
-  const { setShowSendResetPasswordLinkDialog } =
-    useSendResetPasswordLinkStore();
-
   return (
     <div className="from-base-100 to-base-200 flex min-h-screen items-center justify-center bg-gradient-to-br px-4 py-12">
       {showErrorToast && (
@@ -301,32 +279,30 @@ export default function UserProfile() {
                     src={
                       isLoadingUserProfilePicture ||
                       getUserProfilePictureFailed ||
-                      !userProfilePictureData.avatarUrl
+                      !userProfilePictureData
                         ? defaultProfilePic
-                        : getUniqueImageUrl(userProfilePictureData.avatarUrl)
+                        : getUniqueImageUrl(userProfilePictureData)
                     }
                     alt="Profile"
                   />
                 </div>
               </div>
               <div>
-                {!!userProfileData.userProfile.displayName && (
+                {!!userProfileData.displayName && (
                   <h2 className="text-base-content text-2xl font-bold">
-                    {userProfileData.userProfile.displayName}
+                    {userProfileData.displayName}
                   </h2>
                 )}
                 <p className="text-base-content/70 flex items-center gap-2">
                   <HiMail className="size-4" />
-                  {userProfileData.userProfile.email}
+                  {userProfileData.email}
                 </p>
               </div>
             </div>
             <div className="flex gap-2">
               <button
                 className="btn btn-primary"
-                disabled={
-                  isSubmitting || !isAuthenticatedUserSession(userSession)
-                }
+                disabled={isSubmitting}
                 onClick={handleSubmit(handleSave, handleProfileUpdateFailure)}
               >
                 {t('save')}
@@ -334,9 +310,7 @@ export default function UserProfile() {
               <button
                 className="btn btn-success"
                 disabled={
-                  !userProfileData.userProfile.displayName ||
-                  !isAuthenticatedUserSession(userSession) ||
-                  !userProfileData.userProfile.userType
+                  !userProfileData.displayName || !userProfileData.userType
                 }
                 onClick={goToNextPageBasedOnUserType}
               >
@@ -348,15 +322,15 @@ export default function UserProfile() {
           {/* Profile Form */}
           <div className="divider"></div>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <h3 className="text-base-content flex items-center gap-2 text-xl font-semibold">
               <HiUser className="size-6" />
               {t('profile')}
             </h3>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text flex items-center gap-1">
+            <div className="form-control w-full">
+              <label className="label pb-2">
+                <span className="label-text flex items-center gap-1 font-medium">
                   {t('display_name')}
                   <CgAsterisk className="text-error size-3" />
                 </span>
@@ -364,37 +338,39 @@ export default function UserProfile() {
               <input
                 id="displayName"
                 type="text"
-                className="input input-bordered"
+                className="input input-bordered w-full"
                 placeholder="Your name"
                 {...register('displayName')}
-                defaultValue={userProfileData.userProfile.displayName ?? ''}
+                defaultValue={userProfileData.displayName ?? ''}
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">{t('date_of_birth')}</span>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="form-control w-full">
+                <label className="label pb-2">
+                  <span className="label-text font-medium">
+                    {t('date_of_birth')}
+                  </span>
                 </label>
                 <input
                   id="dateOfBirth"
                   type="date"
                   {...register('dateOfBirth')}
-                  defaultValue={userProfileData.userProfile.dateOfBirth ?? ''}
+                  defaultValue={userProfileData.dateOfBirth ?? ''}
                   max={dateOfBirthLimit}
-                  className="input input-bordered"
+                  className="input input-bordered w-full"
                 />
               </div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">{t('gender')}</span>
+              <div className="form-control w-full">
+                <label className="label pb-2">
+                  <span className="label-text font-medium">{t('gender')}</span>
                 </label>
                 <select
                   id="gender"
                   {...register('gender')}
-                  defaultValue={userProfileData.userProfile.gender ?? ''}
-                  className="select select-bordered"
+                  defaultValue={userProfileData.gender ?? ''}
+                  className="select select-bordered w-full"
                 >
                   <option value="" disabled hidden>
                     {t('select_your_gender')}
@@ -405,30 +381,32 @@ export default function UserProfile() {
               </div>
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">{t('phone_number')}</span>
+            <div className="form-control w-full">
+              <label className="label pb-2">
+                <span className="label-text font-medium">
+                  {t('phone_number')}
+                </span>
               </label>
               <input
                 id="phoneNumber"
                 {...register('phoneNumber')}
                 type="tel"
-                className="input input-bordered tabular-nums"
-                defaultValue={userProfileData.userProfile.phoneNumber ?? ''}
+                className="input input-bordered w-full tabular-nums"
+                defaultValue={userProfileData.phoneNumber ?? ''}
                 placeholder="+14155552671"
               />
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">{t('bio')}</span>
+            <div className="form-control w-full">
+              <label className="label pb-2">
+                <span className="label-text font-medium">{t('bio')}</span>
               </label>
               <textarea
                 id="bio"
                 {...register('bio')}
-                className="textarea textarea-bordered h-24"
+                className="textarea textarea-bordered h-24 w-full"
                 placeholder="Bio"
-                defaultValue={userProfileData.userProfile.bio ?? ''}
+                defaultValue={userProfileData.bio ?? ''}
               ></textarea>
             </div>
           </div>
@@ -436,23 +414,22 @@ export default function UserProfile() {
           {/* Action Links */}
           <div className="divider"></div>
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-            {isAuthenticatedUserSession(userSession) &&
-              userSession!.user.app_metadata.provider === 'email' && (
-                <button
-                  className="link link-primary"
-                  onClick={() => setShowSendResetPasswordLinkDialog(true)}
-                >
-                  {t('change_password')}
-                </button>
-              )}
+            {userSession!.user.app_metadata.provider === 'email' && (
+              <button
+                className="link link-primary"
+                onClick={() => setShowSendResetPasswordLinkDialog(true)}
+              >
+                {t('change_password')}
+              </button>
+            )}
             <button
               className="link link-primary"
               onClick={() => setShowUserConversionDialog(true)}
             >
               {t(
-                userProfileData.userProfile.userType == null
+                userProfileData.userType == null
                   ? 'set_user_type'
-                  : userProfileData.userProfile.userType === 'Rehomer'
+                  : userProfileData.userType === 'Rehomer'
                     ? 'become_an_adopter'
                     : 'become_a_rehomer'
               )}
@@ -488,9 +465,9 @@ export default function UserProfile() {
                     src={
                       isLoadingUserProfilePicture ||
                       getUserProfilePictureFailed ||
-                      !userProfilePictureData.avatarUrl
+                      !userProfilePictureData
                         ? defaultProfilePic
-                        : getUniqueImageUrl(userProfilePictureData.avatarUrl)
+                        : getUniqueImageUrl(userProfilePictureData)
                     }
                     alt="Profile"
                   />
@@ -511,8 +488,7 @@ export default function UserProfile() {
 
                 {!isLoadingUserProfilePicture &&
                   !getUserProfilePictureFailed &&
-                  !!userProfilePictureData.avatarUrl &&
-                  userProfilePictureData.avatarUrl !== defaultProfilePic && (
+                  userProfilePictureData !== defaultProfilePic && (
                     <button
                       className="btn btn-error btn-outline gap-2"
                       onClick={handleDeleteProfilePicture}
@@ -576,7 +552,7 @@ export default function UserProfile() {
       <UserConversionDialog
         isOpen={showUserConversionDialog}
         onClose={() => setShowUserConversionDialog(false)}
-        currentUserType={userProfileData.userProfile.userType}
+        currentUserType={userProfileData.userType}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { conversationValidator } from './conversationValidator';
+import { conversationValidator } from '../../../validators/conversationValidator';
 
 export const getConversationsResponseValidator = z.object({
   conversations: z.array(conversationValidator),

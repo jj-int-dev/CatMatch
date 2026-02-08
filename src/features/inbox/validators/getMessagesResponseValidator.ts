@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { messageValidator } from './messageValidator';
+import { messageValidator } from '../../../validators/messageValidator';
 
 export const getMessagesResponseValidator = z.object({
   messages: z.array(messageValidator),

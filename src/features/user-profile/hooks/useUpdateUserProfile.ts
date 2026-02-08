@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/auth-store';
 import i18next from '../../../utils/i18n';
-import type { UpdateUserProfileResponse } from '../types/UpdateUserProfileResponse';
 import updateUserProfile from '../api/updateUserProfile';
 import type { UserProfileFormSchema } from '../validators/userProfileFormValidator';
+import type { GetUserProfileResponseSchema } from '../validators/getUserProfileResponseValidator';
 
 export default function () {
   const userSession = useAuthStore((state) => state.session);
@@ -14,7 +14,7 @@ export default function () {
   return useMutation({
     mutationFn: async (
       userProfileData: UserProfileFormSchema
-    ): Promise<UpdateUserProfileResponse> => {
+    ): Promise<GetUserProfileResponseSchema> => {
       if (!userId || !accessToken || !refreshToken) {
         throw new Error(i18next.t('auth_required'));
       }

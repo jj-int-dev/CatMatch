@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../../stores/auth-store';
 import useSetTypingStatus from '../hooks/useSetTypingStatus';
-import type { MessageSchema } from '../validators/messageValidator';
-import type { ConversationSchema } from '../validators/conversationValidator';
+import type { MessageSchema } from '../../../validators/messageValidator';
+import type { ConversationSchema } from '../../../validators/conversationValidator';
 
 interface ChatInterfaceProps {
   conversation: ConversationSchema | null;

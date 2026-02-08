@@ -175,26 +175,32 @@ CatMatch/
 │   │   ├── toasts/
 │   │   └── ...
 │   ├── config/                 # Configuration files
-│   │   └── locales/           # Translation files
-│   ├── features/              # Feature-based modules
-│   │   ├── discovery/         # Cat browsing and search
-│   │   ├── inbox/             # Messaging system
-│   │   ├── landing-page/      # Landing page
-│   │   ├── log-in/            # Authentication
-│   │   ├── registration/      # User registration
-│   │   ├── rehomer-dashboard/ # Cat listing management
-│   │   └── user-profile/      # User profile management
-│   ├── hooks/                 # Custom React hooks
-│   ├── stores/                # Zustand stores
-│   ├── test/                  # Test configuration and utilities
-│   ├── types/                 # TypeScript type definitions
-│   ├── utils/                 # Utility functions
-│   ├── validators/            # Zod validators
-│   └── main.tsx               # Application entry point
-├── vitest.config.ts           # Vitest configuration
-├── vite.config.ts             # Vite configuration
-├── tailwind.config.ts         # Tailwind configuration
-└── tsconfig.json              # TypeScript configuration
+│   │   └── locales/            # Translation files
+│   ├── features/               # Feature-based modules
+│   │   ├── discovery/          # Cat browsing and search
+│   │   ├── inbox/              # Messaging system
+│   │   ├── landing-page/       # Landing page
+│   │   ├── log-in/             # Authentication
+|   |   |-- not-found/          # Not Found page
+|   |   |-- oauth-callback/     # Callback for Oauth login
+|   |   |-- privacy-policy/     # Privacy Policy
+│   │   ├── registration/       # User registration
+│   │   ├── rehomer-dashboard/  # Cat listing management
+|   |   |-- reset-password/     # Reset Password
+|   |   |-- user-data-deletion/ # Data deletion policy
+│   │   └── user-profile/       # User profile management
+│   ├── hooks/                  # Custom React hooks
+│   ├── stores/                 # Zustand stores
+│   ├── test/                   # Test configuration and utilities
+│   ├── types/                  # TypeScript type definitions
+│   ├── utils/                  # Utility functions
+│   ├── validators/             # Zod validators
+|   |-- index.css               # Global theme/styling
+│   └── main.tsx                # Application entry point
+├── vitest.config.ts            # Vitest configuration
+├── vite.config.ts              # Vite configuration
+├── tailwind.config.ts          # Tailwind configuration
+└── tsconfig.json               # TypeScript configuration
 ```
 
 ## Documentation

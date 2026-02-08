@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/auth-store';
 import i18next from '../../../utils/i18n';
-import type { UpdateUserProfilePictureResponse } from '../types/UpdateUserProfilePictureResponse';
 import updateUserProfilePicture from '../api/updateUserProfilePicture';
 
 export default function () {
@@ -11,9 +10,7 @@ export default function () {
   const refreshToken = userSession?.refresh_token ?? null;
 
   return useMutation({
-    mutationFn: async (
-      imageFormData: FormData
-    ): Promise<UpdateUserProfilePictureResponse> => {
+    mutationFn: async (imageFormData: FormData): Promise<string> => {
       if (!userId || !accessToken || !refreshToken) {
         throw new Error(i18next.t('auth_required'));
       }

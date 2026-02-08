@@ -6,9 +6,13 @@ import useGetUserType from '../../../hooks/useGetUserType';
 import { useMobileNavigationGestures } from '../../../hooks/useSwipeGesture';
 import {
   usePresence,
-  useRealtimeConversations,
-  useRealtimeMessages
+  useGetConversationsQuery,
+  useGetMessagesQuery,
+  useRealtimeConversationsSync,
+  useRealtimeMessagesSync
 } from '../hooks';
+import { useSendMessage } from '../hooks';
+import { markConversationAsRead } from '../api/markConversationAsRead';
 import ConversationList from './ConversationList';
 import ChatInterface from './ChatInterface';
 import EmptyStateAdopter from './EmptyStateAdopter';
@@ -43,16 +47,24 @@ export default function MessagesPage() {
   const [isMobileView, setIsMobileView] = useState(false);
   const [showConversationList, setShowConversationList] = useState(true);
 
-  // Use real-time hooks
-  const { conversations, loading: conversationsLoading } =
-    useRealtimeConversations();
-  const {
-    messages,
-    loading: messagesLoading,
-    sendMessage,
-    markMessageAsRead
-  } = useRealtimeMessages(selectedConversationId);
+  // Unified cache strategy - Use query hooks + real-time sync
+  const { data: conversationsData, isLoading: conversationsLoading } =
+    useGetConversationsQuery(1, 50);
+  const { data: messagesData, isLoading: messagesLoading } =
+    useGetMessagesQuery(selectedConversationId, 1, 50);
+
+  // Enable real-time synchronization (invalidates cache on changes)
+  useRealtimeConversationsSync();
+  useRealtimeMessagesSync(selectedConversationId);
+
   const { onlineUsers, isUserOnline } = usePresence();
+
+  // Extract data from query results
+  const conversations = conversationsData?.conversations || [];
+  const messages = messagesData?.messages || [];
+
+  // Use send message mutation
+  const { mutateAsync: sendMessage } = useSendMessage();
 
   // Check if user is adopter or rehomer
   const isAdopter = userType === 'Adopter';
@@ -105,24 +117,27 @@ export default function MessagesPage() {
 
   // Mark conversation as read when selected
   useEffect(() => {
-    if (selectedConversationId) {
-      // We need to mark individual messages as read
-      // This would be implemented when we have the message IDs
-      // For now, we could mark all unread messages as read
-      messages.forEach((message) => {
-        if (!message.is_read && message.sender_id !== userSession?.user?.id) {
-          markMessageAsRead(message.message_id);
-        }
-      });
+    if (selectedConversationId && userSession?.user?.id) {
+      // Mark all messages in the conversation as read at the conversation level
+      markConversationAsRead(
+        userSession.user.id,
+        selectedConversationId,
+        userSession.access_token,
+        userSession.refresh_token
+      )
+        .then(() => {
+          console.log('Conversation marked as read:', selectedConversationId);
+          // Note: Unread counts will be updated via real-time subscriptions
+        })
+        .catch((error) => {
+          console.error('Failed to mark conversation as read:', error);
+        });
     }
-  }, [selectedConversationId, messages, markMessageAsRead, userSession]);
+  }, [selectedConversationId, userSession]);
 
   // Handle conversation selection
   const handleSelectConversation = (conversationId: string) => {
     setSelectedConversationId(conversationId);
-    if (isMobileView) {
-      setShowConversationList(false);
-    }
   };
 
   // Handle back to conversation list on mobile
@@ -132,9 +147,12 @@ export default function MessagesPage() {
 
   // Handle sending message
   const handleSendMessage = async (content: string) => {
-    if (!selectedConversationId || !sendMessage) return;
+    if (!selectedConversationId || !userSession?.user?.id) return;
     try {
-      await sendMessage(content);
+      await sendMessage({
+        conversationId: selectedConversationId,
+        content
+      });
     } catch (error) {
       console.error('Failed to send message:', error);
     }

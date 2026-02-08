@@ -1,5 +1,5 @@
 import type { MessageEventType } from './MessageEventType';
-import type { ConversationSchema } from '../validators/conversationValidator';
+import type { ConversationSchema } from '../../../validators/conversationValidator';
 
 export type ConversationEvent = {
   type: MessageEventType;

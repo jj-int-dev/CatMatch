@@ -2,9 +2,9 @@ import {
   createConversationResponseValidator,
   type CreateConversationResponseSchema
 } from '../validators/createConversationResponseValidator';
-import { axiosMessagesClient } from '../../../utils/axios-client';
-import getTokenHeaders from '../../../utils/getTokenHeaders';
-import i18next from '../../../utils/i18n';
+import { axiosMessagesClient } from '../utils/axios-client';
+import getTokenHeaders from '../utils/getTokenHeaders';
+import i18next from '../utils/i18n';
 
 /**
  * Create a new conversation

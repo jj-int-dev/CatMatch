@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/auth-store';
 import i18next from '../../../utils/i18n';
-import { sendMessage } from '../api/sendMessage';
-import type { SendMessageResponseSchema } from '../validators/sendMessageResponseValidator';
+import { sendMessage } from '../../../api/sendMessage';
+import type { SendMessageResponseSchema } from '../../../validators/sendMessageResponseValidator';
 import type { SendMessageRequest } from '../types/SendMessageRequest';
 
 /**

@@ -2,9 +2,9 @@ import {
   sendMessageResponseValidator,
   type SendMessageResponseSchema
 } from '../validators/sendMessageResponseValidator';
-import { axiosMessagesClient } from '../../../utils/axios-client';
-import getTokenHeaders from '../../../utils/getTokenHeaders';
-import i18next from '../../../utils/i18n';
+import { axiosMessagesClient } from '../utils/axios-client';
+import getTokenHeaders from '../utils/getTokenHeaders';
+import i18next from '../utils/i18n';
 
 /**
  * Send a message in a conversation

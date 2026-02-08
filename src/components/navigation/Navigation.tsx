@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth-store';
 import useGetUserProfilePicture from '../../hooks/useGetUserProfilePicture';
 import useGetUserType from '../../hooks/useGetUserType';
-import useGetUnreadMessagesCount from './hooks/useGetUnreadMessagesCount';
+import useRealtimeUnreadCount from './hooks/useRealtimeUnreadCount';
 import { useTheme } from '../../hooks/useTheme';
 import defaultProfilePic from '../../assets/default_profile_pic.webp';
 import getUniqueImageUrl from '../../utils/getUniqueImageUrl';
@@ -27,6 +27,7 @@ import { FaCat } from 'react-icons/fa';
 export default function Navigation() {
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
+  const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
   const userSession = useAuthStore((state) => state.session);
   const isAuthenticatedUserSession = useAuthStore(
     (state) => state.isAuthenticatedUserSession
@@ -104,7 +105,7 @@ export default function Navigation() {
     data: profilePicture
   } = useGetUserProfilePicture();
   const { isPending: isGettingUserType, data: userType } = useGetUserType();
-  const { data: unreadCount } = useGetUnreadMessagesCount();
+  const { data: unreadCount } = useRealtimeUnreadCount();
 
   const profilePicUrl =
     isGettingProfilePicture || getProfilePictureFailed || !profilePicture
@@ -149,7 +150,7 @@ export default function Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden items-center space-x-2 md:flex lg:space-x-4">
             {/* Main Menu Items */}
-            {isAuthenticatedUserSession(userSession) && (
+            {!isLoadingSession && isAuthenticatedUserSession(userSession) && (
               <>
                 {!isGettingUserType &&
                   !!userType &&
@@ -281,30 +282,34 @@ export default function Navigation() {
             </div>
 
             {/* Profile Picture */}
-            <div className="relative">
-              <button
-                className="text-base-content hover:bg-base-200 flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors md:px-3 md:text-sm"
-                onClick={goToUserProfile}
-              >
-                <div className="border-primary/30 relative h-8 w-8 overflow-hidden rounded-full border-2">
-                  <img
-                    src={profilePicUrl}
-                    alt={t('profile_picture')}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <span className="hidden lg:inline">{t('profile')}</span>
-              </button>
-            </div>
+            {!isLoadingSession && isAuthenticatedUserSession(userSession) && (
+              <div className="relative">
+                <button
+                  className="text-base-content hover:bg-base-200 flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors md:px-3 md:text-sm"
+                  onClick={goToUserProfile}
+                >
+                  <div className="border-primary/30 relative h-8 w-8 overflow-hidden rounded-full border-2">
+                    <img
+                      src={profilePicUrl}
+                      alt={t('profile_picture')}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <span className="hidden lg:inline">{t('profile')}</span>
+                </button>
+              </div>
+            )}
 
             {/* Sign Out Button */}
-            <button
-              onClick={onLogout}
-              className="text-error hover:bg-error/10 flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors md:px-4 md:text-sm"
-            >
-              <FiLogOut className="h-4 w-4" />
-              <span>{t('sign_out')}</span>
-            </button>
+            {!isLoadingSession && isAuthenticatedUserSession(userSession) && (
+              <button
+                onClick={onLogout}
+                className="text-error hover:bg-error/10 flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors md:px-4 md:text-sm"
+              >
+                <FiLogOut className="h-4 w-4" />
+                <span>{t('sign_out')}</span>
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -331,35 +336,37 @@ export default function Navigation() {
         >
           <div className="space-y-1 px-4 py-3">
             {/* Mobile Profile Section */}
-            <div className="bg-base-200 mb-4 flex items-center space-x-3 rounded-lg p-4">
-              <div className="border-primary/40 relative h-12 w-12 overflow-hidden rounded-full border-2">
-                <img
-                  src={profilePicUrl}
-                  alt={t('profile_picture')}
-                  className="h-full w-full object-cover"
-                />
+            {!isLoadingSession && isAuthenticatedUserSession(userSession) && (
+              <div className="bg-base-200 mb-4 flex items-center space-x-3 rounded-lg p-4">
+                <div className="border-primary/40 relative h-12 w-12 overflow-hidden rounded-full border-2">
+                  <img
+                    src={profilePicUrl}
+                    alt={t('profile_picture')}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base-content font-medium">
+                    {t('user_profile')}
+                  </h3>
+                  <p className="text-base-content/70 text-sm">
+                    {t('view_edit_profile')}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    goToUserProfile();
+                  }}
+                  className="text-base-content hover:bg-base-300 rounded-lg p-2 transition-colors"
+                >
+                  <FiUser className="h-5 w-5" />
+                </button>
               </div>
-              <div className="flex-1">
-                <h3 className="text-base-content font-medium">
-                  {t('user_profile')}
-                </h3>
-                <p className="text-base-content/70 text-sm">
-                  {t('view_edit_profile')}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  goToUserProfile();
-                }}
-                className="text-base-content hover:bg-base-300 rounded-lg p-2 transition-colors"
-              >
-                <FiUser className="h-5 w-5" />
-              </button>
-            </div>
+            )}
 
             {/* Mobile Menu Items */}
-            {isAuthenticatedUserSession(userSession) && (
+            {!isLoadingSession && isAuthenticatedUserSession(userSession) && (
               <>
                 {!isGettingUserType &&
                   !!userType &&
@@ -473,13 +480,15 @@ export default function Navigation() {
             </div>
 
             {/* Mobile Sign Out Button */}
-            <button
-              onClick={onMobileLogout}
-              className="text-error hover:bg-error/10 flex w-full items-center space-x-3 rounded-lg px-4 py-3 text-base font-medium transition-colors"
-            >
-              <FiLogOut className="h-5 w-5" />
-              <span>{t('sign_out')}</span>
-            </button>
+            {!isLoadingSession && isAuthenticatedUserSession(userSession) && (
+              <button
+                onClick={onMobileLogout}
+                className="text-error hover:bg-error/10 flex w-full items-center space-x-3 rounded-lg px-4 py-3 text-base font-medium transition-colors"
+              >
+                <FiLogOut className="h-5 w-5" />
+                <span>{t('sign_out')}</span>
+              </button>
+            )}
           </div>
         </div>
       )}

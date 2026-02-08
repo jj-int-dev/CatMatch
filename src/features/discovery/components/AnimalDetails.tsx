@@ -13,8 +13,7 @@ import { IoArrowBack } from 'react-icons/io5';
 import useGetAnimal from '../hooks/useGetAnimal';
 import getAgeDisplay from '../utils/getAgeDisplay';
 import defaultCatPic from '../../../assets/default_cat.webp';
-import useCreateConversation from '../../inbox/hooks/useCreateConversation';
-import useSendMessage from '../../inbox/hooks/useSendMessage';
+import { useInitiateConversation } from '../../../hooks/useInitiateConversation';
 import useGetUserType from '../../../hooks/useGetUserType';
 
 export default function AnimalDetails() {
@@ -63,32 +62,20 @@ export default function AnimalDetails() {
     null
   );
 
-  // Hooks for messaging
-  const { mutateAsync: createConversation, isPending: isCreatingConversation } =
-    useCreateConversation();
-  const { mutateAsync: sendMessage, isPending: isSendingMessage } =
-    useSendMessage();
+  // Use shared messaging hook
+  const { initiateConversation, isPending: isInitiatingConversation } =
+    useInitiateConversation();
 
   const handleSendMessage = async () => {
-    if (!message.trim() || !animal || !animal.rehomerId) return;
+    if (!message.trim() || !animal || !animal.rehomerId || !animal.animalId)
+      return;
 
     try {
-      // First, create or get the conversation
-      const conversationResponse = await createConversation({
+      // Initiate conversation with initial message (single atomic operation)
+      await initiateConversation({
         rehomerId: animal.rehomerId,
-        animalId: animal.animalId
-      });
-
-      if (!conversationResponse?.conversation?.conversation_id) {
-        throw new Error('Failed to create conversation');
-      }
-
-      const conversationId = conversationResponse.conversation.conversation_id;
-
-      // Then send the message
-      await sendMessage({
-        conversationId,
-        content: message
+        animalId: animal.animalId,
+        initialMessage: message.trim()
       });
 
       // Close chat dialog immediately
@@ -561,14 +548,10 @@ export default function AnimalDetails() {
                     </button>
                     <button
                       onClick={handleSendMessage}
-                      disabled={
-                        !message.trim() ||
-                        isCreatingConversation ||
-                        isSendingMessage
-                      }
+                      disabled={!message.trim() || isInitiatingConversation}
                       className="btn btn-primary gap-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {isCreatingConversation || isSendingMessage ? (
+                      {isInitiatingConversation ? (
                         <>
                           <span className="loading loading-spinner loading-sm"></span>
                           {t('sending')}

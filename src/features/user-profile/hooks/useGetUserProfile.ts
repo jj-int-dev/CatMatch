@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/auth-store';
-import type { GetUserProfileResponse } from '../types/GetUserProfileResponse';
 import getUserProfile from '../api/getUserProfile';
+import type { GetUserProfileResponseSchema } from '../validators/getUserProfileResponseValidator';
 
 export default function () {
   const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
@@ -12,7 +12,7 @@ export default function () {
 
   return useQuery({
     queryKey: ['user-profile', userId],
-    queryFn: async (): Promise<GetUserProfileResponse> =>
+    queryFn: async (): Promise<GetUserProfileResponseSchema> =>
       await getUserProfile(userId!, accessToken!, refreshToken!),
     enabled: !isLoadingSession && !!userId && !!accessToken && !!refreshToken
   });

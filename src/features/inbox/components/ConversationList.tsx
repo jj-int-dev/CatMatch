@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../../stores/auth-store';
-import type { ConversationSchema } from '../validators/conversationValidator';
+import type { ConversationSchema } from '../../../validators/conversationValidator';
 
 interface ConversationListProps {
   conversations: ConversationSchema[];

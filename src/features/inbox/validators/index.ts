@@ -1,8 +1,11 @@
 export {
   conversationValidator,
   type ConversationSchema
-} from './conversationValidator';
-export { messageValidator, type MessageSchema } from './messageValidator';
+} from '../../../validators/conversationValidator';
+export {
+  messageValidator,
+  type MessageSchema
+} from '../../../validators/messageValidator';
 export {
   getConversationsResponseValidator,
   type GetConversationsResponseSchema
@@ -14,11 +17,11 @@ export {
 export {
   sendMessageResponseValidator,
   type SendMessageResponseSchema
-} from './sendMessageResponseValidator';
+} from '../../../validators/sendMessageResponseValidator';
 export {
   createConversationResponseValidator,
   type CreateConversationResponseSchema
-} from './createConversationResponseValidator';
+} from '../../../validators/createConversationResponseValidator';
 export {
   markAsReadResponseValidator,
   type MarkAsReadResponseSchema
