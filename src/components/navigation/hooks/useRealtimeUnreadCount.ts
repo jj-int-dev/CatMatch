@@ -63,7 +63,7 @@ export default function useRealtimeUnreadCount() {
             // No filter - we'll refetch count on any message change
             // This is simpler and more reliable than trying to calculate client-side
           },
-          async (payload: RealtimePostgresChangesPayload<any>) => {
+          async (_payload: RealtimePostgresChangesPayload<any>) => {
             console.log('Message change detected, refetching unread count');
 
             // Refetch the count from the server

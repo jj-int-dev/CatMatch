@@ -2,11 +2,11 @@ import { useTranslation } from 'react-i18next';
 import { FaSpinner } from 'react-icons/fa';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import { HiCheckCircle } from 'react-icons/hi';
-import type { GetUserProfileResponse } from '../types/GetUserProfileResponse';
 import useUpdateUserType from '../hooks/useUpdateUserType';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import type { GetUserProfileResponseSchema } from '../validators/getUserProfileResponseValidator';
 
 interface UserConversionDialogProps {
   isOpen: boolean;
@@ -34,7 +34,7 @@ export default function UserConversionDialog({
       await updateUserTypeMutation.mutateAsync(targetUserType);
       queryClient.setQueryData(
         ['user-profile', userSession?.user.id],
-        (profileData: GetUserProfileResponse) => {
+        (profileData: GetUserProfileResponseSchema) => {
           return { ...profileData, userType: targetUserType };
         }
       );

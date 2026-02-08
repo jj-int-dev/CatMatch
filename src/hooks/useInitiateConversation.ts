@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../stores/auth-store';
 import { createConversation } from '../api/createConversation';
@@ -21,7 +20,6 @@ import { sendMessage as apiSendMessage } from '../api/sendMessage';
  */
 export function useInitiateConversation() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const userSession = useAuthStore((state) => state.session);
   const isAuthenticatedUserSession = useAuthStore(
