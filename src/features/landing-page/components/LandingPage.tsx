@@ -119,8 +119,8 @@ function LandingPage() {
                     ))}
                   </div>
                   <span className="text-base-content/80 text-sm">
-                    <span className="font-semibold">1,000+</span> successful
-                    adoptions
+                    <span className="font-semibold">1,000+</span>{' '}
+                    {t('successful_adoptions')}
                   </span>
                 </div>
               </div>
@@ -169,7 +169,7 @@ function LandingPage() {
                           500+
                         </div>
                         <div className="text-base-content/80 text-sm">
-                          Cats Available
+                          {t('cats_available')}
                         </div>
                       </div>
                       <div className="text-center">
@@ -177,7 +177,7 @@ function LandingPage() {
                           98%
                         </div>
                         <div className="text-base-content/80 text-sm">
-                          Success Rate
+                          {t('success_rate')}
                         </div>
                       </div>
                       <div className="text-center">
@@ -185,7 +185,7 @@ function LandingPage() {
                           24h
                         </div>
                         <div className="text-base-content/80 text-sm">
-                          Avg. Response
+                          {t('avg_response')}
                         </div>
                       </div>
                     </div>
@@ -202,11 +202,10 @@ function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-base-content mb-4 font-serif text-4xl font-bold md:text-5xl">
-              Happy Tails & Purrfect Stories
+              {t('happy_tails_stories')}
             </h2>
             <p className="text-base-content/80 mx-auto mb-12 max-w-2xl text-lg">
-              See how CatMatch has brought joy to families and found loving
-              homes for cats in need.
+              {t('happy_tails_stories_desc')}
             </p>
           </div>
 
@@ -245,13 +244,13 @@ function LandingPage() {
                         {testimonial.name}
                       </div>
                       <div className="text-base-content/80 text-sm">
-                        Happy Cat Parent
+                        {t('happy_cat_parent')}
                       </div>
                     </div>
                     <div className="from-primary/10 to-accent/10 flex items-center gap-2 rounded-full bg-gradient-to-r px-3 py-1">
                       <TbCheck className="text-primary size-4" />
                       <span className="text-primary text-sm font-medium">
-                        Verified
+                        {t('verified')}
                       </span>
                     </div>
                   </div>
