@@ -1,11 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { AddressSuggestionSchema } from '../../../validators/addressSuggestionValidators';
 import useGetAddressSuggestions from '../../../hooks/useGetAddressSuggestions';
-import type { UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import type {
+  UseFormSetValue,
+  UseFormWatch,
+  Path,
+  PathValue
+} from 'react-hook-form';
 
 // Define a type for forms that have an address field with the expected structure
 export type FormWithAddress = {
-  address?: {
+  address: {
     formatted: string;
     lat: number;
     lon: number;
@@ -20,10 +25,6 @@ export type UseAddressHandlingReturn = {
   handleAddressChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAddressSelect: (address: AddressSuggestionSchema) => void;
   setLocationTooltip: React.Dispatch<React.SetStateAction<boolean>>;
-  setShowAddressSuggestions: React.Dispatch<React.SetStateAction<boolean>>;
-  setAddressSuggestions: React.Dispatch<
-    React.SetStateAction<AddressSuggestionSchema[]>
-  >;
 };
 
 export default function useAddressHandling<T extends FormWithAddress>(
@@ -37,38 +38,86 @@ export default function useAddressHandling<T extends FormWithAddress>(
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
   const [locationTooltip, setLocationTooltip] = useState(false);
 
-  // Use a type assertion to handle the optional address field
-  const addressValue = watch('address.formatted' as any) as string | undefined;
+  // Properly typed watch - no type assertions needed
+  const addressFormatted = watch('address.formatted' as Path<T>);
+  const addressLat = watch('address.lat' as Path<T>);
+  const addressLon = watch('address.lon' as Path<T>);
+
   const {
     data: fetchedAddressSuggestions,
     isLoading: isLoadingAddressSuggestions
-  } = useGetAddressSuggestions(addressValue || '', languageCode);
+  } = useGetAddressSuggestions(
+    (addressFormatted as string) || '',
+    languageCode,
+    'client-custom-location'
+  );
+
+  // Manage suggestions visibility based on whether user has selected an address
+  // Only show suggestions if user is typing AND hasn't selected an address yet
+  useEffect(() => {
+    // If lat/lon exist, user has selected an address - don't show suggestions
+    if (addressLat && addressLon) {
+      setShowAddressSuggestions(false);
+      setAddressSuggestions([]);
+      return;
+    }
+
+    // User is typing and hasn't selected yet - show suggestions if available
+    if (
+      fetchedAddressSuggestions &&
+      fetchedAddressSuggestions.results.length > 0
+    ) {
+      setAddressSuggestions(fetchedAddressSuggestions.results);
+      setShowAddressSuggestions(true);
+    } else {
+      setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
+    }
+  }, [fetchedAddressSuggestions, addressLat, addressLon]);
 
   const handleAddressChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      // Use type assertion for setValue
-      (setValue as any)('address.formatted', value, { shouldValidate: true });
 
-      if (
-        fetchedAddressSuggestions &&
-        fetchedAddressSuggestions.results.length > 0
-      ) {
-        setAddressSuggestions(fetchedAddressSuggestions.results);
-        setShowAddressSuggestions(true);
-      } else {
-        setAddressSuggestions([]);
-        setShowAddressSuggestions(false);
-      }
+      // When user types, update formatted field and CLEAR lat/lon
+      // This ensures validation knows the address is incomplete
+      setValue('address.formatted' as Path<T>, value as PathValue<T, Path<T>>, {
+        shouldValidate: true
+      });
+      setValue('address.lat' as Path<T>, 0 as PathValue<T, Path<T>>, {
+        shouldValidate: true
+      });
+      setValue('address.lon' as Path<T>, 0 as PathValue<T, Path<T>>, {
+        shouldValidate: true
+      });
+      setValue('address.city' as Path<T>, '' as PathValue<T, Path<T>>, {
+        shouldValidate: true
+      });
     },
-    [fetchedAddressSuggestions, setValue]
+    [setValue]
   );
 
   const handleAddressSelect = useCallback(
     (address: AddressSuggestionSchema) => {
-      // Use type assertion for setValue
-      (setValue as any)('address', address, { shouldValidate: true });
-      setShowAddressSuggestions(false);
+      // Set all address fields with properly typed values
+      setValue(
+        'address.formatted' as Path<T>,
+        address.formatted as PathValue<T, Path<T>>,
+        {
+          shouldValidate: true
+        }
+      );
+      setValue('address.lat' as Path<T>, address.lat as PathValue<T, Path<T>>, {
+        shouldValidate: true
+      });
+      setValue('address.lon' as Path<T>, address.lon as PathValue<T, Path<T>>, {
+        shouldValidate: true
+      });
+      // city not needed for rehomer purposes, only for discovery purposes
+      setValue('address.city' as Path<T>, '' as PathValue<T, Path<T>>, {
+        shouldValidate: true
+      });
+      // Suggestions will be hidden by the useEffect when it detects lat/lon exist
     },
     [setValue]
   );
@@ -80,8 +129,6 @@ export default function useAddressHandling<T extends FormWithAddress>(
     isLoadingAddressSuggestions,
     handleAddressChange,
     handleAddressSelect,
-    setLocationTooltip,
-    setShowAddressSuggestions,
-    setAddressSuggestions
+    setLocationTooltip
   };
 }

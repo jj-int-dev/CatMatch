@@ -285,7 +285,8 @@ export default function Discovery() {
               {animalsData?.animals.length} {t('animals_found')}
             </p>
             <p className="text-sm text-gray-600">
-              {t('page')} {page} {t('of')} {animalsData?.pagination.totalPages}
+              {t('page')} {page} {t('of')}{' '}
+              {animalsData?.pagination.totalPages || 1}
             </p>
           </div>
         </div>

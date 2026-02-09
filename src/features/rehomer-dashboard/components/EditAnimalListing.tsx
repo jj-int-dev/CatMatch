@@ -121,15 +121,18 @@ export default function EditAnimalListing() {
   } = useUpdateAnimalListingPhotos();
 
   useEffect(() => {
-    if (animalListing?.animal) {
-      const animal = animalListing.animal;
-      setValue('name', animal.name);
-      setValue('age', animal.ageInWeeks);
-      setValue('gender', animal.gender);
-      setValue('description', animal.description);
-      setValue('neutered', animal.neutered ? 'yes' : 'no');
-      setValue('address.formatted', animal.addressDisplayName);
-      setExistingPhotos(animal.animalPhotos || []);
+    if (animalListing) {
+      setValue('name', animalListing.name);
+      setValue('age', animalListing.ageInWeeks);
+      setValue('gender', animalListing.gender);
+      setValue('address.lat', animalListing.addressLatitude);
+      setValue('address.lon', animalListing.addressLongitude);
+      // city not needed for rehomer purposes, only for discovery purposes
+      setValue('address.city', '');
+      setValue('description', animalListing.description);
+      setValue('neutered', animalListing.neutered ? 'yes' : 'no');
+      setValue('address.formatted', animalListing.addressDisplayName);
+      setExistingPhotos(animalListing.animalPhotos || []);
     }
   }, [animalListing, setValue]);
 

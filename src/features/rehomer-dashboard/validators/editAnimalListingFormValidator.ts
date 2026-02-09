@@ -28,7 +28,7 @@ export const createEditAnimalListingFormValidator = () =>
         .max(1000, i18next.t('animal_desc_max'))
         .optional(),
       neutered: z.enum(['yes', 'no'], i18next.t('invalid_neutered')).optional(),
-      address: addressSuggestionValidator.optional()
+      address: addressSuggestionValidator
     })
     .refine(
       (data) => {

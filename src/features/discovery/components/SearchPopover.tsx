@@ -5,7 +5,7 @@ import { IoClose, IoLocationOutline } from 'react-icons/io5';
 import { FaCat, FaNeuter } from 'react-icons/fa';
 import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
 import { GiPathDistance } from 'react-icons/gi';
-import type { SearchFilters } from '../types/SearchFilters';
+import type { LocationSource, SearchFilters } from '../types/SearchFilters';
 import type { AddressSuggestionSchema } from '../../../validators/addressSuggestionValidators';
 import { searchFiltersValidator } from '../validators/searchFiltersValidator';
 
@@ -38,55 +38,99 @@ export default function SearchPopover({
 
   const { data: fetchedAddressSuggestions } = useGetAddressSuggestions(
     searchFilters.location.formatted,
-    i18n.language.split('-')[0]
+    i18n.language.split('-')[0],
+    searchFilters.locationSource
   );
 
-  const handleAddressChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setLocationError(null);
+  const handleAddressChange = (addressSearchText: string) => {
+    setLocationError(null);
 
+    // If the address field is empty, revert to client-ip
+    if (addressSearchText.trim().length === 0) {
       onFiltersChange({
         ...searchFilters,
-        locationSource: 'client-custom-location',
+        locationSource: 'client-ip',
         location: {
-          formatted: value,
+          formatted: '',
           city: null,
           latitude: null,
           longitude: null
         }
       });
-
-      if (
-        fetchedAddressSuggestions &&
-        fetchedAddressSuggestions.results.length > 0
-      ) {
-        setAddressSuggestions(fetchedAddressSuggestions.results);
-        setShowAddressSuggestions(true);
-      } else {
-        setAddressSuggestions([]);
-        setShowAddressSuggestions(false);
-      }
-    },
-    [fetchedAddressSuggestions, searchFilters]
-  );
-
-  const handleAddressSelect = useCallback(
-    (address: AddressSuggestionSchema) => {
-      onFiltersChange({
-        ...searchFilters,
-        locationSource: 'client-custom-location',
-        location: {
-          formatted: address.formatted,
-          city: address.city,
-          latitude: address.lat,
-          longitude: address.lon
-        }
-      });
+      setAddressSuggestions([]);
       setShowAddressSuggestions(false);
-    },
-    [searchFilters]
-  );
+      return;
+    }
+
+    // User is typing an address, set locationSource to client-custom-location
+    // and update the formatted field, but clear the other location fields
+    // since they haven't selected an address yet
+    onFiltersChange({
+      ...searchFilters,
+      locationSource: 'client-custom-location',
+      location: {
+        formatted: addressSearchText,
+        city: null,
+        latitude: null,
+        longitude: null
+      }
+    });
+
+    // Update address suggestions display based on fetched data
+    if (
+      fetchedAddressSuggestions &&
+      fetchedAddressSuggestions.results.length > 0
+    ) {
+      setAddressSuggestions(fetchedAddressSuggestions.results);
+      setShowAddressSuggestions(true);
+    } else {
+      setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Only show suggestions if user is typing and hasn't selected an address yet
+    // If latitude/longitude exist, it means user has completed their selection
+    // so we should NOT show the dropdown (even if new suggestions arrive)
+    if (
+      searchFilters.locationSource === 'client-custom-location' &&
+      !searchFilters.location.latitude &&
+      !searchFilters.location.longitude &&
+      fetchedAddressSuggestions &&
+      fetchedAddressSuggestions.results.length > 0
+    ) {
+      setAddressSuggestions(fetchedAddressSuggestions.results);
+      setShowAddressSuggestions(true);
+    } else {
+      setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
+    }
+  }, [
+    isOpen,
+    fetchedAddressSuggestions,
+    searchFilters.locationSource,
+    searchFilters.location.latitude,
+    searchFilters.location.longitude
+  ]);
+
+  const handleAddressSelect = (address: AddressSuggestionSchema) => {
+    // Update the input field with the selected address
+    onFiltersChange({
+      ...searchFilters,
+      locationSource: 'client-custom-location',
+      location: {
+        formatted: address.formatted,
+        city: address.city,
+        latitude: address.lat,
+        longitude: address.lon
+      }
+    });
+    setAddressSuggestions([]);
+    setShowAddressSuggestions(false);
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -96,20 +140,33 @@ export default function SearchPopover({
     }
   }, [isOpen]);
 
+  const handleClickOutside = useCallback(() => {
+    const { isValid } = searchFiltersValidator(searchFilters, t);
+
+    if (!isValid) {
+      // Don't close if filters are invalid
+      setLocationError(t('invalid_address'));
+      return;
+    }
+
+    setAddressSuggestions([]);
+    setShowAddressSuggestions(false);
+    onClose();
+  }, [searchFilters, t, onClose]);
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleMouseDown = (event: MouseEvent) => {
       if (
         popoverRef.current &&
         !popoverRef.current.contains(event.target as Node)
       ) {
-        setShowAddressSuggestions(false);
-        onClose();
+        handleClickOutside();
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose]);
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
+  }, [handleClickOutside]);
 
   const handleFieldChange = (field: keyof SearchFilters, value: any) => {
     const newFilters = { ...searchFilters, [field]: value };
@@ -133,22 +190,28 @@ export default function SearchPopover({
       return;
     }
 
+    setAddressSuggestions([]);
     setShowAddressSuggestions(false);
-    onFiltersChange({
+
+    // First, set the locationSource to client-current-location
+    const newFilters = {
       ...searchFilters,
-      locationSource: 'client-current-location',
+      locationSource: 'client-current-location' as LocationSource,
       location: {
         formatted: '',
         city: null,
         latitude: null,
         longitude: null
       }
-    });
+    };
+
+    onFiltersChange(newFilters);
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        // Use the updated filters with locationSource already set
         onFiltersChange({
-          ...searchFilters,
+          ...newFilters,
           location: {
             formatted: '',
             city: null,
@@ -157,7 +220,9 @@ export default function SearchPopover({
           }
         });
       },
-      () => {
+      (_error) => {
+        setLocationError(t('current_location_error'));
+        // Revert to client-ip on error
         onFiltersChange({
           ...searchFilters,
           locationSource: 'client-ip',
@@ -188,6 +253,17 @@ export default function SearchPopover({
     await onSearch();
   };
 
+  const handleCloseClick = () => {
+    const { isValid, error } = searchFiltersValidator(searchFilters, t);
+
+    if (!isValid) {
+      setLocationError(error);
+      return;
+    }
+
+    onClose();
+  };
+
   return (
     <dialog
       ref={popoverRef}
@@ -205,7 +281,7 @@ export default function SearchPopover({
             {t('search_filters')}
           </h3>
           <button
-            onClick={onClose}
+            onClick={handleCloseClick}
             className="btn btn-circle btn-ghost btn-sm"
             disabled={isSearching}
           >
@@ -246,7 +322,7 @@ export default function SearchPopover({
                     className="input input-bordered w-full"
                     autoComplete="off"
                     value={searchFilters.location.formatted}
-                    onChange={handleAddressChange}
+                    onChange={(e) => handleAddressChange(e.target.value)}
                     disabled={
                       searchFilters.locationSource === 'client-current-location'
                     }
@@ -298,13 +374,13 @@ export default function SearchPopover({
               onChange={(e) =>
                 handleFieldChange('maxDistanceMeters', parseInt(e.target.value))
               }
-              className="range range-primary"
+              className="range range-primary w-full"
             />
             <div className="text-base-content/70 mt-2 flex w-full justify-between px-2 text-xs">
               <span>1 km</span>
-              <span>62 km</span>
-              <span>125 km</span>
-              <span>188 km</span>
+              <span>60 km</span>
+              <span>115 km</span>
+              <span>175 km</span>
               <span>250 km</span>
             </div>
           </div>
@@ -429,7 +505,7 @@ export default function SearchPopover({
               {t('reset')}
             </button>
             <button
-              onClick={onClose}
+              onClick={handleCloseClick}
               className="btn btn-ghost"
               disabled={isSearching}
             >

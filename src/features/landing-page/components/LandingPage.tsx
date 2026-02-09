@@ -270,11 +270,10 @@ function LandingPage() {
 
         <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="mb-6 font-serif text-4xl font-bold text-white md:text-5xl">
-            Ready to Find Your Purrfect Match?
+            {t('ready_to_find_match')}
           </h2>
           <p className="text-primary-content/80 mb-10 text-lg md:text-xl">
-            Join thousands of happy cats and loving families. Start your journey
-            today.
+            {t('ready_to_find_match_desc')}
           </p>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
@@ -292,7 +291,7 @@ function LandingPage() {
               className="inline-flex items-center justify-center gap-3 rounded-2xl border-2 border-white/30 bg-transparent px-8 py-4 text-lg font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-white hover:bg-white/10 active:scale-95"
             >
               <TbPaw className="size-6" />
-              <span>Browse Cats</span>
+              <span>{t('browse_cats_cta')}</span>
             </button>
           </div>
 
@@ -300,25 +299,25 @@ function LandingPage() {
             <div className="text-center">
               <div className="text-3xl font-bold text-white">500+</div>
               <div className="text-primary-content/80 text-sm">
-                Cats Available
+                {t('cats_available')}
               </div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-white">1,000+</div>
               <div className="text-primary-content/80 text-sm">
-                Happy Families
+                {t('happy_families')}
               </div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-white">98%</div>
               <div className="text-primary-content/80 text-sm">
-                Success Rate
+                {t('success_rate')}
               </div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-white">24h</div>
               <div className="text-primary-content/80 text-sm">
-                Avg. Response
+                {t('avg_response')}
               </div>
             </div>
           </div>
@@ -337,13 +336,13 @@ function LandingPage() {
                 </span>
               </div>
               <p className="text-neutral-content/80">
-                Connecting loving homes with cats in need since 2023.
+                {t('connecting_homes_since')}
               </p>
             </div>
 
             <div>
               <h3 className="text-neutral-content mb-4 font-semibold">
-                For Adopters
+                {t('for_adopters')}
               </h3>
               <ul className="text-neutral-content/80 space-y-2">
                 <li>
@@ -351,7 +350,7 @@ function LandingPage() {
                     href="#"
                     className="hover:text-neutral-content transition-colors"
                   >
-                    Browse Cats
+                    {t('browse_cats_link')}
                   </a>
                 </li>
                 <li>
@@ -359,7 +358,7 @@ function LandingPage() {
                     href="#"
                     className="hover:text-neutral-content transition-colors"
                   >
-                    Adoption Process
+                    {t('adoption_process')}
                   </a>
                 </li>
                 <li>
@@ -367,7 +366,7 @@ function LandingPage() {
                     href="#"
                     className="hover:text-neutral-content transition-colors"
                   >
-                    FAQ
+                    {t('faq')}
                   </a>
                 </li>
               </ul>
@@ -375,7 +374,7 @@ function LandingPage() {
 
             <div>
               <h3 className="text-neutral-content mb-4 font-semibold">
-                For Rehomers
+                {t('for_rehomers')}
               </h3>
               <ul className="text-neutral-content/80 space-y-2">
                 <li>
@@ -383,7 +382,7 @@ function LandingPage() {
                     href="#"
                     className="hover:text-neutral-content transition-colors"
                   >
-                    List a Cat
+                    {t('list_a_cat')}
                   </a>
                 </li>
                 <li>
@@ -391,7 +390,7 @@ function LandingPage() {
                     href="#"
                     className="hover:text-neutral-content transition-colors"
                   >
-                    Rehoming Guide
+                    {t('rehoming_guide')}
                   </a>
                 </li>
                 <li>
@@ -399,7 +398,7 @@ function LandingPage() {
                     href="#"
                     className="hover:text-neutral-content transition-colors"
                   >
-                    Safety Tips
+                    {t('safety_tips')}
                   </a>
                 </li>
               </ul>
@@ -407,7 +406,7 @@ function LandingPage() {
 
             <div>
               <h3 className="text-neutral-content mb-4 font-semibold">
-                Company
+                {t('company')}
               </h3>
               <ul className="text-neutral-content/80 space-y-2">
                 <li>
@@ -415,7 +414,7 @@ function LandingPage() {
                     href="#"
                     className="hover:text-neutral-content transition-colors"
                   >
-                    About Us
+                    {t('about_us')}
                   </a>
                 </li>
                 <li>
@@ -423,7 +422,7 @@ function LandingPage() {
                     href="#"
                     className="hover:text-neutral-content transition-colors"
                   >
-                    Contact
+                    {t('contact')}
                   </a>
                 </li>
                 <li>
@@ -431,7 +430,7 @@ function LandingPage() {
                     href="#"
                     className="hover:text-neutral-content transition-colors"
                   >
-                    Privacy Policy
+                    {t('privacy_policy')}
                   </a>
                 </li>
               </ul>
@@ -439,7 +438,7 @@ function LandingPage() {
           </div>
 
           <div className="border-neutral-focus text-neutral-content/80 mt-12 border-t pt-8 text-center">
-            <p>© 2023 CatMatch. All rights reserved.</p>
+            <p>{t('copyright_text')}</p>
           </div>
         </div>
       </footer>

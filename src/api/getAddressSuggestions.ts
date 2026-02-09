@@ -20,7 +20,8 @@ export default async function (
           type: 'street',
           limit: 5,
           lang: languageCode,
-          format: 'json'
+          format: 'json',
+          filter: 'countrycode:auto'
         }
       }
     );
