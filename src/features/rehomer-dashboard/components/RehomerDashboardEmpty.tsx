@@ -45,10 +45,7 @@ export default function RehomerDashboardEmpty() {
               <HiSparkles className="text-primary mt-0.5 size-5 flex-shrink-0" />
               <div className="text-left">
                 <p className="text-base-content/80 text-sm">
-                  {t(
-                    'empty_dashboard_tip',
-                    'Create your first listing to start connecting with potential adopters in your area.'
-                  )}
+                  {t('empty_dashboard_tip')}
                 </p>
               </div>
             </div>
