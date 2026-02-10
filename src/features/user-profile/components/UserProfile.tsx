@@ -103,6 +103,24 @@ export default function UserProfile() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const openChooseProfilePicDialog = () =>
+    (
+      document.getElementById(
+        'chooseProfilePicDialog'
+      ) as HTMLDialogElement | null
+    )?.showModal();
+
+  const closeChooseProfilePicDialog = () =>
+    (
+      document.getElementById(
+        'chooseProfilePicDialog'
+      ) as HTMLDialogElement | null
+    )?.close();
+
+  const openFileExplorer = () => {
+    fileInputRef.current?.click();
+  };
+
   const saveNewProfilePicture = async (newPicture: File) => {
     if (!isAuthenticatedUserSession(userSession)) return;
 
@@ -186,24 +204,6 @@ export default function UserProfile() {
       />
     );
   }
-
-  const openChooseProfilePicDialog = () =>
-    (
-      document.getElementById(
-        'chooseProfilePicDialog'
-      ) as HTMLDialogElement | null
-    )?.showModal();
-
-  const closeChooseProfilePicDialog = () =>
-    (
-      document.getElementById(
-        'chooseProfilePicDialog'
-      ) as HTMLDialogElement | null
-    )?.close();
-
-  const openFileExplorer = () => {
-    fileInputRef.current?.click();
-  };
 
   const handleSave = async (formData: UserProfileFormSchema) => {
     try {
