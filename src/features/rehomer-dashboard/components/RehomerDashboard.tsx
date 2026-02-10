@@ -47,8 +47,14 @@ export default function RehomerDashboard() {
     }
   }, [userSession, isLoadingSession, isLoadingUserType, userType]);
 
-  const getAgeDisplay = (ageInWeeks: number) =>
-    `${(ageInWeeks / 4).toFixed(2)} ${t('months_old')}`;
+  const getAgeDisplay = (ageInWeeks: number) => {
+    const months = ageInWeeks / 4;
+    const formattedMonths = Number.isInteger(months)
+      ? months.toString()
+      : months.toFixed(2);
+
+    return `${formattedMonths} ${t('months_old')}`;
+  };
 
   const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
   const initialPage = !isNaN(pageFromUrl) && pageFromUrl >= 1 ? pageFromUrl : 1;
