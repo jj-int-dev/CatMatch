@@ -3,7 +3,7 @@ import * as z from 'zod';
 export const getUserProfileResponseValidator = z.object({
   email: z.email(),
   displayName: z.string().nullable(),
-  dateOfBirth: z.iso
+  dateOfBirth: z.coerce
     .date()
     .refine((date) => new Date(date) < new Date())
     .nullable(),

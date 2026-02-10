@@ -8,7 +8,7 @@ export const createUserProfileFormValidator = () =>
       .min(1, { message: i18next.t('display_name_required') }),
     dateOfBirth: z.union([
       z.literal(''),
-      z.iso.date().refine((date) => new Date(date) < new Date(), {
+      z.coerce.date().refine((date) => new Date(date) < new Date(), {
         message: i18next.t('invalid_date')
       })
     ]), //empty string or E.164 format phone number
