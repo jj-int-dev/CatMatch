@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FaQuestionCircle, FaTimes } from 'react-icons/fa';
-import { IoCloudUploadOutline } from 'react-icons/io5';
+import { IoCloudUploadOutline, IoArrowBack } from 'react-icons/io5';
 import { useAuthStore } from '../../../stores/auth-store';
 import {
   createEditAnimalListingFormValidator,
@@ -38,6 +38,7 @@ export default function EditAnimalListing() {
 
   const goToDiscovery = () => navigate('/discovery', { replace: true });
   const goToLoginPage = () => navigate('/login', { replace: true });
+  const goBackToDashboard = () => navigate('/rehomer/dashboard');
 
   useEffect(() => {
     if (!isLoadingSession && !isLoadingUserType) {
@@ -348,6 +349,20 @@ export default function EditAnimalListing() {
       <div className="mx-auto max-w-4xl">
         <div className="card bg-base-100 shadow-2xl">
           <div className="card-body">
+            {/* Back Navigation Button */}
+            <div className="mb-4">
+              <button
+                onClick={goBackToDashboard}
+                className="btn btn-ghost btn-sm text-base-content/70 hover:text-base-content hover:bg-base-200 gap-2 transition-colors"
+                aria-label="Back to dashboard"
+              >
+                <IoArrowBack className="h-5 w-5" />
+                <span className="hidden sm:inline">
+                  {t('return_to_dashboard')}
+                </span>
+              </button>
+            </div>
+
             <h1 className="card-title text-base-content justify-center text-3xl font-bold md:text-4xl">
               {t('edit_animal_title')}
             </h1>
