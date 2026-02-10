@@ -189,6 +189,18 @@ export default function EditAnimalListing() {
         const animalPhotos = new FormData();
         photosToUpload.forEach((photo) => animalPhotos.append('photos', photo));
 
+        // Add photo URLs to delete
+        const photoUrlsToDelete = existingPhotos
+          .filter((photo) => photo.markedForDeletion)
+          .map((photo) => photo.photoUrl);
+
+        if (photoUrlsToDelete.length > 0) {
+          animalPhotos.append(
+            'photoUrlsToDelete',
+            JSON.stringify(photoUrlsToDelete)
+          );
+        }
+
         await updateAnimalListingPhotos({
           animalId: animalId!,
           animalPhotos
