@@ -1,9 +1,13 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { IoAddCircleOutline } from 'react-icons/io5';
 import { HiSparkles } from 'react-icons/hi2';
 
 export default function RehomerDashboardEmpty() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const goToAddAnimalListingPage = () => navigate('/rehomer/animal/add');
 
   return (
     <div className="flex min-h-[400px] items-center justify-center p-4">
@@ -26,7 +30,10 @@ export default function RehomerDashboardEmpty() {
 
           {/* Call to Action */}
           <div className="card-actions w-full">
-            <button className="btn btn-primary btn-lg w-full gap-2 shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <button
+              className="btn btn-primary btn-lg w-full gap-2 shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
+              onClick={goToAddAnimalListingPage}
+            >
               <IoAddCircleOutline className="size-6" />
               <span>{t('add_first_cat')}</span>
             </button>
