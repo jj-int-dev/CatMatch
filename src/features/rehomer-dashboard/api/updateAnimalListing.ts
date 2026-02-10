@@ -16,7 +16,6 @@ export default async function (
       animalData,
       { headers: getTokenHeaders(accessToken, refreshToken) }
     );
-    return Promise.reject(new Error(i18next.t('update_animal_listing_error')));
   } catch (error) {
     return Promise.reject(new Error(i18next.t('update_animal_listing_error')));
   }

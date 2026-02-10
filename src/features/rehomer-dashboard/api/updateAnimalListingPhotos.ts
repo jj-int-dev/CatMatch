@@ -10,7 +10,7 @@ export default async function (
   refreshToken: string
 ): Promise<void> {
   try {
-    await axiosRehomersClient.post(
+    await axiosRehomersClient.patch(
       `/${userId}/update-animal-photos/${animalId}`,
       animalPhotos,
       { headers: getTokenHeaders(accessToken, refreshToken) }

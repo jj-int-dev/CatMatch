@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import { FaQuestionCircle, FaTimes } from 'react-icons/fa';
 import { IoCloudUploadOutline, IoArrowBack } from 'react-icons/io5';
 import { useAuthStore } from '../../../stores/auth-store';
@@ -28,6 +29,7 @@ export default function EditAnimalListing() {
   const { animalId } = useParams();
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const userSession = useAuthStore((state) => state.session);
   const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
   const isAuthenticatedUserSession = useAuthStore(
@@ -193,7 +195,6 @@ export default function EditAnimalListing() {
         const photoUrlsToDelete = existingPhotos
           .filter((photo) => photo.markedForDeletion)
           .map((photo) => photo.photoUrl);
-
         if (photoUrlsToDelete.length > 0) {
           animalPhotos.append(
             'photoUrlsToDelete',
@@ -216,9 +217,10 @@ export default function EditAnimalListing() {
         setSuccessMessage(t('animal_listing_updated_successfully'));
         if (hasPhotoChanges) {
           clearPhotos();
-          setExistingPhotos(
-            existingPhotos.filter((photo) => !photo.markedForDeletion)
-          );
+          // Invalidate the query to refetch fresh data from the server
+          await queryClient.invalidateQueries({
+            queryKey: ['animal-listing', userSession!.user.id, animalId]
+          });
         }
       }
     } catch (error) {
