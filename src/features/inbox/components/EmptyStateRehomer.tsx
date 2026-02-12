@@ -17,7 +17,7 @@ export default function EmptyStateRehomer({
   };
 
   return (
-    <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+    <div className="flex h-full flex-col items-center overflow-y-auto p-8 py-12 text-center">
       <div className="from-primary/10 to-secondary/10 mb-6 rounded-full bg-gradient-to-br p-8">
         <svg
           className="text-primary h-16 w-16"
@@ -147,7 +147,7 @@ export default function EmptyStateRehomer({
         <ul className="text-info-content space-y-2 text-left text-sm">
           <li className="flex items-start">
             <svg
-              className="text-info mr-2 h-5 w-5"
+              className="text-info mr-2 h-5 w-5 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -169,7 +169,7 @@ export default function EmptyStateRehomer({
           </li>
           <li className="flex items-start">
             <svg
-              className="text-info mr-2 h-5 w-5"
+              className="text-info mr-2 h-5 w-5 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -191,7 +191,7 @@ export default function EmptyStateRehomer({
           </li>
           <li className="flex items-start">
             <svg
-              className="text-info mr-2 h-5 w-5"
+              className="text-info mr-2 h-5 w-5 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

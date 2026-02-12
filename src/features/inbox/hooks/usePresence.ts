@@ -3,6 +3,21 @@ import { supabase } from '../../../utils/supabase-client';
 import { useAuthStore } from '../../../stores/auth-store';
 
 /**
+ * Represents a single presence entry in the channel
+ */
+interface PresenceEntry {
+  key: string;
+  online_at?: string;
+  user_id?: string;
+}
+
+/**
+ * Represents the presence state structure from Supabase
+ * The state is an object where keys are user IDs and values are arrays of presence entries
+ */
+type PresenceState = Record<string, PresenceEntry[]>;
+
+/**
  * Hook for presence tracking (online/offline status)
  * @returns Object containing online users and functions to track presence
  */
@@ -33,12 +48,15 @@ export function usePresence() {
       // Track presence
       channel
         .on('presence', { event: 'sync' }, () => {
-          const state = channel.presenceState();
+          const state = channel.presenceState() as PresenceState;
           const onlineUserIds = new Set<string>();
 
-          Object.values(state).forEach((presenceEntries: any) => {
-            presenceEntries.forEach((presence: any) => {
-              onlineUserIds.add(presence.key);
+          Object.values(state).forEach((presenceEntries: PresenceEntry[]) => {
+            presenceEntries.forEach((presence: PresenceEntry) => {
+              // Only add the key if it's a valid string (not undefined or empty)
+              if (presence?.key && typeof presence.key === 'string') {
+                onlineUserIds.add(presence.key);
+              }
             });
           });
 

@@ -24,7 +24,7 @@ export async function createConversation(
 ): Promise<CreateConversationResponseSchema> {
   try {
     const conversationData = await axiosMessagesClient.post(
-      `${userId}/conversations`,
+      `/${userId}/conversations`,
       { rehomerId, animalId },
       { headers: getTokenHeaders(accessToken, refreshToken) }
     );

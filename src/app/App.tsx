@@ -18,7 +18,7 @@ import UserDataDeletion from '../features/user-data-deletion/components/UserData
 import AnimalDetails from '../features/discovery/components/AnimalDetails';
 import EditAnimalListing from '../features/rehomer-dashboard/components/EditAnimalListing';
 import AddAnimalListing from '../features/rehomer-dashboard/components/AddAnimalListing';
-import MessagesPage from '../features/inbox/components/MessagesPage';
+import Inbox from '../features/inbox/components/Inbox';
 import { SendResetPasswordLinkDialog } from '../components/send-reset-password-link/SendResetPasswordLinkDialog';
 
 function App() {
@@ -67,7 +67,7 @@ function App() {
           path="rehomer/animal/edit/:animalId"
           element={<EditAnimalListing />}
         />
-        <Route path="messages" element={<MessagesPage />} />
+        <Route path="inbox" element={<Inbox />} />
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="*" element={<NotFound />} />

@@ -24,7 +24,7 @@ export async function getConversations(
 ): Promise<GetConversationsResponseSchema> {
   try {
     const conversationsData = await axiosMessagesClient.get(
-      `${userId}/conversations`,
+      `/${userId}/conversations`,
       {
         headers: getTokenHeaders(accessToken, refreshToken),
         params: { page, pageSize }

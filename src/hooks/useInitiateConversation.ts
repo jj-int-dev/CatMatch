@@ -53,11 +53,11 @@ export function useInitiateConversation() {
         refreshToken
       );
 
-      if (!conversationResponse?.conversation?.conversation_id) {
+      if (!conversationResponse?.conversation?.conversationId) {
         throw new Error(t('create_conversation_error'));
       }
 
-      const conversationId = conversationResponse.conversation.conversation_id;
+      const conversationId = conversationResponse.conversation.conversationId;
 
       // Step 2: Send the initial message
       const messageResponse = await apiSendMessage(
@@ -79,7 +79,7 @@ export function useInitiateConversation() {
 
       // Invalidate messages for this conversation
       queryClient.invalidateQueries({
-        queryKey: ['messages', data.conversation.conversation_id]
+        queryKey: ['messages', data.conversation.conversationId]
       });
 
       // Invalidate unread count
@@ -87,7 +87,7 @@ export function useInitiateConversation() {
 
       console.log(
         'Conversation initiated successfully:',
-        data.conversation.conversation_id
+        data.conversation.conversationId
       );
     },
     onError: (error) => {

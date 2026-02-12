@@ -16,7 +16,7 @@ export default function EmptyStateAdopter({
   };
 
   return (
-    <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+    <div className="flex h-full flex-col items-center overflow-y-auto p-8 py-12 text-center">
       <div className="mb-6 rounded-full bg-gradient-to-br from-blue-50 to-purple-50 p-8">
         <svg
           className="h-16 w-16 text-blue-500"

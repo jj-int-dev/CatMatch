@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../../stores/auth-store';
 import useSetTypingStatus from '../hooks/useSetTypingStatus';
 import type { MessageSchema } from '../../../validators/messageValidator';
-import type { ConversationSchema } from '../../../validators/conversationValidator';
+import type { ConversationSchema } from '../validators/getConversationsResponseValidator';
 
 interface ChatInterfaceProps {
   conversation: ConversationSchema | null;
@@ -37,10 +37,10 @@ export default function ChatInterface({
   const otherUserTyping = React.useMemo(() => {
     if (!conversation || !userId) return false;
 
-    const isAdopter = conversation.adopter_id === userId;
+    const isAdopter = conversation.adopterId === userId;
     return isAdopter
-      ? conversation.rehomer_is_typing
-      : conversation.adopter_is_typing;
+      ? conversation.rehomerIsTyping
+      : conversation.adopterIsTyping;
   }, [conversation, userId]);
 
   // Scroll to bottom when messages change
@@ -53,7 +53,7 @@ export default function ChatInterface({
   // Mark conversation as read when opened
   useEffect(() => {
     if (conversation && onMarkAsRead) {
-      onMarkAsRead(conversation.conversation_id);
+      onMarkAsRead(conversation.conversationId);
     }
   }, [conversation, onMarkAsRead]);
 
@@ -66,7 +66,7 @@ export default function ChatInterface({
     if (newMessage.trim() && conversation) {
       // Send typing status to server
       setTypingStatus({
-        conversationId: conversation.conversation_id,
+        conversationId: conversation.conversationId,
         isTyping: true
       });
 
@@ -74,7 +74,7 @@ export default function ChatInterface({
       typingTimeoutRef.current = setTimeout(() => {
         if (conversation) {
           setTypingStatus({
-            conversationId: conversation.conversation_id,
+            conversationId: conversation.conversationId,
             isTyping: false
           });
         }
@@ -82,7 +82,7 @@ export default function ChatInterface({
     } else if (conversation) {
       // Send stop typing status
       setTypingStatus({
-        conversationId: conversation.conversation_id,
+        conversationId: conversation.conversationId,
         isTyping: false
       });
     }
@@ -170,9 +170,9 @@ export default function ChatInterface({
   }
 
   const otherUserId =
-    conversation.adopter_id === userId
-      ? conversation.rehomer_id
-      : conversation.adopter_id;
+    conversation.adopterId === userId
+      ? conversation.rehomerId
+      : conversation.adopterId;
 
   return (
     <div className="flex h-full flex-col">
@@ -247,15 +247,13 @@ export default function ChatInterface({
         ) : (
           <div className="space-y-4">
             {messages.map((message) => {
-              const isOwnMessage = message.sender_id === userId;
-              const messageTime = new Date(message.created_at);
-              const readTime = message.read_at
-                ? new Date(message.read_at)
-                : null;
+              const isOwnMessage = message.senderId === userId;
+              const messageTime = new Date(message.createdAt);
+              const readTime = message.readAt ? new Date(message.readAt) : null;
 
               return (
                 <div
-                  key={message.message_id}
+                  key={message.messageId}
                   className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
@@ -291,7 +289,7 @@ export default function ChatInterface({
                                 minute: '2-digit'
                               })}
                             </span>
-                          ) : message.is_read ? (
+                          ) : message.isRead ? (
                             <span title={t('read')}>✓✓</span>
                           ) : (
                             <span title={t('unread')}>✓</span>

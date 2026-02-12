@@ -24,7 +24,7 @@ export async function setTypingStatus(
 ): Promise<SetTypingStatusResponseSchema> {
   try {
     const response = await axiosMessagesClient.put(
-      `${userId}/conversations/${conversationId}/typing`,
+      `/${userId}/conversations/${conversationId}/typing`,
       { isTyping },
       {
         headers: getTokenHeaders(accessToken, refreshToken)

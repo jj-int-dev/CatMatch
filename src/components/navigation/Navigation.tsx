@@ -166,7 +166,7 @@ export default function Navigation() {
                     </NavLink>
                   ))}
 
-                <NavLink to="/messages" className={menuItemStyles}>
+                <NavLink to="/inbox" className={menuItemStyles}>
                   <FiMessageSquare className="h-4 w-4" />
                   <span>{t('messages')}</span>
                   {!!unreadCount && unreadCount > 0 && (

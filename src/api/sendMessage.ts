@@ -28,11 +28,15 @@ export async function sendMessage(
       { content },
       { headers: getTokenHeaders(accessToken, refreshToken) }
     );
-
-    const { success, data } = sendMessageResponseValidator.safeParse(
+    console.log('sendMessage before validation:');
+    console.log(messageData.data);
+    const { success, data, error } = sendMessageResponseValidator.safeParse(
       messageData.data
     );
-
+    if (error) {
+      console.log('error from sending message:');
+      console.log(error);
+    }
     if (success) return data;
 
     return Promise.reject(new Error(i18next.t('send_message_error')));

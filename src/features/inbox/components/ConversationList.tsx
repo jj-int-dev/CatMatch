@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../../stores/auth-store';
-import type { ConversationSchema } from '../../../validators/conversationValidator';
+import type { ConversationSchema } from '../validators/getConversationsResponseValidator';
 
 interface ConversationListProps {
   conversations: ConversationSchema[];
@@ -107,22 +107,22 @@ export default function ConversationList({
       <div className="space-y-2 p-2">
         {conversations.map((conversation) => {
           const otherUserId =
-            conversation.adopter_id === userId
-              ? conversation.rehomer_id
-              : conversation.adopter_id;
+            conversation.adopterId === userId
+              ? conversation.rehomerId
+              : conversation.adopterId;
           const isOnline = isUserOnline(otherUserId);
           const isSelected =
-            selectedConversationId === conversation.conversation_id;
+            selectedConversationId === conversation.conversationId;
           const hasUnread =
             conversation.unreadCount && conversation.unreadCount > 0;
-          const lastMessageTime = conversation.last_message_at
-            ? new Date(conversation.last_message_at)
+          const lastMessageTime = conversation.lastMessageAt
+            ? new Date(conversation.lastMessageAt)
             : null;
 
           return (
             <button
-              key={conversation.conversation_id}
-              onClick={() => onSelectConversation(conversation.conversation_id)}
+              key={conversation.conversationId}
+              onClick={() => onSelectConversation(conversation.conversationId)}
               className={`w-full rounded-lg p-4 text-left transition-colors hover:bg-gray-50 active:bg-gray-100 ${
                 isSelected
                   ? 'border border-blue-200 bg-blue-50'
@@ -175,7 +175,7 @@ export default function ConversationList({
                     </p>
                   )}
 
-                  {conversation.last_message_at && (
+                  {conversation.lastMessageAt && (
                     <p className="truncate text-sm text-gray-500">
                       {t('last_message')}:{' '}
                       {lastMessageTime?.toLocaleTimeString([], {

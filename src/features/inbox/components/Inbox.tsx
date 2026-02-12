@@ -18,7 +18,7 @@ import ChatInterface from './ChatInterface';
 import EmptyStateAdopter from './EmptyStateAdopter';
 import EmptyStateRehomer from './EmptyStateRehomer';
 
-export default function MessagesPage() {
+export default function Inbox() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const userSession = useAuthStore((state) => state.session);
@@ -71,7 +71,7 @@ export default function MessagesPage() {
 
   // Find selected conversation
   const selectedConversation = selectedConversationId
-    ? conversations.find((c) => c.conversation_id === selectedConversationId)
+    ? conversations.find((c) => c.conversationId === selectedConversationId)
     : null;
 
   // Handle responsive design with multiple breakpoints
@@ -167,6 +167,24 @@ export default function MessagesPage() {
     // Rehomers cannot create new chats - they can only respond to existing ones
   };
 
+  // Determine which empty state to show
+  const showEmptyState = conversations.length === 0 && !conversationsLoading;
+  const showConversationView = !showEmptyState && showConversationList;
+
+  // IMPORTANT: Use swipe gesture hook BEFORE any early returns to comply with Rules of Hooks
+  // Hooks must be called in the same order on every render, so this must be before the
+  // conditional returns below (isLoadingSession, isAuthenticatedUserSession checks)
+  const { ref: swipeRef } = useMobileNavigationGestures(
+    // Swipe right to go back to conversation list (when in chat view)
+    isMobileView && !showConversationList
+      ? handleBackToConversations
+      : undefined,
+    // Swipe left to go to chat view (when in conversation list with a selected conversation)
+    isMobileView && showConversationList && selectedConversationId
+      ? () => handleSelectConversation(selectedConversationId)
+      : undefined
+  );
+
   if (isLoadingSession || isLoadingUserType) {
     return (
       <div className="bg-base-100 flex min-h-screen items-center justify-center">
@@ -192,22 +210,6 @@ export default function MessagesPage() {
       </div>
     );
   }
-
-  // Determine which empty state to show
-  const showEmptyState = conversations.length === 0 && !conversationsLoading;
-  const showConversationView = !showEmptyState && showConversationList;
-
-  // Use swipe gesture for mobile navigation (after all functions are declared)
-  const { ref: swipeRef } = useMobileNavigationGestures(
-    // Swipe right to go back to conversation list (when in chat view)
-    isMobileView && !showConversationList
-      ? handleBackToConversations
-      : undefined,
-    // Swipe left to go to chat view (when in conversation list with a selected conversation)
-    isMobileView && showConversationList && selectedConversationId
-      ? () => handleSelectConversation(selectedConversationId)
-      : undefined
-  );
 
   return (
     <div
@@ -297,9 +299,9 @@ export default function MessagesPage() {
           {/* Conversation List - Desktop or Mobile when showing list */}
           {(showConversationView || !isMobileView) && (
             <div
-              className={`${isMobileView ? 'w-full' : 'w-full md:w-96 lg:w-80 xl:w-96'} border-base-300 bg-base-100 overflow-hidden rounded-2xl border shadow-xl transition-all duration-300`}
+              className={`${isMobileView ? 'w-full' : 'w-full md:w-96 lg:w-80 xl:w-96'} border-base-300 bg-base-100 flex h-full flex-col overflow-hidden rounded-2xl border shadow-xl transition-all duration-300`}
             >
-              <div className="border-base-300 border-b p-4">
+              <div className="border-base-300 flex-shrink-0 border-b p-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-base-content text-lg font-semibold">
                     {t('conversations')}
@@ -317,20 +319,22 @@ export default function MessagesPage() {
                   </button>
                 )}
               </div>
-              <ConversationList
-                conversations={conversations}
-                loading={conversationsLoading}
-                selectedConversationId={selectedConversationId}
-                onSelectConversation={handleSelectConversation}
-                onlineUsers={onlineUsers}
-                isUserOnline={isUserOnline}
-              />
+              <div className="min-h-0 flex-1 overflow-hidden">
+                <ConversationList
+                  conversations={conversations}
+                  loading={conversationsLoading}
+                  selectedConversationId={selectedConversationId}
+                  onSelectConversation={handleSelectConversation}
+                  onlineUsers={onlineUsers}
+                  isUserOnline={isUserOnline}
+                />
+              </div>
             </div>
           )}
 
           {/* Chat Interface or Empty State */}
           <div
-            className={`${isMobileView ? 'w-full' : 'flex-1'} ${!showConversationList || !isMobileView ? 'block' : 'hidden md:block'} border-base-300 bg-base-100 overflow-hidden rounded-2xl border shadow-xl transition-all duration-300`}
+            className={`${isMobileView ? 'w-full' : 'flex-1'} ${isMobileView && showConversationList && !showEmptyState ? 'hidden' : 'block'} border-base-300 bg-base-100 flex h-full flex-col overflow-hidden rounded-2xl border shadow-xl transition-all duration-300`}
           >
             {showEmptyState ? (
               <div className="h-full">
@@ -378,7 +382,7 @@ export default function MessagesPage() {
                         onClick={() => {
                           if (conversations.length > 0) {
                             handleSelectConversation(
-                              conversations[0].conversation_id
+                              conversations[0].conversationId
                             );
                           }
                         }}

@@ -22,7 +22,7 @@ export async function markConversationAsRead(
 ): Promise<MarkAsReadResponseSchema> {
   try {
     const markAsReadData = await axiosMessagesClient.put(
-      `${userId}/conversations/${conversationId}/read`,
+      `/${userId}/conversations/${conversationId}/read`,
       {},
       { headers: getTokenHeaders(accessToken, refreshToken) }
     );
