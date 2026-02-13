@@ -1,8 +1,4 @@
 export {
-  conversationValidator,
-  type ConversationSchema
-} from '../../../validators/conversationValidator';
-export {
   messageValidator,
   type MessageSchema
 } from '../../../validators/messageValidator';

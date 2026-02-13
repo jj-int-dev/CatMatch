@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../utils/supabase-client';
 import { useAuthStore } from '../../../stores/auth-store';
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
-import type { ConversationSchema } from '../../../validators/conversationValidator';
+import type { ConversationRealtimePayload } from '../types/ConversationRealtimePayload';
 
 /**
  * Real-time sync hook for conversations - Unified cache strategy
@@ -34,12 +34,14 @@ export function useRealtimeConversationsSync() {
             schema: 'public',
             table: 'conversations'
           },
-          (payload: RealtimePostgresChangesPayload<ConversationSchema>) => {
+          (
+            payload: RealtimePostgresChangesPayload<ConversationRealtimePayload>
+          ) => {
             console.log('Conversation change received:', payload.eventType);
 
             // Client-side filter: only process if user is a participant
-            const newConv = payload.new as ConversationSchema;
-            const oldConv = payload.old as ConversationSchema;
+            const newConv = payload.new as ConversationRealtimePayload;
+            const oldConv = payload.old as ConversationRealtimePayload;
 
             const isParticipant =
               newConv?.adopter_id === userId ||

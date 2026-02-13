@@ -1,54 +1,61 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../utils/supabase-client';
 import { useAuthStore } from '../../../stores/auth-store';
 import { getUnreadMessagesCount } from '../api/getUnreadMessagesCount';
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 /**
- * Hook for real-time unread messages count with Supabase subscription
- * Subscribes to message changes and updates count in real-time
+ * Hook for real-time unread messages count with TanStack Query
+ *
+ * This hook follows the unified cache strategy:
+ * - Uses TanStack Query to fetch and cache unread count
+ * - Subscribes to message changes and invalidates the query to trigger refetch
+ * - Works seamlessly with invalidateQueries calls from other hooks
+ *
  * @returns Object containing unread count and loading state
  */
 export default function useRealtimeUnreadCount() {
+  const queryClient = useQueryClient();
   const userSession = useAuthStore((state) => state.session);
   const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
   const isAuthenticatedUserSession = useAuthStore(
     (state) => state.isAuthenticatedUserSession
   );
 
-  const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!isLoadingSession) {
+  // Use TanStack Query to fetch and cache unread count
+  const query = useQuery({
+    queryKey: ['unreadCount'],
+    queryFn: async () => {
       if (!isAuthenticatedUserSession(userSession)) {
-        setUnreadCount(0);
-        setLoading(false);
-        return;
+        return 0;
       }
 
       const userId = userSession!.user.id;
       const accessToken = userSession!.access_token;
       const refreshToken = userSession!.refresh_token;
 
-      // Fetch initial count
-      const fetchInitialCount = async () => {
-        try {
-          const count = await getUnreadMessagesCount(
-            userId,
-            accessToken,
-            refreshToken
-          );
-          setUnreadCount(count);
-        } catch (error) {
-          console.error('Failed to fetch unread count:', error);
-          setUnreadCount(0);
-        } finally {
-          setLoading(false);
-        }
-      };
+      try {
+        const count = await getUnreadMessagesCount(
+          userId,
+          accessToken,
+          refreshToken
+        );
+        return count;
+      } catch (error) {
+        console.error('Failed to fetch unread count:', error);
+        return 0;
+      }
+    },
+    enabled: !isLoadingSession && isAuthenticatedUserSession(userSession),
+    staleTime: 0, // Always consider data stale to allow frequent refetches
+    refetchOnWindowFocus: true // Refetch when user returns to the app
+  });
 
-      fetchInitialCount();
+  // Subscribe to real-time message changes and invalidate query
+  useEffect(() => {
+    if (!isLoadingSession && isAuthenticatedUserSession(userSession)) {
+      const userId = userSession!.user.id;
 
       // Subscribe to real-time message changes
       // We need to know about INSERT (new messages) and UPDATE (messages marked as read)
@@ -60,24 +67,17 @@ export default function useRealtimeUnreadCount() {
             event: '*',
             schema: 'public',
             table: 'messages'
-            // No filter - we'll refetch count on any message change
+            // No filter - we'll invalidate query on any message change
             // This is simpler and more reliable than trying to calculate client-side
           },
-          async (_payload: RealtimePostgresChangesPayload<any>) => {
-            console.log('Message change detected, refetching unread count');
+          (_payload: RealtimePostgresChangesPayload<any>) => {
+            console.log(
+              'Message change detected, invalidating unread count query'
+            );
 
-            // Refetch the count from the server
+            // Invalidate the query to trigger refetch
             // This ensures accuracy and avoids complex client-side logic
-            try {
-              const count = await getUnreadMessagesCount(
-                userId,
-                accessToken,
-                refreshToken
-              );
-              setUnreadCount(count);
-            } catch (error) {
-              console.error('Failed to refetch unread count:', error);
-            }
+            queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
           }
         )
         .subscribe((status) => {
@@ -91,10 +91,10 @@ export default function useRealtimeUnreadCount() {
         supabase.removeChannel(channel);
       };
     }
-  }, [isLoadingSession, userSession, isAuthenticatedUserSession]);
+  }, [isLoadingSession, userSession, isAuthenticatedUserSession, queryClient]);
 
   return {
-    data: unreadCount,
-    isLoading: loading
+    data: query.data ?? 0,
+    isLoading: query.isLoading
   };
 }
