@@ -524,5 +524,6 @@
   "bella_testimonial": "Adopting Bella was pure joy — she's my little sunshine daily.",
   "hero_description": "Connect loving homes with cats in need. Whether you're looking to adopt or rehome, we make the process simple, safe, and joyful.",
   "copyright_text": "© 2023 CatMatch. All rights reserved.",
-  "empty_dashboard_tip": "Create your first listing to start connecting with potential adopters in your area."
+  "empty_dashboard_tip": "Create your first listing to start connecting with potential adopters in your area.",
+  "delete_convo_error": "Failed to delete conversation"
 }

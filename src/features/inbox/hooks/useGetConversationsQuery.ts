@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/auth-store';
 import { getConversations } from '../api/getConversations';
+import { useTranslation } from 'react-i18next';
 
 /**
  * TanStack Query hook for fetching conversations
@@ -16,6 +17,7 @@ export function useGetConversationsQuery(
   page: number = 1,
   pageSize: number = 50
 ) {
+  const { t } = useTranslation();
   const userSession = useAuthStore((state) => state.session);
   const isLoadingSession = useAuthStore((state) => state.isLoadingSession);
   const isAuthenticatedUserSession = useAuthStore(
@@ -26,7 +28,7 @@ export function useGetConversationsQuery(
     queryKey: ['conversations', userSession?.user?.id, page, pageSize],
     queryFn: async () => {
       if (!isAuthenticatedUserSession(userSession)) {
-        throw new Error('User not authenticated');
+        throw new Error(t('auth_required'));
       }
 
       const userId = userSession!.user.id;
