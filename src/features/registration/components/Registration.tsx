@@ -2,7 +2,7 @@ import catLogo from '../../../assets/cat_logo.webp';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useNavigate } from 'react-router-dom';
-import { FaFacebook, FaGoogle } from 'react-icons/fa';
+import { FaFacebook, FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import {
@@ -34,6 +34,8 @@ export default function Registration() {
 
   const [serverError, setServerError] = useState<string | null>(null);
   const [isThirdPartyLoading, setIsThirdPartyLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const formSchema = useMemo(
     () => createRegistrationFormValidator(),
@@ -181,14 +183,30 @@ export default function Registration() {
                       {t('password')}
                     </span>
                   </label>
-                  <input
-                    id="password"
-                    type="password"
-                    autoComplete="new-password"
-                    {...register('password')}
-                    className="input input-bordered focus:input-primary w-full"
-                    placeholder={t('create_password')}
-                  />
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      {...register('password')}
+                      className="input input-bordered focus:input-primary w-full pr-10"
+                      placeholder={t('create_password')}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-base-content/60 hover:text-base-content absolute top-1/2 right-3 -translate-y-1/2"
+                      aria-label={
+                        showPassword ? 'Hide password' : 'Show password'
+                      }
+                    >
+                      {showPassword ? (
+                        <FaEyeSlash className="h-5 w-5" />
+                      ) : (
+                        <FaEye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Confirm Password Field */}
@@ -198,14 +216,32 @@ export default function Registration() {
                       {t('confirm_password')}
                     </span>
                   </label>
-                  <input
-                    id="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    {...register('confirmPassword')}
-                    className="input input-bordered focus:input-primary w-full"
-                    placeholder={t('confirm_your_password')}
-                  />
+                  <div className="relative">
+                    <input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      {...register('confirmPassword')}
+                      className="input input-bordered focus:input-primary w-full pr-10"
+                      placeholder={t('confirm_your_password')}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="text-base-content/60 hover:text-base-content absolute top-1/2 right-3 -translate-y-1/2"
+                      aria-label={
+                        showConfirmPassword ? 'Hide password' : 'Show password'
+                      }
+                    >
+                      {showConfirmPassword ? (
+                        <FaEyeSlash className="h-5 w-5" />
+                      ) : (
+                        <FaEye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Sign Up Button */}
