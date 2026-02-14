@@ -205,12 +205,12 @@ export default function ChatInterface({
               <p className="text-sm text-gray-600">{conversation.animalName}</p>
             )}
           </div>
-          {conversation.unreadCount && conversation.unreadCount > 0 && (
+          {conversation.unreadCount && conversation.unreadCount > 0 ? (
             <div className="rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white">
               {conversation.unreadCount}{' '}
               {t('unread', { count: conversation.unreadCount })}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -282,12 +282,9 @@ export default function ChatInterface({
                               title={t('read_at', {
                                 time: readTime.toLocaleString()
                               })}
+                              className="font-bold text-[#34B7F1]"
                             >
-                              ✓✓{' '}
-                              {readTime.toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                              ✓✓
                             </span>
                           ) : message.isRead ? (
                             <span title={t('read')}>✓✓</span>
@@ -332,7 +329,7 @@ export default function ChatInterface({
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={t('type_message')}
-              className="min-h-[60px] w-full resize-none rounded-lg border border-gray-300 p-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none sm:min-h-[80px]"
+              className="min-h-[60px] w-full resize-none rounded-lg border border-gray-300 p-3 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none sm:min-h-[80px]"
               rows={2}
               disabled={isSending}
             />

@@ -42,6 +42,7 @@ export default function Navigation() {
   const themeDropdownRef = useRef<HTMLDivElement>(null);
   const languageDropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
   // Handle click outside to close dropdowns
   useEffect(() => {
@@ -60,7 +61,9 @@ export default function Navigation() {
       }
       if (
         mobileMenuRef.current &&
-        !mobileMenuRef.current.contains(event.target as Node)
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        mobileMenuButtonRef.current &&
+        !mobileMenuButtonRef.current.contains(event.target as Node)
       ) {
         setIsMobileMenuOpen(false);
       }
@@ -315,7 +318,11 @@ export default function Navigation() {
           {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              ref={mobileMenuButtonRef}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMobileMenuOpen(!isMobileMenuOpen);
+              }}
               className="text-base-content hover:bg-base-200 rounded-lg p-2 transition-colors"
             >
               {isMobileMenuOpen ? (
@@ -391,7 +398,7 @@ export default function Navigation() {
                   ))}
 
                 <NavLink
-                  to="/messages"
+                  to="/inbox"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={mobileMenuItemStyles}
                 >

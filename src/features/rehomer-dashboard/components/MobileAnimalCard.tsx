@@ -187,7 +187,7 @@ export default function MobileAnimalCard({
             <div className="flex flex-shrink-0 items-stretch">
               <button
                 onClick={handleEdit}
-                className="bg-info text-info-content hover:bg-info/90 active:bg-info/80 flex w-[70px] flex-col items-center justify-center gap-1 transition-all"
+                className="bg-info text-info-content hover:bg-info/90 active:bg-info/80 flex w-[70px] cursor-pointer flex-col items-center justify-center gap-1 transition-all"
                 aria-label={t('edit')}
               >
                 <FaRegEdit className="size-5" />
@@ -195,7 +195,7 @@ export default function MobileAnimalCard({
               </button>
               <button
                 onClick={handleDelete}
-                className="bg-error text-error-content hover:bg-error/90 active:bg-error/80 flex w-[70px] flex-col items-center justify-center gap-1 transition-all"
+                className="bg-error text-error-content hover:bg-error/90 active:bg-error/80 flex w-[70px] cursor-pointer flex-col items-center justify-center gap-1 transition-all"
                 aria-label={t('delete')}
               >
                 <FaRegTrashAlt className="size-5" />

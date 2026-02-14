@@ -38,7 +38,6 @@ export default function useAddressHandling<T extends FormWithAddress>(
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
   const [locationTooltip, setLocationTooltip] = useState(false);
 
-  // Properly typed watch - no type assertions needed
   const addressFormatted = watch('address.formatted' as Path<T>);
   const addressLat = watch('address.lat' as Path<T>);
   const addressLon = watch('address.lon' as Path<T>);

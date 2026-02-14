@@ -20,6 +20,9 @@ import EditAnimalListing from '../features/rehomer-dashboard/components/EditAnim
 import AddAnimalListing from '../features/rehomer-dashboard/components/AddAnimalListing';
 import Inbox from '../features/inbox/components/Inbox';
 import { SendResetPasswordLinkDialog } from '../components/send-reset-password-link/SendResetPasswordLinkDialog';
+import SafetyTips from '../features/safety-tips/SafetyTips';
+import FAQ from '../features/faq/FAQ';
+import About from '../features/about/About';
 
 function App() {
   const setSession = useAuthStore((state) => state.setSession);
@@ -69,6 +72,9 @@ function App() {
         />
         <Route path="inbox" element={<Inbox />} />
         <Route path="reset-password" element={<ResetPassword />} />
+        <Route path="safety-tips" element={<SafetyTips />} />
+        <Route path="faq" element={<FAQ />} />
+        <Route path="about" element={<About />} />
         <Route path="/" element={<LandingPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -347,7 +347,11 @@ function LandingPage() {
               <ul className="text-neutral-content/80 space-y-2">
                 <li>
                   <a
-                    href="#"
+                    href={
+                      isAuthenticatedUserSession(userSession)
+                        ? '/discovery'
+                        : '/login'
+                    }
                     className="hover:text-neutral-content transition-colors"
                   >
                     {t('browse_cats_link')}
@@ -355,15 +359,7 @@ function LandingPage() {
                 </li>
                 <li>
                   <a
-                    href="#"
-                    className="hover:text-neutral-content transition-colors"
-                  >
-                    {t('adoption_process')}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
+                    href="/faq"
                     className="hover:text-neutral-content transition-colors"
                   >
                     {t('faq')}
@@ -379,7 +375,11 @@ function LandingPage() {
               <ul className="text-neutral-content/80 space-y-2">
                 <li>
                   <a
-                    href="#"
+                    href={
+                      isAuthenticatedUserSession(userSession)
+                        ? '/rehomer/dashboard'
+                        : '/login'
+                    }
                     className="hover:text-neutral-content transition-colors"
                   >
                     {t('list_a_cat')}
@@ -387,15 +387,7 @@ function LandingPage() {
                 </li>
                 <li>
                   <a
-                    href="#"
-                    className="hover:text-neutral-content transition-colors"
-                  >
-                    {t('rehoming_guide')}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
+                    href="/safety-tips"
                     className="hover:text-neutral-content transition-colors"
                   >
                     {t('safety_tips')}
@@ -411,7 +403,7 @@ function LandingPage() {
               <ul className="text-neutral-content/80 space-y-2">
                 <li>
                   <a
-                    href="#"
+                    href="/about"
                     className="hover:text-neutral-content transition-colors"
                   >
                     {t('about_us')}
@@ -419,15 +411,7 @@ function LandingPage() {
                 </li>
                 <li>
                   <a
-                    href="#"
-                    className="hover:text-neutral-content transition-colors"
-                  >
-                    {t('contact')}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
+                    href="/privacy-policy"
                     className="hover:text-neutral-content transition-colors"
                   >
                     {t('privacy_policy')}

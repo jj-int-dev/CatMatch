@@ -74,10 +74,6 @@ export function SendResetPasswordLinkDialog() {
     }
   };
 
-  const handleSendEmailFailure = () => {
-    // Errors are already available in `errors` object
-  };
-
   if (!showSendResetPasswordLinkDialog) return null;
 
   return (
@@ -186,7 +182,7 @@ export function SendResetPasswordLinkDialog() {
               <button
                 className="btn btn-primary w-full"
                 disabled={isSubmitting}
-                onClick={handleSubmit(handleSendEmail, handleSendEmailFailure)}
+                onClick={handleSubmit(handleSendEmail)}
               >
                 {isSubmitting ? (
                   <>

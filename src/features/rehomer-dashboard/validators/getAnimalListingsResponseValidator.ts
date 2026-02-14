@@ -10,7 +10,7 @@ export const getAnimalListingsResponseValidator = z.object({
       neutered: z.boolean(),
       addressDisplayName: z.string().min(1),
       description: z.string().min(1),
-      createdAt: z.string(), // PostgreSQL timestamp format: 2026-02-12 01:38:25.815112+00
+      createdAt: z.string(), // DB timestamp format: 2026-02-12 01:38:25.815112+00
       addressLatitude: z.number(),
       addressLongitude: z.number(),
       animalPhotos: z.array(

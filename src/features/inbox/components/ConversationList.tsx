@@ -234,8 +234,8 @@ export default function ConversationList({
                     </div>
 
                     {/* Conversation details */}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1 pr-12">
+                      <div className="flex items-center justify-between gap-3">
                         <h4 className="truncate text-base font-medium text-gray-900">
                           {conversation.otherUserName ||
                             `User ${otherUserId.substring(0, 8)}...`}
@@ -263,24 +263,24 @@ export default function ConversationList({
                         </p>
                       )}
                     </div>
-
-                    {/* Unread indicator */}
-                    {hasUnread && (
-                      <div className="flex items-center">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-sm font-medium text-white">
-                          {conversation.unreadCount}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </button>
+
+                {/* Unread indicator */}
+                {hasUnread ? (
+                  <div className="absolute top-2 right-2">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-sm font-medium text-white">
+                      {conversation.unreadCount}
+                    </span>
+                  </div>
+                ) : null}
 
                 {/* Delete Button */}
                 <button
                   onClick={(e) =>
                     handleDeleteClick(conversation.conversationId, e)
                   }
-                  className="absolute top-2 right-2 rounded-full p-2 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-100 hover:text-red-600"
+                  className="absolute right-2 bottom-2 flex items-center justify-center rounded-full p-2 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-100 hover:text-red-600"
                   aria-label={t('delete_conversation')}
                   title={t('delete_conversation')}
                 >

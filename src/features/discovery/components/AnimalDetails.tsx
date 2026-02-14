@@ -125,8 +125,6 @@ export default function AnimalDetails() {
     );
   }
 
-  // TODO: add error UI if getAnimalFailed
-
   if (!animal) {
     return (
       <div className="from-base-100 to-base-200 flex min-h-screen items-center justify-center bg-gradient-to-br">

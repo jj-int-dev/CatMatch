@@ -6,7 +6,7 @@ export const createConversationResponseValidator = z.object({
     adopterId: z.string().uuid(),
     rehomerId: z.string().uuid(),
     animalId: z.string().uuid().nullable(),
-    createdAt: z.string(), // PostgreSQL timestamp format: 2026-02-12 01:38:25.815112+00
+    createdAt: z.string(), // DB timestamp format: 2026-02-12 01:38:25.815112+00
     lastMessageAt: z.string().nullable(),
     adopterLastActiveAt: z.string().nullable(),
     rehomerLastActiveAt: z.string().nullable(),
