@@ -195,7 +195,7 @@ export default function Registration() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-base-content/60 hover:text-base-content absolute top-1/2 right-3 -translate-y-1/2"
+                      className="text-base-content/60 hover:text-base-content absolute top-1/2 right-3 z-10 -translate-y-1/2"
                       aria-label={
                         showPassword ? 'Hide password' : 'Show password'
                       }
@@ -230,7 +230,7 @@ export default function Registration() {
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="text-base-content/60 hover:text-base-content absolute top-1/2 right-3 -translate-y-1/2"
+                      className="text-base-content/60 hover:text-base-content absolute top-1/2 right-3 z-10 -translate-y-1/2"
                       aria-label={
                         showConfirmPassword ? 'Hide password' : 'Show password'
                       }
