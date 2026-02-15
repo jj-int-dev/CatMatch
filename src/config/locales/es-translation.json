@@ -622,8 +622,7 @@
   "safety_tips_warning_point_3": "Sea paciente durante el período de adaptación. Puede tomar semanas para que un gato se asiente completamente.",
   "safety_tips_cta_title": "¿Listo para Adoptar Responsablemente?",
   "safety_tips_cta_subtitle": "Use estas pautas para garantizar un viaje de adopción seguro y exitoso.",
-  "safety_tips_cta_button": "Ver Gatos Disponibles"
-,
+  "safety_tips_cta_button": "Ver Gatos Disponibles",
   "faq_hero_badge": "Centro de Ayuda",
   "faq_hero_title": "Preguntas Frecuentes",
   "faq_hero_subtitle": "Encuentre respuestas rápidas a preguntas comunes sobre adoptar, dar en adopción y usar CatMatch",
@@ -657,5 +656,8 @@
   "faq_cta_title": "¿Todavía Tiene Preguntas?",
   "faq_cta_subtitle": "¿No encuentra la respuesta que busca? Consulte nuestros otros recursos o comience a buscar gatos disponibles para adopción.",
   "faq_cta_button_safety": "Consejos de Seguridad",
-  "faq_cta_button_browse": "Buscar Gatos"
+  "faq_cta_button_browse": "Buscar Gatos",
+  "email_verification_sent": "¡Correo de Verificación Enviado!",
+  "email_verification_message": "Hemos enviado un correo de verificación a su bandeja de entrada. Por favor revise su correo y haga clic en el enlace de verificación para activar su cuenta.",
+  "redirecting_to_login": "Redirigiendo a la página de inicio de sesión en {{seconds}} segundos..."
 }

@@ -621,8 +621,7 @@
   "safety_tips_warning_point_3": "Be patient during the adjustment period. It can take weeks for a cat to fully settle in.",
   "safety_tips_cta_title": "Ready to Adopt Responsibly?",
   "safety_tips_cta_subtitle": "Use these guidelines to ensure a safe and successful adoption journey.",
-  "safety_tips_cta_button": "Browse Available Cats"
-,
+  "safety_tips_cta_button": "Browse Available Cats",
   "faq_hero_badge": "Help Center",
   "faq_hero_title": "Frequently Asked Questions",
   "faq_hero_subtitle": "Find quick answers to common questions about adopting, rehoming, and using CatMatch",
@@ -656,5 +655,8 @@
   "faq_cta_title": "Still Have Questions?",
   "faq_cta_subtitle": "Can't find the answer you're looking for? Check our other resources or start browsing cats available for adoption.",
   "faq_cta_button_safety": "Safety Tips",
-  "faq_cta_button_browse": "Browse Cats"
+  "faq_cta_button_browse": "Browse Cats",
+  "email_verification_sent": "Verification Email Sent!",
+  "email_verification_message": "We've sent a verification email to your inbox. Please check your email and click the verification link to activate your account.",
+  "redirecting_to_login": "Redirecting to login page in {{seconds}} seconds..."
 }

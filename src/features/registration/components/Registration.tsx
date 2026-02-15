@@ -36,6 +36,8 @@ export default function Registration() {
   const [isThirdPartyLoading, setIsThirdPartyLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(5);
 
   const formSchema = useMemo(
     () => createRegistrationFormValidator(),
@@ -54,6 +56,35 @@ export default function Registration() {
 
   const goToUserProfile = () => navigate(`/user-profile`);
   const goToLoginPage = () => navigate('/login');
+
+  useEffect(() => {
+    let countdownTimer: NodeJS.Timeout;
+    let redirectTimer: NodeJS.Timeout;
+
+    if (showVerificationMessage) {
+      // Start countdown
+      countdownTimer = setInterval(() => {
+        setRedirectCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownTimer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      // Redirect after 5 seconds
+      redirectTimer = setTimeout(() => {
+        setShowVerificationMessage(false);
+        goToLoginPage();
+      }, 5000);
+    }
+
+    return () => {
+      clearInterval(countdownTimer);
+      clearTimeout(redirectTimer);
+    };
+  }, [showVerificationMessage]);
 
   useEffect(() => {
     return () => {
@@ -90,7 +121,9 @@ export default function Registration() {
       if (isAuthenticatedUserSession(userSession)) {
         goToUserProfile();
       } else if (isAuthenticatedUser(user)) {
-        goToLoginPage();
+        // User needs to verify email
+        setShowVerificationMessage(true);
+        setRedirectCountdown(5);
       }
     }
   };
@@ -120,6 +153,11 @@ export default function Registration() {
     clearErrors();
   };
 
+  const onCloseVerificationToast = () => {
+    setShowVerificationMessage(false);
+    goToLoginPage();
+  };
+
   const formErrorMessages = Object.values(errors)
     .filter((error) => error?.message)
     .map((error) => error.message as string);
@@ -136,6 +174,57 @@ export default function Registration() {
           messages={allErrorMessages}
           onCloseToast={onCloseErrorToast}
         />
+      )}
+
+      {showVerificationMessage && (
+        <div className="toast toast-top toast-center z-50">
+          <div className="alert alert-info max-w-md shadow-2xl">
+            <div className="flex w-full flex-col gap-3">
+              <div className="flex items-start gap-3">
+                {/* Email Icon */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 shrink-0 stroke-current"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold">
+                    {t('email_verification_sent')}
+                  </h3>
+                  <p className="mt-1 text-sm">
+                    {t('email_verification_message')}
+                  </p>
+                </div>
+
+                {/* Close Button */}
+                <button
+                  onClick={onCloseVerificationToast}
+                  className="btn btn-circle btn-ghost btn-sm"
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Countdown */}
+              <div className="flex items-center gap-2 pl-9">
+                <div className="loading loading-spinner loading-sm"></div>
+                <p className="text-sm opacity-80">
+                  {t('redirecting_to_login', { seconds: redirectCountdown })}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <div className="mx-auto flex max-w-md flex-col items-center">
