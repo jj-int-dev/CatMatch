@@ -389,7 +389,11 @@ export default function Discovery() {
           </div>
         ) : isMobile ? (
           // Mobile swipe view
-          <div className="relative" ref={swipeRef}>
+          <div
+            className="relative touch-pan-y"
+            ref={swipeRef}
+            style={{ touchAction: 'pan-y' }}
+          >
             <div className="mb-6 flex items-center justify-between">
               <button
                 onClick={() =>

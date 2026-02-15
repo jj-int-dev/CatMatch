@@ -41,9 +41,19 @@ export function useSwipeGesture(options: UseSwipeGestureOptions = {}) {
 
   const startTimeRef = useRef<number>(0);
   const elementRef = useRef<HTMLElement | null>(null);
+  const swipeStateRef = useRef<SwipeState>(swipeState);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    swipeStateRef.current = swipeState;
+  }, [swipeState]);
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
     const touch = e.touches[0];
+
+    // Don't prevent default in touchstart - let the browser track the gesture
+    // We'll prevent it in touchmove once we determine the direction
+
     setSwipeState({
       isSwiping: true,
       startX: touch.clientX,
@@ -56,20 +66,39 @@ export function useSwipeGesture(options: UseSwipeGestureOptions = {}) {
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
-      if (!swipeState.isSwiping) return;
+      const state = swipeStateRef.current;
+      if (!state.isSwiping) return;
 
       const touch = e.touches[0];
-      const deltaX = touch.clientX - swipeState.startX;
-      const deltaY = touch.clientY - swipeState.startY;
+      const deltaX = touch.clientX - state.startX;
+      const deltaY = touch.clientY - state.startY;
       const absDeltaX = Math.abs(deltaX);
       const absDeltaY = Math.abs(deltaY);
 
-      // Prevent default browser behavior for swipes
-      // Horizontal swipes: stop back/forward navigation
-      // Vertical swipes: stop pull-to-refresh
-      if (absDeltaX > 10 || absDeltaY > 10) {
-        e.preventDefault();
-        e.stopPropagation();
+      // Prevent browser gestures as soon as we detect movement direction
+      // This needs to happen EARLY before browser commits to navigation
+      if (absDeltaX > 5 || absDeltaY > 5) {
+        // Once we know the direction, prevent browser handling
+        if (absDeltaX > absDeltaY) {
+          // Horizontal movement - always prevent to stop back/forward navigation
+          e.preventDefault();
+          e.stopPropagation();
+        } else if (absDeltaY > absDeltaX) {
+          // Vertical movement - only prevent pull-to-refresh at page edges
+          const scrollTop =
+            window.pageYOffset || document.documentElement.scrollTop;
+          const scrollHeight = document.documentElement.scrollHeight;
+          const clientHeight = document.documentElement.clientHeight;
+
+          // Prevent pull-to-refresh at top and bounce at bottom
+          if (
+            (scrollTop === 0 && deltaY > 0) ||
+            (scrollTop + clientHeight >= scrollHeight && deltaY < 0)
+          ) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }
       }
 
       setSwipeState((prev: SwipeState) => ({
@@ -83,12 +112,13 @@ export function useSwipeGesture(options: UseSwipeGestureOptions = {}) {
         onDrag(deltaX);
       }
     },
-    [swipeState.isSwiping, swipeState.startX, onDrag]
+    [onDrag]
   );
 
   const handleTouchEnd = useCallback(
     (_e: TouchEvent) => {
-      if (!swipeState.isSwiping) return;
+      const state = swipeStateRef.current;
+      if (!state.isSwiping) return;
 
       const endTime = Date.now();
       const duration = endTime - startTimeRef.current;
@@ -99,8 +129,8 @@ export function useSwipeGesture(options: UseSwipeGestureOptions = {}) {
         return;
       }
 
-      const deltaX = swipeState.currentX - swipeState.startX;
-      const deltaY = swipeState.currentY - swipeState.startY;
+      const deltaX = state.currentX - state.startX;
+      const deltaY = state.currentY - state.startY;
       const absDeltaX = Math.abs(deltaX);
       const absDeltaY = Math.abs(deltaY);
 
@@ -125,7 +155,6 @@ export function useSwipeGesture(options: UseSwipeGestureOptions = {}) {
       if (onDragEnd) onDragEnd();
     },
     [
-      swipeState,
       threshold,
       maxDuration,
       onSwipeLeft,
