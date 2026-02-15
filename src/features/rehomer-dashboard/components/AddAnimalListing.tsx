@@ -194,6 +194,9 @@ export default function AddAnimalListing() {
     isCreatingAnimalListing ||
     isCreatingAnimalListingPhotos;
 
+  const descriptionLength = watch('description')?.length || 0;
+  const maxDescriptionLength = 1000;
+
   return (
     <div className="from-base-200 to-base-300 min-h-screen bg-gradient-to-br px-4 py-8 md:px-8">
       {allErrorMessages.length > 0 && (
@@ -418,7 +421,19 @@ export default function AddAnimalListing() {
                     {...register('description')}
                     className="textarea textarea-bordered focus:textarea-primary h-32 w-full"
                     placeholder={t('description_placeholder')}
+                    maxLength={maxDescriptionLength}
                   />
+                  <div className="mt-1 flex justify-end">
+                    <span
+                      className={`text-sm font-medium transition-colors ${
+                        descriptionLength >= maxDescriptionLength
+                          ? 'text-error'
+                          : 'text-base-content/60'
+                      }`}
+                    >
+                      {descriptionLength} / {maxDescriptionLength}
+                    </span>
+                  </div>
                   {errors.description && (
                     <label className="label">
                       <span className="label-text-alt text-error">

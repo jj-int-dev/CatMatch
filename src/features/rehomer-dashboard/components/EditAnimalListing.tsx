@@ -272,6 +272,8 @@ export default function EditAnimalListing() {
     setSuccessMessage(null);
   };
 
+  const maxDescriptionLength = 1000;
+
   const isSubmitDisabled =
     isSubmitting ||
     isCompressing ||
@@ -671,7 +673,21 @@ export default function EditAnimalListing() {
                     {...register('description')}
                     className="textarea textarea-bordered focus:textarea-primary h-32 w-full"
                     placeholder={t('description_placeholder')}
+                    maxLength={maxDescriptionLength}
                   />
+                  <div className="mt-1 flex justify-end">
+                    <span
+                      className={`text-sm font-medium transition-colors ${
+                        (watch('description')?.length || 0) >=
+                        maxDescriptionLength
+                          ? 'text-error'
+                          : 'text-base-content/60'
+                      }`}
+                    >
+                      {watch('description')?.length || 0} /{' '}
+                      {maxDescriptionLength}
+                    </span>
+                  </div>
                   {errors.description && (
                     <label className="label">
                       <span className="label-text-alt text-error">
