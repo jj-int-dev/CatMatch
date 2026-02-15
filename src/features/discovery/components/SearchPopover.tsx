@@ -343,7 +343,7 @@ export default function SearchPopover({
                   )}
                 </div>
                 <label className="label">
-                  <span className="label-text-alt text-base-content/70">
+                  <span className="label-text-alt text-base-content/70 break-words whitespace-normal">
                     {t('search_location_desc')}
                   </span>
                 </label>
