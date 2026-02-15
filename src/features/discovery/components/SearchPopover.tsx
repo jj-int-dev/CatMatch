@@ -337,9 +337,9 @@ export default function SearchPopover({
       <div
         className={`modal-box bg-base-100 ${isMobile ? 'h-full max-h-full w-full max-w-full rounded-none p-0' : 'max-w-3xl'}`}
       >
-        {/* Header - Sticky on mobile */}
+        {/* Header */}
         <div
-          className={`border-base-200 flex items-center justify-between border-b ${isMobile ? 'bg-base-100 sticky top-0 z-20 p-4' : 'mb-6 pb-4'}`}
+          className={`border-base-200 flex items-center justify-between border-b ${isMobile ? 'p-4' : 'mb-6 pb-4'}`}
         >
           <h3
             id="search-popover-title"
@@ -357,19 +357,10 @@ export default function SearchPopover({
           </button>
         </div>
 
-        {/* Scrollable Content */}
+        {/* Content */}
         <div
           ref={scrollContainerRef}
-          className={`space-y-6 ${isMobile ? 'max-h-[calc(100vh-140px)] overflow-y-auto p-4' : 'max-h-[60vh] overflow-y-auto'}`}
-          style={
-            isMobile
-              ? ({
-                  WebkitOverflowScrolling: 'touch',
-                  overscrollBehavior: 'contain',
-                  touchAction: 'pan-y'
-                } as React.CSSProperties)
-              : {}
-          }
+          className={`space-y-6 ${isMobile ? 'p-4' : 'max-h-[60vh] overflow-y-auto'}`}
         >
           {/* Location Section */}
           <div className="card bg-base-200/50">
@@ -577,9 +568,9 @@ export default function SearchPopover({
           </div>
         </div>
 
-        {/* Footer Actions - Sticky on mobile */}
+        {/* Footer Actions */}
         <div
-          className={`border-base-200 flex gap-2 border-t ${isMobile ? 'bg-base-100 sticky bottom-0 z-20 p-4' : 'mt-6 flex-col pt-6 sm:flex-row sm:justify-between'}`}
+          className={`border-base-200 flex gap-2 border-t ${isMobile ? 'p-4' : 'mt-6 flex-col pt-6 sm:flex-row sm:justify-between'}`}
         >
           {isMobile ? (
             <>
