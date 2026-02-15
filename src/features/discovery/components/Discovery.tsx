@@ -398,7 +398,7 @@ export default function Discovery() {
                       </div>
                     </div>
 
-                    <p className="mt-4 line-clamp-3 text-gray-600">
+                    <p className="text-base-content/70 mt-4 line-clamp-3">
                       {animal.description}
                     </p>
 
@@ -469,7 +469,7 @@ export default function Discovery() {
                       </div>
                     </div>
 
-                    <p className="mt-3 line-clamp-2 text-gray-600">
+                    <p className="text-base-content/70 mt-3 line-clamp-2">
                       {animal.description}
                     </p>
 
