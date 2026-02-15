@@ -17,9 +17,13 @@
     @apply h-full;
     @apply scroll-smooth;
     @apply overflow-auto;
+    /* Prevent pull-to-refresh and horizontal navigation gestures on mobile */
+    overscroll-behavior: contain;
   }
   body {
     @apply min-h-full;
+    /* Prevent overscroll bounce effect */
+    overscroll-behavior-y: contain;
   }
 }
 

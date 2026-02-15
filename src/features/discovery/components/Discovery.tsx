@@ -322,7 +322,7 @@ export default function Discovery() {
   }
 
   return (
-    <div className="bg-base-100 min-h-screen p-4 md:p-8" ref={swipeRef}>
+    <div className="bg-base-100 min-h-screen p-4 md:p-8">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -389,7 +389,7 @@ export default function Discovery() {
           </div>
         ) : isMobile ? (
           // Mobile swipe view
-          <div className="relative">
+          <div className="relative" ref={swipeRef}>
             <div className="mb-6 flex items-center justify-between">
               <button
                 onClick={() =>

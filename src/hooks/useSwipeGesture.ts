@@ -64,9 +64,12 @@ export function useSwipeGesture(options: UseSwipeGestureOptions = {}) {
       const absDeltaX = Math.abs(deltaX);
       const absDeltaY = Math.abs(deltaY);
 
-      // Prevent default browser behavior for horizontal swipes to stop back/forward navigation
-      if (absDeltaX > absDeltaY && absDeltaX > 10) {
+      // Prevent default browser behavior for swipes
+      // Horizontal swipes: stop back/forward navigation
+      // Vertical swipes: stop pull-to-refresh
+      if (absDeltaX > 10 || absDeltaY > 10) {
         e.preventDefault();
+        e.stopPropagation();
       }
 
       setSwipeState((prev: SwipeState) => ({
