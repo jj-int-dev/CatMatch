@@ -141,10 +141,10 @@ export default function EmptyStateRehomer({
       </div>
 
       <div className="bg-info/10 border-info/20 mt-8 rounded-lg border p-6">
-        <h3 className="text-info-content mb-3 font-medium">
+        <h3 className="text-base-content mb-3 font-medium">
           {t('tips_for_rehomers', 'Tips for Successful Rehoming')}
         </h3>
-        <ul className="text-info-content space-y-2 text-left text-sm">
+        <ul className="text-base-content/80 space-y-2 text-left text-sm">
           <li className="flex items-start">
             <svg
               className="text-info mr-2 h-5 w-5 flex-shrink-0"

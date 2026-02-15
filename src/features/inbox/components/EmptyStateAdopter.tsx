@@ -17,9 +17,9 @@ export default function EmptyStateAdopter({
 
   return (
     <div className="flex h-full flex-col items-center overflow-y-auto p-8 py-12 text-center">
-      <div className="mb-6 rounded-full bg-gradient-to-br from-blue-50 to-purple-50 p-8">
+      <div className="from-primary/10 to-secondary/10 mb-6 rounded-full bg-gradient-to-br p-8">
         <svg
-          className="h-16 w-16 text-blue-500"
+          className="text-primary h-16 w-16"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -61,7 +61,7 @@ export default function EmptyStateAdopter({
       </div>
 
       <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <div className="border-base-300 bg-base-100 rounded-lg border p-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
             <svg
               className="h-6 w-6 text-blue-600"
@@ -89,7 +89,7 @@ export default function EmptyStateAdopter({
           </p>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <div className="border-base-300 bg-base-100 rounded-lg border p-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
             <svg
               className="h-6 w-6 text-purple-600"
@@ -117,7 +117,7 @@ export default function EmptyStateAdopter({
           </p>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <div className="border-base-300 bg-base-100 rounded-lg border p-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
             <svg
               className="h-6 w-6 text-green-600"
