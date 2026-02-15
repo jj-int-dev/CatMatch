@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import SearchPopover from './SearchPopover';
 import DiscoveryLoading from './DiscoveryLoading';
 import DiscoveryError from './DiscoveryError';
-import type { SearchFilters } from '../types/SearchFilters';
+import type { SearchFilters, LocationSource } from '../types/SearchFilters';
 import type { GetAnimalsRequest } from '../types/GetAnimalsRequest';
 import useGetAnimals from '../hooks/useGetAnimals';
 import { useSwipeGesture } from '../../../hooks/useSwipeGesture';
@@ -51,24 +51,7 @@ export default function Discovery() {
     }
   }, [userSession, isLoadingSession, isLoadingUserType, userType]);
 
-  // Get page from URL query parameter or default to 1
-  const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
-  const initialPage = !isNaN(pageFromUrl) && pageFromUrl >= 1 ? pageFromUrl : 1;
   const pageSize = 10;
-
-  // Pagination state
-  const [page, setPage] = useState(initialPage);
-
-  // Update URL when page changes
-  const updatePage = useCallback(
-    (newPage: number) => {
-      setPage(newPage);
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.set('page', newPage.toString());
-      setSearchParams(newSearchParams, { replace: true });
-    },
-    [searchParams, setSearchParams]
-  );
 
   const defaultSearchFilters: SearchFilters = {
     gender: 'All',
@@ -97,15 +80,142 @@ export default function Discovery() {
     maxDistanceMeters: 250000
   };
 
-  const [searchFilters, setSearchFilters] = useState<SearchFilters>({
-    ...defaultSearchFilters
+  // Parse search filters from URL query parameters
+  const getSearchFiltersFromURL = useCallback((): SearchFilters | null => {
+    const gender = searchParams.get('gender');
+    const minAge = searchParams.get('minAge');
+    const maxAge = searchParams.get('maxAge');
+    const neutered = searchParams.get('neutered');
+    const maxDistance = searchParams.get('maxDistance');
+    const locationSource = searchParams.get('locationSource');
+    const latitude = searchParams.get('lat');
+    const longitude = searchParams.get('lon');
+    const locationFormatted = searchParams.get('location');
+    const locationCity = searchParams.get('city');
+
+    // If no search params exist, return null to use defaults
+    if (
+      !gender &&
+      !minAge &&
+      !maxAge &&
+      !neutered &&
+      !maxDistance &&
+      !locationSource
+    ) {
+      return null;
+    }
+
+    const filters: SearchFilters = {
+      gender: (gender as 'Male' | 'Female' | 'All') || 'All',
+      minAgeWeeks: minAge ? parseInt(minAge) : 0,
+      maxAgeWeeks: maxAge ? parseInt(maxAge) : 1920,
+      neutered: (neutered as 'Neutered Only' | 'All') || 'All',
+      maxDistanceMeters: maxDistance ? parseInt(maxDistance) : 250000,
+      locationSource: (locationSource as LocationSource) || 'client-ip',
+      location: {
+        formatted: locationFormatted || '',
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
+        city: locationCity || null
+      }
+    };
+
+    return filters;
+  }, [searchParams]);
+
+  const getSearchRequestFromURL = useCallback((): GetAnimalsRequest | null => {
+    const filters = getSearchFiltersFromURL();
+    if (!filters) return null;
+
+    const request: GetAnimalsRequest = {
+      gender: filters.gender === 'All' ? null : filters.gender,
+      minAgeWeeks: filters.minAgeWeeks,
+      maxAgeWeeks: filters.maxAgeWeeks,
+      neutered: filters.neutered === 'Neutered Only',
+      latitude:
+        filters.locationSource === 'client-ip'
+          ? null
+          : filters.location.latitude,
+      longitude:
+        filters.locationSource === 'client-ip'
+          ? null
+          : filters.location.longitude,
+      locationSource: filters.locationSource,
+      locationDetails:
+        filters.locationSource === 'client-custom-location'
+          ? filters.location.city
+          : null,
+      maxDistanceMeters: filters.maxDistanceMeters
+    };
+
+    return request;
+  }, [getSearchFiltersFromURL]);
+
+  // Initialize state from URL or defaults
+  const [searchFilters, setSearchFilters] = useState<SearchFilters>(() => {
+    return getSearchFiltersFromURL() || { ...defaultSearchFilters };
   });
 
-  const [searchRequest, setSearchRequest] = useState<GetAnimalsRequest>({
-    ...defaultSearchRequest
+  const [searchRequest, setSearchRequest] = useState<GetAnimalsRequest>(() => {
+    return getSearchRequestFromURL() || { ...defaultSearchRequest };
   });
   const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
   const [currentAnimalIndex, setCurrentAnimalIndex] = useState(0);
+
+  // Get page from URL query parameter or default to 1
+  const pageFromUrl = parseInt(searchParams.get('page') || '1', 10);
+  const initialPage = !isNaN(pageFromUrl) && pageFromUrl >= 1 ? pageFromUrl : 1;
+
+  // Pagination state
+  const [page, setPage] = useState(initialPage);
+
+  // Update URL when page changes
+  const updatePage = useCallback(
+    (newPage: number) => {
+      setPage(newPage);
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.set('page', newPage.toString());
+      setSearchParams(newSearchParams, { replace: true });
+    },
+    [searchParams, setSearchParams]
+  );
+
+  // Update URL with search filters
+  const updateSearchFiltersInURL = useCallback(
+    (filters: SearchFilters) => {
+      const newSearchParams = new URLSearchParams();
+
+      // Add search filter params
+      newSearchParams.set('gender', filters.gender);
+      newSearchParams.set('minAge', filters.minAgeWeeks.toString());
+      newSearchParams.set('maxAge', filters.maxAgeWeeks.toString());
+      newSearchParams.set('neutered', filters.neutered);
+      newSearchParams.set('maxDistance', filters.maxDistanceMeters.toString());
+      newSearchParams.set('locationSource', filters.locationSource);
+
+      if (filters.location.formatted) {
+        newSearchParams.set('location', filters.location.formatted);
+      }
+
+      if (filters.location.latitude !== null) {
+        newSearchParams.set('lat', filters.location.latitude.toString());
+      }
+
+      if (filters.location.longitude !== null) {
+        newSearchParams.set('lon', filters.location.longitude.toString());
+      }
+
+      if (filters.location.city) {
+        newSearchParams.set('city', filters.location.city);
+      }
+
+      // Always set page to 1 when searching
+      newSearchParams.set('page', '1');
+
+      setSearchParams(newSearchParams, { replace: true });
+    },
+    [setSearchParams]
+  );
 
   // Check if device is mobile
   const [isMobile, setIsMobile] = useState(false);
@@ -190,8 +300,9 @@ export default function Discovery() {
     };
 
     setSearchRequest(newSearchRequest);
+    updateSearchFiltersInURL(searchFilters);
     setIsSearchPopoverOpen(false);
-    updatePage(1);
+    setPage(1);
   };
 
   // Loading state

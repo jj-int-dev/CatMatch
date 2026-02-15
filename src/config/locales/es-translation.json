@@ -661,5 +661,9 @@
   "faq_cta_button_browse": "Buscar Gatos",
   "email_verification_sent": "¡Correo de Verificación Enviado!",
   "email_verification_message": "Hemos enviado un correo de verificación a su bandeja de entrada. Por favor revise su correo y haga clic en el enlace de verificación para activar su cuenta.",
-  "redirecting_to_login": "Redirigiendo a la página de inicio de sesión en {{seconds}} segundos..."
+  "redirecting_to_login": "Redirigiendo a la página de inicio de sesión en {{seconds}} segundos...",
+  "photos_count_label": "Fotos",
+  "no_photos": "Ninguna",
+  "photo_lowercase": "foto",
+  "photos_lowercase": "fotos"
 }

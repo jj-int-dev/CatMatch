@@ -60,6 +60,14 @@ export function useSwipeGesture(options: UseSwipeGestureOptions = {}) {
 
       const touch = e.touches[0];
       const deltaX = touch.clientX - swipeState.startX;
+      const deltaY = touch.clientY - swipeState.startY;
+      const absDeltaX = Math.abs(deltaX);
+      const absDeltaY = Math.abs(deltaY);
+
+      // Prevent default browser behavior for horizontal swipes to stop back/forward navigation
+      if (absDeltaX > absDeltaY && absDeltaX > 10) {
+        e.preventDefault();
+      }
 
       setSwipeState((prev: SwipeState) => ({
         ...prev,
@@ -136,9 +144,16 @@ export function useSwipeGesture(options: UseSwipeGestureOptions = {}) {
       elementRef.current = node;
 
       if (elementRef.current) {
-        elementRef.current.addEventListener('touchstart', handleTouchStart);
-        elementRef.current.addEventListener('touchmove', handleTouchMove);
-        elementRef.current.addEventListener('touchend', handleTouchEnd);
+        // Use { passive: false } to allow preventDefault() to work
+        elementRef.current.addEventListener('touchstart', handleTouchStart, {
+          passive: false
+        });
+        elementRef.current.addEventListener('touchmove', handleTouchMove, {
+          passive: false
+        });
+        elementRef.current.addEventListener('touchend', handleTouchEnd, {
+          passive: false
+        });
       }
     },
     [handleTouchStart, handleTouchMove, handleTouchEnd]
@@ -148,9 +163,10 @@ export function useSwipeGesture(options: UseSwipeGestureOptions = {}) {
   useEffect(() => {
     return () => {
       if (elementRef.current) {
-        elementRef.current.removeEventListener('touchstart', handleTouchStart);
-        elementRef.current.removeEventListener('touchmove', handleTouchMove);
-        elementRef.current.removeEventListener('touchend', handleTouchEnd);
+        const currentElement = elementRef.current;
+        currentElement.removeEventListener('touchstart', handleTouchStart);
+        currentElement.removeEventListener('touchmove', handleTouchMove);
+        currentElement.removeEventListener('touchend', handleTouchEnd);
       }
     };
   }, [handleTouchStart, handleTouchMove, handleTouchEnd]);

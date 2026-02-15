@@ -660,5 +660,9 @@
   "faq_cta_button_browse": "Browse Cats",
   "email_verification_sent": "Verification Email Sent!",
   "email_verification_message": "We've sent a verification email to your inbox. Please check your email and click the verification link to activate your account.",
-  "redirecting_to_login": "Redirecting to login page in {{seconds}} seconds..."
+  "redirecting_to_login": "Redirecting to login page in {{seconds}} seconds...",
+  "photos_count_label": "Photos",
+  "no_photos": "No photos",
+  "photo_lowercase": "photo",
+  "photos_lowercase": "photos"
 }
