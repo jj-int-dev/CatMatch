@@ -30,6 +30,7 @@ export default function SearchPopover({
 }: SearchPopoverProps) {
   const { i18n, t } = useTranslation();
   const popoverRef = useRef<HTMLDialogElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [addressSuggestions, setAddressSuggestions] = useState<
     AddressSuggestionSchema[]
   >([]);
@@ -151,17 +152,53 @@ export default function SearchPopover({
       // Prevent body scroll on mobile when modal is open
       if (isMobile) {
         document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
       }
     } else {
       popoverRef.current?.close();
       // Re-enable body scroll
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
 
     return () => {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     };
   }, [isOpen, isMobile]);
+
+  // Handle touch events on mobile to prevent parent scroll interference
+  useEffect(() => {
+    if (!isMobile || !isOpen) return;
+
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      // Stop propagation to prevent swipe gesture on parent
+      e.stopPropagation();
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      // Stop propagation to prevent swipe gesture on parent
+      e.stopPropagation();
+    };
+
+    scrollContainer.addEventListener('touchstart', handleTouchStart, {
+      passive: true
+    });
+    scrollContainer.addEventListener('touchmove', handleTouchMove, {
+      passive: true
+    });
+
+    return () => {
+      scrollContainer.removeEventListener('touchstart', handleTouchStart);
+      scrollContainer.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [isMobile, isOpen]);
 
   const handleClickOutside = useCallback(() => {
     const { isValid } = searchFiltersValidator(searchFilters, t);
@@ -322,7 +359,17 @@ export default function SearchPopover({
 
         {/* Scrollable Content */}
         <div
+          ref={scrollContainerRef}
           className={`space-y-6 ${isMobile ? 'max-h-[calc(100vh-140px)] overflow-y-auto p-4' : 'max-h-[60vh] overflow-y-auto'}`}
+          style={
+            isMobile
+              ? ({
+                  WebkitOverflowScrolling: 'touch',
+                  overscrollBehavior: 'contain',
+                  touchAction: 'pan-y'
+                } as React.CSSProperties)
+              : {}
+          }
         >
           {/* Location Section */}
           <div className="card bg-base-200/50">
