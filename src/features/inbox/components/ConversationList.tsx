@@ -124,7 +124,7 @@ export default function ConversationList({
             />
           </svg>
         </div>
-        <h3 className="mb-2 text-lg font-medium text-gray-900">
+        <h3 className="text-base-content mb-2 text-lg font-medium">
           {t('no_conversations')}
         </h3>
         <p className="text-center text-gray-500">
