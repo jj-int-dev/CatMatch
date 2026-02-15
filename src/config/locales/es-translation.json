@@ -350,7 +350,7 @@
   "loading_cat_details": "Cargando datos del gato...",
   "cat_not_found": "Gato No Encontrado",
   "cat_not_found_desc": "El gato que busca no existe o ya fue adoptado.",
-  "back_to_discovery": "Volver a Búsqueda",
+  "back_btn": "Regresar",
   "message_sent": "¡Mensaje enviado!",
   "message_sent_desc": "Revise su bandeja de entrada para monitorear su conversación con el dueño del gato.",
   "featured_photo": "Foto Principal",

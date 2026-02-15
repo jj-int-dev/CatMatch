@@ -350,7 +350,7 @@
   "loading_cat_details": "Loading cat details...",
   "cat_not_found": "Cat Not Found",
   "cat_not_found_desc": "The cat you're looking for doesn't exist or has been adopted.",
-  "back_to_discovery": "Back to Discovery",
+  "back_btn": "Back",
   "message_sent": "Message sent!",
   "message_sent_desc": "Check your inbox to monitor your conversation with this cat's owner.",
   "featured_photo": "Featured Photo",

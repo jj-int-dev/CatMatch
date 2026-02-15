@@ -111,7 +111,7 @@ export default function AnimalDetails() {
     }
   };
 
-  const goToDiscovery = () => navigate('/discovery');
+  const goBack = () => navigate(-1);
 
   // Show loading while checking user type or fetching animal
   if (isLoadingUserType || isGettingAnimal) {
@@ -133,9 +133,9 @@ export default function AnimalDetails() {
             {t('cat_not_found')}
           </h2>
           <p className="text-base-content/80 mb-6">{t('cat_not_found_desc')}</p>
-          <button onClick={goToDiscovery} className="btn btn-primary gap-2">
+          <button onClick={goBack} className="btn btn-primary gap-2">
             <IoArrowBack className="size-5" />
-            {t('back_to_discovery')}
+            {t('back_btn')}
           </button>
         </div>
       </div>
@@ -211,11 +211,11 @@ export default function AnimalDetails() {
       {/* Back Button */}
       <div className="mx-auto mb-6 max-w-7xl">
         <button
-          onClick={goToDiscovery}
+          onClick={goBack}
           className="btn btn-ghost text-base-content/80 hover:text-base-content gap-2 transition-colors"
         >
           <IoArrowBack className="size-5" />
-          {t('back_to_discovery')}
+          {t('back_btn')}
         </button>
       </div>
 
