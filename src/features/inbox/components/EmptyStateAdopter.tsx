@@ -34,11 +34,11 @@ export default function EmptyStateAdopter({
         </svg>
       </div>
 
-      <h2 className="mb-3 text-2xl font-bold text-gray-900">
+      <h2 className="text-base-content mb-3 text-2xl font-bold">
         {t('empty_inbox_adopter')}
       </h2>
 
-      <p className="mb-8 max-w-md text-gray-600">
+      <p className="text-base-content/80 mb-8 max-w-md">
         {t('empty_inbox_adopter_description')}
       </p>
 
@@ -62,9 +62,9 @@ export default function EmptyStateAdopter({
 
       <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">
         <div className="border-base-300 bg-base-100 rounded-lg border p-6">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+          <div className="bg-info/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full">
             <svg
-              className="h-6 w-6 text-blue-600"
+              className="text-info h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -78,10 +78,10 @@ export default function EmptyStateAdopter({
               />
             </svg>
           </div>
-          <h3 className="mb-2 font-medium text-gray-900">
+          <h3 className="text-base-content mb-2 font-medium">
             {t('find_cats', 'Find Cats')}
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-base-content/80 text-sm">
             {t(
               'find_cats_description',
               'Browse through cats available for adoption in your area'
@@ -90,9 +90,9 @@ export default function EmptyStateAdopter({
         </div>
 
         <div className="border-base-300 bg-base-100 rounded-lg border p-6">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
+          <div className="bg-secondary/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full">
             <svg
-              className="h-6 w-6 text-purple-600"
+              className="text-secondary h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -106,10 +106,10 @@ export default function EmptyStateAdopter({
               />
             </svg>
           </div>
-          <h3 className="mb-2 font-medium text-gray-900">
+          <h3 className="text-base-content mb-2 font-medium">
             {t('message_owners', 'Message Owners')}
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-base-content/80 text-sm">
             {t(
               'message_owners_description',
               'Send messages to cat owners to learn more about their cats'
@@ -118,9 +118,9 @@ export default function EmptyStateAdopter({
         </div>
 
         <div className="border-base-300 bg-base-100 rounded-lg border p-6">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+          <div className="bg-success/10 mb-4 flex h-12 w-12 items-center justify-center rounded-full">
             <svg
-              className="h-6 w-6 text-green-600"
+              className="text-success h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -134,10 +134,10 @@ export default function EmptyStateAdopter({
               />
             </svg>
           </div>
-          <h3 className="mb-2 font-medium text-gray-900">
+          <h3 className="text-base-content mb-2 font-medium">
             {t('arrange_adoption', 'Arrange Adoption')}
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-base-content/80 text-sm">
             {t(
               'arrange_adoption_description',
               'Coordinate with owners to bring your new furry friend home'
