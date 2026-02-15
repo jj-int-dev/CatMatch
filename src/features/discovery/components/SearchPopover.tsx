@@ -35,6 +35,19 @@ export default function SearchPopover({
   >([]);
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const { data: fetchedAddressSuggestions } = useGetAddressSuggestions(
     searchFilters.location.formatted,
@@ -135,10 +148,20 @@ export default function SearchPopover({
   useEffect(() => {
     if (isOpen) {
       popoverRef.current?.showModal();
+      // Prevent body scroll on mobile when modal is open
+      if (isMobile) {
+        document.body.style.overflow = 'hidden';
+      }
     } else {
       popoverRef.current?.close();
+      // Re-enable body scroll
+      document.body.style.overflow = '';
     }
-  }, [isOpen]);
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, isMobile]);
 
   const handleClickOutside = useCallback(() => {
     const { isValid } = searchFiltersValidator(searchFilters, t);
@@ -156,6 +179,9 @@ export default function SearchPopover({
 
   useEffect(() => {
     const handleMouseDown = (event: MouseEvent) => {
+      // On mobile, don't close on backdrop click - only close via button
+      if (isMobile) return;
+
       if (
         popoverRef.current &&
         !popoverRef.current.contains(event.target as Node)
@@ -166,7 +192,7 @@ export default function SearchPopover({
 
     document.addEventListener('mousedown', handleMouseDown);
     return () => document.removeEventListener('mousedown', handleMouseDown);
-  }, [handleClickOutside]);
+  }, [handleClickOutside, isMobile]);
 
   const handleFieldChange = (field: keyof SearchFilters, value: any) => {
     const newFilters = { ...searchFilters, [field]: value };
@@ -267,16 +293,20 @@ export default function SearchPopover({
   return (
     <dialog
       ref={popoverRef}
-      className={`modal modal-bottom sm:modal-middle ${isOpen ? 'modal-open' : ''}`}
+      className={`modal ${isMobile ? 'modal-bottom' : 'modal-middle'} ${isOpen ? 'modal-open' : ''}`}
       aria-labelledby="search-popover-title"
       onClose={onClose}
     >
-      <div className="modal-box bg-base-100 w-full max-w-3xl">
-        {/* Header */}
-        <div className="border-base-200 mb-6 flex items-center justify-between border-b pb-4">
+      <div
+        className={`modal-box bg-base-100 ${isMobile ? 'h-full max-h-full w-full max-w-full rounded-none p-0' : 'max-w-3xl'}`}
+      >
+        {/* Header - Sticky on mobile */}
+        <div
+          className={`border-base-200 flex items-center justify-between border-b ${isMobile ? 'bg-base-100 sticky top-0 z-20 p-4' : 'mb-6 pb-4'}`}
+        >
           <h3
             id="search-popover-title"
-            className="text-base-content text-2xl font-bold"
+            className="text-base-content text-xl font-bold md:text-2xl"
           >
             {t('search_filters')}
           </h3>
@@ -284,21 +314,25 @@ export default function SearchPopover({
             onClick={handleCloseClick}
             className="btn btn-circle btn-ghost btn-sm"
             disabled={isSearching}
+            aria-label={t('close')}
           >
             <IoClose className="size-6" />
           </button>
         </div>
 
-        <div className="max-h-[60vh] space-y-6 overflow-y-auto">
+        {/* Scrollable Content */}
+        <div
+          className={`space-y-6 ${isMobile ? 'max-h-[calc(100vh-140px)] overflow-y-auto p-4' : 'max-h-[60vh] overflow-y-auto'}`}
+        >
           {/* Location Section */}
           <div className="card bg-base-200/50">
-            <div className="card-body">
-              <h4 className="card-title text-base-content mb-4 flex items-center gap-2 text-lg">
-                <IoLocationOutline className="size-6" />
+            <div className="card-body p-4">
+              <h4 className="card-title text-base-content mb-3 flex items-center gap-2 text-base md:text-lg">
+                <IoLocationOutline className="size-5 md:size-6" />
                 {t('location')}
               </h4>
 
-              <label className="label cursor-pointer justify-start gap-3">
+              <label className="label cursor-pointer justify-start gap-3 py-2">
                 <input
                   type="checkbox"
                   className="checkbox checkbox-primary"
@@ -307,7 +341,9 @@ export default function SearchPopover({
                   }
                   onChange={(e) => requestUserLocation(e.target.checked)}
                 />
-                <span className="label-text">{t('use_current_location')}</span>
+                <span className="label-text text-sm md:text-base">
+                  {t('use_current_location')}
+                </span>
               </label>
 
               <div className="form-control">
@@ -319,7 +355,7 @@ export default function SearchPopover({
                         ? 'using_current_location'
                         : 'address_placeholder'
                     )}
-                    className="input input-bordered w-full"
+                    className="input input-bordered w-full text-sm md:text-base"
                     autoComplete="off"
                     value={searchFilters.location.formatted}
                     onChange={(e) => handleAddressChange(e.target.value)}
@@ -329,11 +365,11 @@ export default function SearchPopover({
                   />
 
                   {showAddressSuggestions && addressSuggestions.length > 0 && (
-                    <div className="bg-base-100 border-base-300 absolute z-10 mt-1 w-full rounded-lg border shadow-lg">
+                    <div className="bg-base-100 border-base-300 absolute z-30 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border shadow-lg">
                       {addressSuggestions.map((address, index) => (
                         <button
                           key={index}
-                          className="hover:bg-base-200 text-base-content block w-full px-4 py-3 text-left transition-colors"
+                          className="hover:bg-base-200 text-base-content block w-full px-4 py-3 text-left text-sm transition-colors"
                           onClick={() => handleAddressSelect(address)}
                         >
                           {address.formatted}
@@ -343,13 +379,13 @@ export default function SearchPopover({
                   )}
                 </div>
                 <label className="label">
-                  <span className="label-text-alt text-base-content/70 break-words whitespace-normal">
+                  <span className="label-text-alt text-base-content/70 text-xs break-words whitespace-normal">
                     {t('search_location_desc')}
                   </span>
                 </label>
                 {locationError && (
                   <label className="label">
-                    <span className="label-text-alt text-error">
+                    <span className="label-text-alt text-error text-xs">
                       {locationError}
                     </span>
                   </label>
@@ -361,8 +397,8 @@ export default function SearchPopover({
           {/* Distance Filter */}
           <div className="form-control">
             <label className="label">
-              <span className="label-text text-base-content flex items-center gap-2 text-lg font-semibold">
-                <GiPathDistance className="size-5" />
+              <span className="label-text text-base-content flex items-center gap-2 text-base font-semibold md:text-lg">
+                <GiPathDistance className="size-4 md:size-5" />
                 {`${t('max_distance')}: ${Math.trunc(searchFilters.maxDistanceMeters / 1000)} km`}
               </span>
             </label>
@@ -376,27 +412,27 @@ export default function SearchPopover({
               }
               className="range range-primary w-full"
             />
-            <div className="text-base-content/70 mt-2 flex w-full justify-between px-2 text-xs">
-              <span>1 km</span>
-              <span>60 km</span>
-              <span>115 km</span>
-              <span>175 km</span>
-              <span>250 km</span>
+            <div className="text-base-content/70 mt-2 flex w-full justify-between px-2 text-[10px] md:text-xs">
+              <span>1</span>
+              <span>60</span>
+              <span>115</span>
+              <span>175</span>
+              <span>250</span>
             </div>
           </div>
 
           {/* Age Range */}
           <div className="form-control">
             <label className="label">
-              <span className="label-text text-base-content flex items-center gap-2 text-lg font-semibold">
-                <FaCat className="size-5" />
+              <span className="label-text text-base-content flex items-center gap-2 text-base font-semibold md:text-lg">
+                <FaCat className="size-4 md:size-5" />
                 {t('age_range_weeks')}
               </span>
             </label>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="label">
-                  <span className="label-text">{t('min_age')}</span>
+                <label className="label py-1">
+                  <span className="label-text text-sm">{t('min_age')}</span>
                 </label>
                 <input
                   type="number"
@@ -409,12 +445,12 @@ export default function SearchPopover({
                       Math.min(parseInt(e.target.value) || 0, 1920)
                     )
                   }
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full text-sm"
                 />
               </div>
               <div>
-                <label className="label">
-                  <span className="label-text">{t('max_age')}</span>
+                <label className="label py-1">
+                  <span className="label-text text-sm">{t('max_age')}</span>
                 </label>
                 <input
                   type="number"
@@ -427,12 +463,12 @@ export default function SearchPopover({
                       Math.min(parseInt(e.target.value) || 1920, 1920)
                     )
                   }
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full text-sm"
                 />
               </div>
             </div>
             <label className="label">
-              <span className="label-text-alt text-base-content/70">
+              <span className="label-text-alt text-base-content/70 text-xs">
                 {`${t('age_range')}: ${searchFilters.minAgeWeeks} - ${searchFilters.maxAgeWeeks} ${t('weeks')} (${Math.round(searchFilters.minAgeWeeks / 4)} - ${Math.round(searchFilters.maxAgeWeeks / 4)} ${t('months')})`}
               </span>
             </label>
@@ -440,30 +476,30 @@ export default function SearchPopover({
 
           {/* Gender Filter */}
           <div className="form-control">
-            <label className="label">
-              <span className="label-text text-base-content text-lg font-semibold">
+            <label className="label py-1">
+              <span className="label-text text-base-content text-base font-semibold md:text-lg">
                 {t('gender')}
               </span>
             </label>
             <div className="flex flex-wrap gap-2">
               <button
-                className={`btn ${searchFilters.gender === 'All' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn btn-sm md:btn-md ${searchFilters.gender === 'All' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => handleFieldChange('gender', 'All')}
               >
                 {t('all_genders')}
               </button>
               <button
-                className={`btn gap-2 ${searchFilters.gender === 'Male' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn btn-sm md:btn-md gap-2 ${searchFilters.gender === 'Male' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => handleFieldChange('gender', 'Male')}
               >
-                <TbGenderMale className="size-5" />
+                <TbGenderMale className="size-4 md:size-5" />
                 {t('male')}
               </button>
               <button
-                className={`btn gap-2 ${searchFilters.gender === 'Female' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn btn-sm md:btn-md gap-2 ${searchFilters.gender === 'Female' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => handleFieldChange('gender', 'Female')}
               >
-                <TbGenderFemale className="size-5" />
+                <TbGenderFemale className="size-4 md:size-5" />
                 {t('female')}
               </button>
             </div>
@@ -471,21 +507,21 @@ export default function SearchPopover({
 
           {/* Neutered Filter */}
           <div className="form-control">
-            <label className="label">
-              <span className="label-text text-base-content flex items-center gap-2 text-lg font-semibold">
-                <FaNeuter className="size-5" />
+            <label className="label py-1">
+              <span className="label-text text-base-content flex items-center gap-2 text-base font-semibold md:text-lg">
+                <FaNeuter className="size-4 md:size-5" />
                 {t('neutered_status')}
               </span>
             </label>
             <div className="flex flex-wrap gap-2">
               <button
-                className={`btn ${searchFilters.neutered === 'All' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn btn-sm md:btn-md ${searchFilters.neutered === 'All' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => handleFieldChange('neutered', 'All')}
               >
                 {t('all')}
               </button>
               <button
-                className={`btn ${searchFilters.neutered === 'Neutered Only' ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn btn-sm md:btn-md ${searchFilters.neutered === 'Neutered Only' ? 'btn-primary' : 'btn-outline'}`}
                 onClick={() => handleFieldChange('neutered', 'Neutered Only')}
               >
                 {t('neutered_only')}
@@ -494,44 +530,77 @@ export default function SearchPopover({
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="border-base-200 mt-6 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:justify-between">
-          <div className="flex gap-2">
-            <button
-              onClick={onReset}
-              className="btn btn-ghost"
-              disabled={isSearching}
-            >
-              {t('reset')}
-            </button>
-            <button
-              onClick={handleCloseClick}
-              className="btn btn-ghost"
-              disabled={isSearching}
-            >
-              {t('btn_cancel')}
-            </button>
-          </div>
-          <button
-            onClick={handleSearch}
-            className="btn btn-primary gap-2"
-            disabled={isSearching}
-          >
-            {isSearching ? (
-              <>
-                <span className="loading loading-spinner" />
-                {t('searching')}
-              </>
-            ) : (
-              <>{t('discovery_search_btn')}</>
-            )}
-          </button>
+        {/* Footer Actions - Sticky on mobile */}
+        <div
+          className={`border-base-200 flex gap-2 border-t ${isMobile ? 'bg-base-100 sticky bottom-0 z-20 p-4' : 'mt-6 flex-col pt-6 sm:flex-row sm:justify-between'}`}
+        >
+          {isMobile ? (
+            <>
+              <button
+                onClick={onReset}
+                className="btn btn-outline flex-1"
+                disabled={isSearching}
+              >
+                {t('reset')}
+              </button>
+              <button
+                onClick={handleSearch}
+                className="btn btn-primary flex-1 gap-2"
+                disabled={isSearching}
+              >
+                {isSearching ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm" />
+                    {t('searching')}
+                  </>
+                ) : (
+                  <>{t('discovery_search_btn')}</>
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="flex gap-2">
+                <button
+                  onClick={onReset}
+                  className="btn btn-ghost"
+                  disabled={isSearching}
+                >
+                  {t('reset')}
+                </button>
+                <button
+                  onClick={handleCloseClick}
+                  className="btn btn-ghost"
+                  disabled={isSearching}
+                >
+                  {t('btn_cancel')}
+                </button>
+              </div>
+              <button
+                onClick={handleSearch}
+                className="btn btn-primary gap-2"
+                disabled={isSearching}
+              >
+                {isSearching ? (
+                  <>
+                    <span className="loading loading-spinner" />
+                    {t('searching')}
+                  </>
+                ) : (
+                  <>{t('discovery_search_btn')}</>
+                )}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      <form method="dialog" className="modal-backdrop">
-        <button>{t('close')}</button>
-      </form>
+      {/* Backdrop - only on desktop */}
+      {!isMobile && (
+        <form method="dialog" className="modal-backdrop">
+          <button>{t('close')}</button>
+        </form>
+      )}
     </dialog>
   );
 }

@@ -3,19 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useTranslation } from 'react-i18next';
 import SearchPopover from './SearchPopover';
-import MobileFilterModal from './MobileFilterModal';
 import DiscoveryLoading from './DiscoveryLoading';
 import DiscoveryError from './DiscoveryError';
 import type { SearchFilters } from '../types/SearchFilters';
 import type { GetAnimalsRequest } from '../types/GetAnimalsRequest';
 import useGetAnimals from '../hooks/useGetAnimals';
 import { useSwipeGesture } from '../../../hooks/useSwipeGesture';
-import {
-  IoSearch,
-  IoFilter,
-  IoChevronBack,
-  IoChevronForward
-} from 'react-icons/io5';
+import { IoSearch, IoChevronBack, IoChevronForward } from 'react-icons/io5';
 import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
 import getAgeDisplay from '../utils/getAgeDisplay';
 import defaultCatPic from '../../../assets/default_cat.webp';
@@ -111,7 +105,6 @@ export default function Discovery() {
     ...defaultSearchRequest
   });
   const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [currentAnimalIndex, setCurrentAnimalIndex] = useState(0);
 
   // Check if device is mobile
@@ -198,7 +191,6 @@ export default function Discovery() {
 
     setSearchRequest(newSearchRequest);
     setIsSearchPopoverOpen(false);
-    setIsMobileFilterOpen(false);
     updatePage(1);
   };
 
@@ -238,23 +230,13 @@ export default function Discovery() {
         {/* Search Bar and Controls */}
         <div className="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row">
           <div className="relative w-full md:w-auto">
-            {isMobile ? (
-              <button
-                onClick={() => setIsMobileFilterOpen(true)}
-                className="btn btn-primary h-14 min-h-14 w-full gap-2 pr-6 pl-4 text-lg"
-              >
-                <IoFilter className="size-6" />
-                <span>{t('discovery_search_btn')}</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsSearchPopoverOpen(true)}
-                className="btn btn-primary h-14 min-h-14 w-full gap-2 pr-6 pl-4 text-lg md:w-auto"
-              >
-                <IoSearch className="size-6" />
-                <span>{t('discovery_search_btn')}</span>
-              </button>
-            )}
+            <button
+              onClick={() => setIsSearchPopoverOpen(true)}
+              className="btn btn-primary h-14 min-h-14 w-full gap-2 pr-6 pl-4 text-lg md:w-auto"
+            >
+              <IoSearch className="size-6" />
+              <span>{t('discovery_search_btn')}</span>
+            </button>
 
             {/* Search Popover Component */}
             <SearchPopover
@@ -262,17 +244,6 @@ export default function Discovery() {
               isSearching={isGettingAnimals}
               searchFilters={searchFilters}
               onClose={() => setIsSearchPopoverOpen(false)}
-              onSearch={handleSearch}
-              onReset={handleReset}
-              onFiltersChange={setSearchFilters}
-            />
-
-            {/* Mobile Filter Modal */}
-            <MobileFilterModal
-              isOpen={isMobileFilterOpen}
-              isSearching={isGettingAnimals}
-              searchFilters={searchFilters}
-              onClose={() => setIsMobileFilterOpen(false)}
               onSearch={handleSearch}
               onReset={handleReset}
               onFiltersChange={setSearchFilters}
@@ -299,11 +270,7 @@ export default function Discovery() {
             </h3>
             <p className="mt-2 text-gray-600">{t('discovery_search_help')}</p>
             <button
-              onClick={() =>
-                isMobile
-                  ? setIsMobileFilterOpen(true)
-                  : setIsSearchPopoverOpen(true)
-              }
+              onClick={() => setIsSearchPopoverOpen(true)}
               className="btn btn-primary mt-6 h-14 min-h-14 px-8"
             >
               {t('modify_search')}
