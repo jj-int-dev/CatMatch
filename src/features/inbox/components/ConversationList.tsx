@@ -143,9 +143,7 @@ export default function ConversationList({
             <h3 className="mb-4 text-lg font-semibold text-gray-900">
               {t('delete_conversation')}
             </h3>
-            <p className="mb-6 text-gray-600">
-              {t('delete_conversation_confirmation')}
-            </p>
+            <p className="mb-6 text-gray-600">{t('are_you_sure_delete')}</p>
 
             {/* Error Message */}
             {deleteConversation.isError && deleteConversation.error && (
