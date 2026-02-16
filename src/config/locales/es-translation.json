@@ -656,5 +656,6 @@
   "no_photos": "Ninguna",
   "photo_lowercase": "foto",
   "photos_lowercase": "fotos",
-  "check_email_for_reset_link": "Revise su correo electrónico para el enlace de restablecimiento"
+  "check_email_for_reset_link": "Revise su correo electrónico para el enlace de restablecimiento",
+  "back_to_profile": "Volver al Perfil"
 }

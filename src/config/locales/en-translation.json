@@ -655,5 +655,6 @@
   "no_photos": "No photos",
   "photo_lowercase": "photo",
   "photos_lowercase": "photos",
-  "check_email_for_reset_link": "Check your email for the password reset link"
+  "check_email_for_reset_link": "Check your email for the password reset link",
+  "back_to_profile": "← Back to Profile"
 }
