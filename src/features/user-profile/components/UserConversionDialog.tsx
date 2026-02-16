@@ -132,7 +132,7 @@ export default function UserConversionDialog({
 
                   <p className="text-base-content/80 mb-4">
                     {t(
-                      'adopter_desc',
+                      'adopter_description',
                       'Browse cats and connect with rehomers to find your perfect companion.'
                     )}
                   </p>
@@ -207,7 +207,7 @@ export default function UserConversionDialog({
 
                   <p className="text-base-content/80 mb-4">
                     {t(
-                      'rehomer_desc',
+                      'rehomer_description',
                       'Post cats for adoption and connect with potential adopters.'
                     )}
                   </p>
@@ -274,7 +274,11 @@ export default function UserConversionDialog({
                 type="button"
                 disabled={!targetUserType}
               >
-                {t('continue_as', { userType: targetUserType })}
+                {t(
+                  targetUserType === 'Rehomer'
+                    ? 'continue_as_rehomer'
+                    : 'continue_as_adopter'
+                )}
               </button>
             </div>
           </div>

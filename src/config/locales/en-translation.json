@@ -430,11 +430,12 @@
   "updating_user_type": "Updating user type...",
   "set_user_type": "Set User Type",
   "choose_user_type_desc": "Choose how you'd like to use CatMatch. You can always change this later.",
-  "continue_as": "Continue as {{userType}}",
+  "continue_as_adpopter": "Continue as Adpopter",
+  "continue_as_rehomer": "Continue as Rehomer",
   "selected": "Selected",
   "click_to_select": "Click to select",
-  "adopter_description": "Browse cats and message rehomers about cats you're interested in.",
-  "rehomer_description": "Post cats that you have up for adoption and engage with potential adopters.",
+  "adopter_description": "Browse cats and connect with rehomers to find your perfect companion.",
+  "rehomer_description": "Post cats for adoption and connect with potential adopters.",
   "adopter_feature_1": "Browse available cats in your area",
   "adopter_feature_2": "Message rehomers to learn more about cats",
   "adopter_feature_3": "Adopt a cat and give them a loving home",
@@ -656,5 +657,10 @@
   "photo_lowercase": "photo",
   "photos_lowercase": "photos",
   "check_email_for_reset_link": "Check your email for the password reset link",
-  "back_to_profile": "← Back to Profile"
+  "back_to_profile": "← Back to Profile",
+  "adopter": "Adopter",
+  "rehomer": "Rehomer",
+  "user_type_required": "User Type Required",
+  "user_type_required_message": "Please select your user type (Rehomer or Adopter) to continue using the platform.",
+  "select_user_type": "Select User Type"
 }

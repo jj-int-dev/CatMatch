@@ -322,6 +322,42 @@ export default function UserProfile() {
           {/* Profile Form */}
           <div className="divider"></div>
 
+          {/* User Type Required Alert */}
+          {!userProfileData.userType && (
+            <div className="alert alert-warning shadow-lg">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="size-6 flex-shrink-0 stroke-current"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              <div className="flex-1">
+                <h3 className="font-bold">
+                  {t('user_type_required', 'User Type Required')}
+                </h3>
+                <div className="text-sm">
+                  {t(
+                    'user_type_required_message',
+                    'Please select your user type (Rehomer or Adopter) to continue using the platform.'
+                  )}
+                </div>
+              </div>
+              <button
+                className="btn btn-sm btn-ghost"
+                onClick={() => setShowUserConversionDialog(true)}
+              >
+                {t('select_user_type', 'Select User Type')}
+              </button>
+            </div>
+          )}
+
           <div className="space-y-6">
             <h3 className="text-base-content flex items-center gap-2 text-xl font-semibold">
               <HiUser className="size-6" />
