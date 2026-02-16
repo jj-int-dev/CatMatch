@@ -654,5 +654,6 @@
   "photos_count_label": "Photos",
   "no_photos": "No photos",
   "photo_lowercase": "photo",
-  "photos_lowercase": "photos"
+  "photos_lowercase": "photos",
+  "check_email_for_reset_link": "Check your email for the password reset link"
 }

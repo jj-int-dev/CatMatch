@@ -655,5 +655,6 @@
   "photos_count_label": "Fotos",
   "no_photos": "Ninguna",
   "photo_lowercase": "foto",
-  "photos_lowercase": "fotos"
+  "photos_lowercase": "fotos",
+  "check_email_for_reset_link": "Revise su correo electrónico para el enlace de restablecimiento"
 }
