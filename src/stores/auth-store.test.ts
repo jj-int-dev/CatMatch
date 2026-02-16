@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useAuthStore } from './auth-store';
 import type { Session } from '@supabase/supabase-js';

@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { searchFiltersValidator } from './searchFiltersValidator';
 import type { TFunction } from 'i18next';
 import type { SearchFilters } from '../types/SearchFilters';

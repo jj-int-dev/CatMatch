@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import getAgeDisplay from './getAgeDisplay';
 import type { TFunction } from 'i18next';
 

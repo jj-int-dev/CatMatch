@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { createEmailValidator } from './emailValidator';
 
 describe('createEmailValidator', () => {

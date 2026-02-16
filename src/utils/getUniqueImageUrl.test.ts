@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import getUniqueImageUrl from './getUniqueImageUrl';
 
 describe('getUniqueImageUrl', () => {
