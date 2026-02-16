@@ -5,6 +5,7 @@ import { FaSpinner } from 'react-icons/fa';
 import useDeleteUser from '../hooks/useDeleteUser';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { useAuthStore } from '../../../stores/auth-store';
 
 interface AccountDeletionDialogProps {
   isOpen: boolean;
@@ -17,14 +18,19 @@ export default function AccountDeletionDialog({
 }: AccountDeletionDialogProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const clearSession = useAuthStore((state) => state.clearSession);
   const deleteUserMutation = useDeleteUser();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleConfirmDelete = async () => {
     setErrorMessage(null);
     try {
+      // Delete user first while still authenticated
       await deleteUserMutation.mutateAsync();
+      // Navigate to register page before clearing session to avoid redirect race condition from UserProfile
       navigate('/register', { replace: true });
+      // Clear local session after navigation (user no longer exists in DB)
+      clearSession();
     } catch (error) {
       const errorMsg =
         error instanceof Error ? error.message : t('delete_user_error');
