@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useAuthStore } from '../../../stores/auth-store';
 import useGetUserType from '../../../hooks/useGetUserType';
-import { useMobileNavigationGestures } from '../../../hooks/useSwipeGesture';
 import {
   usePresence,
   useGetConversationsQuery,
@@ -171,20 +170,6 @@ export default function Inbox() {
   const showEmptyState = conversations.length === 0 && !conversationsLoading;
   const showConversationView = !showEmptyState && showConversationList;
 
-  // IMPORTANT: Use swipe gesture hook BEFORE any early returns to comply with Rules of Hooks
-  // Hooks must be called in the same order on every render, so this must be before the
-  // conditional returns below (isLoadingSession, isAuthenticatedUserSession checks)
-  const { ref: swipeRef } = useMobileNavigationGestures(
-    // Swipe right to go back to conversation list (when in chat view)
-    isMobileView && !showConversationList
-      ? handleBackToConversations
-      : undefined,
-    // Swipe left to go to chat view (when in conversation list with a selected conversation)
-    isMobileView && showConversationList && selectedConversationId
-      ? () => handleSelectConversation(selectedConversationId)
-      : undefined
-  );
-
   if (isLoadingSession || isLoadingUserType) {
     return (
       <div className="bg-base-100 flex min-h-screen items-center justify-center">
@@ -212,10 +197,7 @@ export default function Inbox() {
   }
 
   return (
-    <div
-      ref={swipeRef}
-      className="from-base-100 to-base-200 min-h-screen bg-gradient-to-b"
-    >
+    <div className="from-base-100 to-base-200 min-h-screen bg-gradient-to-b">
       {/* Mobile header */}
       {isMobileView && !showConversationList && (
         <div className="border-base-300 bg-base-100/95 sticky top-0 z-20 flex items-center border-b px-4 py-3 shadow-sm backdrop-blur-sm">

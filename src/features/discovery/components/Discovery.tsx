@@ -8,7 +8,6 @@ import DiscoveryError from './DiscoveryError';
 import type { SearchFilters, LocationSource } from '../types/SearchFilters';
 import type { GetAnimalsRequest } from '../types/GetAnimalsRequest';
 import useGetAnimals from '../hooks/useGetAnimals';
-import { useSwipeGesture } from '../../../hooks/useSwipeGesture';
 import { IoSearch, IoChevronBack, IoChevronForward } from 'react-icons/io5';
 import { TbGenderMale, TbGenderFemale } from 'react-icons/tb';
 import getAgeDisplay from '../utils/getAgeDisplay';
@@ -231,25 +230,6 @@ export default function Discovery() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Swipe gesture for animal cards
-  const { ref: swipeRef } = useSwipeGesture({
-    onSwipeLeft: () => {
-      if (
-        animalsData?.animals &&
-        currentAnimalIndex < animalsData.animals.length - 1
-      ) {
-        setCurrentAnimalIndex(currentAnimalIndex + 1);
-      }
-    },
-    onSwipeRight: () => {
-      if (currentAnimalIndex > 0) {
-        setCurrentAnimalIndex(currentAnimalIndex - 1);
-      }
-    },
-    threshold: 50,
-    maxDuration: 300
-  });
-
   const {
     data: animalsData,
     isPending: isGettingAnimals,
@@ -388,12 +368,8 @@ export default function Discovery() {
             </button>
           </div>
         ) : isMobile ? (
-          // Mobile swipe view
-          <div
-            className="relative touch-pan-y"
-            ref={swipeRef}
-            style={{ touchAction: 'pan-y' }}
-          >
+          // Mobile view with navigation buttons
+          <div className="relative">
             <div className="mb-6 flex items-center justify-between">
               <button
                 onClick={() =>
@@ -408,7 +384,9 @@ export default function Discovery() {
                 <p className="font-semibold">
                   {currentAnimalIndex + 1} / {animalsData.animals.length}
                 </p>
-                <p className="text-sm text-gray-600">{t('swipe_to_browse')}</p>
+                <p className="text-sm text-gray-600">
+                  {t('use_arrows_to_browse')}
+                </p>
               </div>
               <button
                 onClick={() =>
