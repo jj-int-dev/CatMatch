@@ -28,6 +28,7 @@ type AuthStore = {
   logUserInWithFacebook: () => Promise<OAuthResponse>;
   logUserInWithGoogle: () => Promise<OAuthResponse>;
   logUserOut: () => Promise<{ error: AuthError | null }>;
+  logUserOutLocalOnly: () => Promise<{ error: AuthError | null }>;
   sendResetPasswordLink: (
     email: string
   ) => Promise<{ error: AuthError | null }>;
@@ -71,6 +72,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       }
     }),
   logUserOut: () => supabase.auth.signOut(),
+  logUserOutLocalOnly: () => supabase.auth.signOut({ scope: 'local' }),
   sendResetPasswordLink: (email) =>
     supabase.auth.resetPasswordForEmail(email, {
       redirectTo: import.meta.env.VITE_RESET_PASSWORD_URL
