@@ -4,6 +4,7 @@ import { FaExclamationTriangle } from 'react-icons/fa';
 import { FaSpinner } from 'react-icons/fa';
 import useDeleteUser from '../hooks/useDeleteUser';
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
 interface AccountDeletionDialogProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export default function AccountDeletionDialog({
   onClose
 }: AccountDeletionDialogProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const deleteUserMutation = useDeleteUser();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -22,6 +24,7 @@ export default function AccountDeletionDialog({
     setErrorMessage(null);
     try {
       await deleteUserMutation.mutateAsync();
+      navigate('/register', { replace: true });
     } catch (error) {
       const errorMsg =
         error instanceof Error ? error.message : t('delete_user_error');
