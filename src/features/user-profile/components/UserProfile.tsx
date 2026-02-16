@@ -188,13 +188,7 @@ export default function UserProfile() {
   const maxDateOfBirth = new Date();
   maxDateOfBirth.setDate(maxDateOfBirth.getDate() - 1);
   const dateOfBirthLimit = maxDateOfBirth.toISOString().split('T')[0];
-  console.log([
-    isLoadingSession,
-    isLoadingUserProfile,
-    getUserProfileFailed,
-    isSubmitting,
-    isUpdatingUserProfile
-  ]);
+
   if (
     isLoadingSession ||
     isLoadingUserProfile ||
