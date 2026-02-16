@@ -16,7 +16,7 @@ export const getUserProfileResponseValidator = z.object({
       }
     )
     .nullable(),
-  phoneNumber: z.e164().nullable(),
+  phoneNumber: z.string().nullable(),
   gender: z.enum(['Man', 'Woman', '']).nullable(),
   bio: z.string().nullable(),
   userType: z.string().nullable()
