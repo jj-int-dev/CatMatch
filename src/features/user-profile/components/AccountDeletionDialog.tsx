@@ -4,6 +4,7 @@ import { FaExclamationTriangle } from 'react-icons/fa';
 import { FaSpinner } from 'react-icons/fa';
 import useDeleteUser from '../hooks/useDeleteUser';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface AccountDeletionDialogProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export default function AccountDeletionDialog({
   onClose
 }: AccountDeletionDialogProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const deleteUserMutation = useDeleteUser();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -24,7 +26,7 @@ export default function AccountDeletionDialog({
       // Delete user first while still authenticated (backend will delete from Supabase)
       await deleteUserMutation.mutateAsync();
       // Use hard redirect to immediately leave the page and prevent UserProfile's useEffect from redirecting
-      window.location.href = '/register';
+      navigate('/register', { replace: true });
     } catch (error) {
       const errorMsg =
         error instanceof Error ? error.message : t('delete_user_error');
